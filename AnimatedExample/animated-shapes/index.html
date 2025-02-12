@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Animated Shapes</title>
+  <style>
+    body {
+      background: #f5f5f5;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .shape {
+      width: 50px;
+      height: 50px;
+      background: #3498db;
+      border-radius: 50%;
+      position: relative;
+      animation: bounce 2s ease-in-out infinite;
+    }
+    @keyframes bounce {
+      0%, 100% {
+        top: 0;
+      }
+      50% {
+        top: 100px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shape"></div>
+</body>
+</html>
+
