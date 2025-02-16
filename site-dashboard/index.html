@@ -13,39 +13,78 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
-
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="logo">
         <i class="fas fa-chart-pie"></i>
         <span class="logo-text">DashStack</span>
       </div>
       <nav>
-        <!-- data-tooltip for collapsed hover -->
-        <a href="/dashboard" class="nav-item active" data-tooltip="Dashboard">
+        <a
+          href="#"
+          class="nav-item active"
+          data-tooltip="Dashboard"
+          hx-get="pages/dashboard.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-home"></i>
           <span class="nav-text">Dashboard</span>
         </a>
-        <a href="/products" class="nav-item" data-tooltip="Products">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Products"
+          hx-get="pages/products.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-box"></i>
           <span class="nav-text">Products</span>
         </a>
-        <a href="/favorites" class="nav-item" data-tooltip="Favorites">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Favorites"
+          hx-get="pages/favorites.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-heart"></i>
           <span class="nav-text">Favorites</span>
         </a>
-        <a href="/inbox" class="nav-item" data-tooltip="Inbox">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Inbox"
+          hx-get="pages/inbox.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-inbox"></i>
           <span class="nav-text">Inbox</span>
         </a>
-        <a href="/orders" class="nav-item" data-tooltip="Order Lists">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Order Lists"
+          hx-get="pages/orders.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-list"></i>
           <span class="nav-text">Order Lists</span>
         </a>
-        <a href="/stock" class="nav-item" data-tooltip="Product Stock">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Product Stock"
+          hx-get="pages/stock.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-warehouse"></i>
           <span class="nav-text">Product Stock</span>
         </a>
@@ -56,34 +95,50 @@
             border-top: 1px solid var(--border-color);
           "
         />
-        <a href="/explore" class="nav-item" data-tooltip="Explore">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Explore"
+          hx-get="pages/explore.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-compass"></i>
-          <!-- Font Awesome Icon for Explore -->
           <span class="nav-text">Explore</span>
         </a>
-
-        <a href="/tech-news" class="nav-item" data-tooltip="Tech News">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Tech News"
+          hx-get="pages/news.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-newspaper"></i>
-          <!-- Font Awesome Icon for Tech News -->
           <span class="nav-text">Tech News</span>
         </a>
-
         <a
-          href="/discussion-forum"
+          href="#"
           class="nav-item"
           data-tooltip="Discussion Forum"
+          hx-get="pages/discussion-forum.html"
+          hx-target="#content"
+          hx-push-url="true"
         >
           <i class="fas fa-comments"></i>
-          <!-- Font Awesome Icon for Discussion Forum -->
           <span class="nav-text">Discussion Forum</span>
         </a>
-
-        <a href="/content" class="nav-item" data-tooltip="Content">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Content"
+          hx-get="pages/content.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-file-alt"></i>
-          <!-- Font Awesome Icon for Content -->
           <span class="nav-text">Content</span>
         </a>
-
         <hr
           style="
             margin: 1rem 0;
@@ -91,16 +146,19 @@
             border-top: 1px solid var(--border-color);
           "
         />
-
-        <a href="/setting" class="nav-item" data-tooltip="Setting">
+        <a
+          href="#"
+          class="nav-item"
+          data-tooltip="Setting"
+          hx-get="pages/setting.html"
+          hx-target="#content"
+          hx-push-url="true"
+        >
           <i class="fas fa-cogs"></i>
-          <!-- Font Awesome Icon for Settings -->
           <span class="nav-text">Setting</span>
         </a>
       </nav>
     </div>
-
-    <!-- HEADER -->
     <header class="header">
       <div class="header-left">
         <button class="toggle-sidebar" onclick="toggleSidebar()">
@@ -110,7 +168,6 @@
       </div>
       <div class="header-right">
         <div class="theme-toggle" onclick="toggleTheme()">
-          <!-- Just the icon, no grey background -->
           <i class="fas fa-moon"></i>
         </div>
         <div class="notifications" onclick="toggleNotifications()">
@@ -139,55 +196,69 @@
             </div>
           </div>
           <div class="profile-menu">
-            <a href="/login" id="login-register">Login / Register</a>
-            <a href="/settings" id="settings-link" style="display: none"
+            <a
+              href="#"
+              id="login-register"
+              hx-get="pages/login.html"
+              hx-target="#content"
+              >Login / Register</a
+            >
+            <a
+              href="#"
+              id="settings-link"
+              hx-get="pages/settings.html"
+              hx-target="#content"
+              style="display: none"
               >Settings</a
             >
-            <a href="/logout" id="logout-link" style="display: none"
+            <a
+              href="#"
+              id="logout-link"
+              hx-get="pages/logout.html"
+              hx-target="#content"
+              style="display: none"
               >Sign Out</a
             >
           </div>
         </div>
       </div>
     </header>
-
-    <!-- MAIN CONTENT -->
     <main class="main-content">
-      <div class="cards-grid">
-        <div class="metric-card">
-          <div class="metric-title">Total User</div>
-          <div class="metric-value">40,689</div>
-          <div class="metric-change positive">
-            <i class="fas fa-arrow-up"></i> 8.5% Up from yesterday
+      <div id="content">
+        <div class="cards-grid">
+          <div class="metric-card">
+            <div class="metric-title">Total User</div>
+            <div class="metric-value">40,689</div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-up"></i> 8.5% Up from yesterday
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Total Order</div>
+            <div class="metric-value">10,293</div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-up"></i> 1.3% Up from past week
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Total Sales</div>
+            <div class="metric-value">$89,000</div>
+            <div class="metric-change negative">
+              <i class="fas fa-arrow-down"></i> 4.3% Down from yesterday
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-title">Total Pending</div>
+            <div class="metric-value">2,040</div>
+            <div class="metric-change positive">
+              <i class="fas fa-arrow-up"></i> 1.8% Up from yesterday
+            </div>
           </div>
         </div>
-        <div class="metric-card">
-          <div class="metric-title">Total Order</div>
-          <div class="metric-value">10,293</div>
-          <div class="metric-change positive">
-            <i class="fas fa-arrow-up"></i> 1.3% Up from past week
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Total Sales</div>
-          <div class="metric-value">$89,000</div>
-          <div class="metric-change negative">
-            <i class="fas fa-arrow-down"></i> 4.3% Down from yesterday
-          </div>
-        </div>
-        <div class="metric-card">
-          <div class="metric-title">Total Pending</div>
-          <div class="metric-value">2,040</div>
-          <div class="metric-change positive">
-            <i class="fas fa-arrow-up"></i> 1.8% Up from yesterday
-          </div>
-        </div>
+        <div class="placeholder-box">Sales Details Graph Placeholder</div>
+        <div class="placeholder-box">Deals Details Table Placeholder</div>
       </div>
-
-      <div class="placeholder-box">Sales Details Graph Placeholder</div>
-      <div class="placeholder-box">Deals Details Table Placeholder</div>
     </main>
-
-    <script src="script.js"></script>
+    <script src="assets/script.js"></script>
   </body>
 </html>

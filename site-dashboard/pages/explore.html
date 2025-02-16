@@ -1,0 +1,440 @@
+<div id="content">
+  <div class="container mx-auto">
+    <h1 class="text-2xl font-bold mb-6">
+      Your Dream Home with Desired Features
+    </h1>
+    <div class="filters">
+      <div class="dropdown">
+        <button class="filter-btn" onclick="toggleDropdown('cityDropdown')">
+          <i class="fas fa-building"></i>
+          City
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div id="cityDropdown" class="dropdown-content">
+          <a href="#">Dubai</a>
+          <a href="#">London</a>
+          <a href="#">New York</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="filter-btn" onclick="toggleDropdown('areaDropdown')">
+          <i class="fas fa-map-marker-alt"></i>
+          Area
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div id="areaDropdown" class="dropdown-content">
+          <a href="#">Palermo</a>
+          <a href="#">Didsbury</a>
+          <a href="#">Downtown</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="filter-btn" onclick="toggleDropdown('priceDropdown')">
+          <i class="fas fa-dollar-sign"></i>
+          1.2M - 3.5M
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div id="priceDropdown" class="dropdown-content">
+          <a href="#">$1M - $2M</a>
+          <a href="#">$2M - $3M</a>
+          <a href="#">$3M - $4M</a>
+        </div>
+      </div>
+      <div class="dropdown">
+        <button class="filter-btn" onclick="toggleDropdown('moreDropdown')">
+          More
+          <i class="fas fa-chevron-down"></i>
+        </button>
+        <div id="moreDropdown" class="dropdown-content">
+          <a href="#">Bedrooms</a>
+          <a href="#">Bathrooms</a>
+          <a href="#">Features</a>
+        </div>
+      </div>
+    </div>
+    <div class="properties-grid">
+      <div class="property-card">
+        <div class="property-image">
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-16%20at%202.33.01%E2%80%AFPM-8jVbMj6LdUMWnn7TXR0ucEIDHHIipj.png"
+            alt="Departamento Palermo"
+          />
+          <div class="image-dots">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+            <span class="dot" onclick="currentSlide(4)"></span>
+          </div>
+          <div class="arrow-btn">
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="property-content">
+          <h2 class="property-title">Departamento - Palermo</h2>
+          <p class="property-address">Av. del Libertador 11580</p>
+          <div class="property-price">$3.2M</div>
+          <div class="property-details">
+            <div class="detail-item">
+              <i class="fas fa-building"></i>
+              Dubai
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-vector-square"></i>
+              4,256.4 sqft
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-bed"></i>
+              3 Room
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="property-card">
+        <div class="property-image">
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-16%20at%202.33.09%E2%80%AFPM-V5YakqiybLWgPGKNBcnPeYvFMtAuL2.png"
+            alt="Camden Town"
+          />
+          <div class="image-dots">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+            <span class="dot" onclick="currentSlide(4)"></span>
+          </div>
+          <div class="arrow-btn">
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="property-content">
+          <h2 class="property-title">Camden Town - Didsbury</h2>
+          <p class="property-address">Zn. SW1A 2AA 2580</p>
+          <div class="property-price">$1.9M</div>
+          <div class="property-details">
+            <div class="detail-item">
+              <i class="fas fa-building"></i>
+              London
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-vector-square"></i>
+              2,821.4 sqft
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-bed"></i>
+              2 Rooms
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="property-card">
+        <div class="property-image">
+          <img
+            src="https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-02-16%20at%202.33.19%E2%80%AFPM-RBZ6s2NsrkVaZV2t3dsoLMUnlwEwg1.png"
+            alt="Departamento Palermo"
+          />
+          <div class="image-dots">
+            <span class="dot active" onclick="currentSlide(1)"></span>
+            <span class="dot" onclick="currentSlide(2)"></span>
+            <span class="dot" onclick="currentSlide(3)"></span>
+            <span class="dot" onclick="currentSlide(4)"></span>
+          </div>
+          <div class="arrow-btn">
+            <i class="fas fa-arrow-right"></i>
+          </div>
+        </div>
+        <div class="property-content">
+          <h2 class="property-title">Departamento - Palermo</h2>
+          <p class="property-address">Av. del Libertador 11580</p>
+          <div class="property-price">$3.2M</div>
+          <div class="property-details">
+            <div class="detail-item">
+              <i class="fas fa-building"></i>
+              Dubai
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-vector-square"></i>
+              4,256.4 sqft
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-bed"></i>
+              3 Room
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .container {
+    padding: 2rem;
+  }
+
+  .filters {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .dropdown {
+    position: relative;
+    display: inline-block;
+  }
+
+  .filter-btn {
+    padding: 0.75rem 1.25rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 25px;
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    color: #374151;
+    transition: all 0.2s ease;
+  }
+
+  .filter-btn:hover {
+    border-color: #d1d5db;
+    background: #f9fafb;
+  }
+
+  .filter-btn.active {
+    border-color: #3b82f6;
+    background: #f0f7ff;
+  }
+
+  .filter-btn i:last-child {
+    margin-left: 0.25rem;
+    transition: transform 0.2s ease;
+  }
+
+  .filter-btn.active i:last-child {
+    transform: rotate(180deg);
+  }
+
+  .dropdown-content {
+    display: none;
+    position: absolute;
+    background: white;
+    min-width: 180px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    border-radius: 12px;
+    z-index: 1;
+    margin-top: 0.5rem;
+    border: 1px solid #e5e7eb;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+  }
+
+  .dropdown-content.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .dropdown-content a {
+    color: #374151;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    transition: background 0.2s ease;
+  }
+
+  .dropdown-content a:first-child {
+    border-top-left-radius: 12px;
+    border-top-right-radius: 12px;
+  }
+
+  .dropdown-content a:last-child {
+    border-bottom-left-radius: 12px;
+    border-bottom-right-radius: 12px;
+  }
+
+  .dropdown-content a:hover {
+    background: #f3f4f6;
+  }
+
+  .dropdown-content a.selected {
+    background: #f0f7ff;
+    color: #3b82f6;
+  }
+
+  .show {
+    display: block;
+  }
+
+  .properties-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 2rem;
+  }
+
+  .property-card {
+    background: white;
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease;
+  }
+
+  .property-card:hover {
+    transform: translateY(-4px);
+  }
+
+  .property-image {
+    position: relative;
+    height: 250px;
+    overflow: hidden;
+  }
+
+  .property-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .image-dots {
+    position: absolute;
+    bottom: 1rem;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 0.5rem;
+    z-index: 2;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.3s ease;
+  }
+
+  .dot.active {
+    background: white;
+  }
+
+  .property-content {
+    padding: 1.5rem;
+  }
+
+  .property-title {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    color: var(--text-primary);
+  }
+
+  .property-address {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+  }
+
+  .property-price {
+    font-size: 1.8rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+  }
+
+  .property-details {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+  }
+
+  .arrow-btn {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    width: 40px;
+    height: 40px;
+    background: #cbaa90;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: background 0.2s ease;
+    z-index: 2;
+  }
+
+  .arrow-btn:hover {
+    background: #b7967c;
+  }
+
+  @media (max-width: 768px) {
+    .properties-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filters {
+      flex-wrap: wrap;
+    }
+  }
+</style>
+
+<script>
+  function toggleDropdown(dropdownId) {
+    const btn = event.currentTarget;
+    const dropdown = document.getElementById(dropdownId);
+
+    document.querySelectorAll(".filter-btn").forEach((button) => {
+      button.classList.remove("active");
+    });
+
+    document.querySelectorAll(".dropdown-content").forEach((content) => {
+      if (content.id !== dropdownId) {
+        content.classList.remove("show");
+      }
+    });
+
+    dropdown.classList.toggle("show");
+    btn.classList.toggle("active");
+  }
+
+  window.onclick = function (event) {
+    if (
+      !event.target.matches(".filter-btn") &&
+      !event.target.matches(".filter-btn *")
+    ) {
+      document.querySelectorAll(".dropdown-content").forEach((dropdown) => {
+        dropdown.classList.remove("show");
+      });
+      document.querySelectorAll(".filter-btn").forEach((btn) => {
+        btn.classList.remove("active");
+      });
+    }
+  };
+
+  document.querySelectorAll(".dropdown-content a").forEach((item) => {
+    item.addEventListener("click", function (e) {
+      e.preventDefault();
+      const dropdown = this.closest(".dropdown-content");
+      dropdown
+        .querySelectorAll("a")
+        .forEach((a) => a.classList.remove("selected"));
+      this.classList.add("selected");
+    });
+  });
+</script>

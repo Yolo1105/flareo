@@ -18,7 +18,6 @@
   --bg-secondary: #242424;
 }
 
-/* Smooth overall transitions for color & background changes */
 html,
 body,
 .sidebar,
@@ -40,7 +39,6 @@ body {
   min-height: 100vh;
 }
 
-/* SIDEBAR */
 .sidebar {
   position: fixed;
   left: 0;
@@ -52,34 +50,32 @@ body {
   padding: 1.5rem;
   transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s;
   z-index: 1000;
-  overflow-x: hidden; /* Prevent horizontal scroll */
-  overflow-y: auto; /* Allow vertical scroll if needed */
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .sidebar.collapsed {
   width: var(--sidebar-collapsed-width);
-  overflow-x: hidden; /* Ensure no overflow when collapsed */
+  overflow-x: hidden;
 }
 
-/* Logo text adjustment in collapsed state */
 .sidebar.collapsed .logo-text {
-  display: none; /* Hide text completely in collapsed state */
+  display: none;
 }
 
-/* When sidebar is collapsed, hide the nav text entirely and center the icon */
 .sidebar.collapsed .nav-text {
-  display: none; /* Hides the text completely from the layout */
-  opacity: 0; /* You can remove opacity/transform if you want a simple toggle */
+  display: none;
+  opacity: 0;
   transform: translateX(-10px);
   pointer-events: none;
 }
 
 .sidebar.collapsed .nav-item {
-  justify-content: center; /* Centers the icon in the collapsed sidebar */
+  justify-content: center;
 }
 
 .sidebar.collapsed .nav-item i {
-  margin-right: 0; /* Remove any right margin so the icon is neatly centered */
+  margin-right: 0;
 }
 
 .nav-text {
@@ -117,7 +113,7 @@ nav {
   margin-bottom: 0.25rem;
   transition: background 0.2s ease, color 0.2s ease;
   white-space: nowrap;
-  position: relative; /* for tooltip */
+  position: relative;
 }
 
 .nav-item i {
@@ -136,7 +132,6 @@ nav {
   color: var(--text-primary);
 }
 
-/* In collapsed mode, center just the icon */
 .sidebar.collapsed .nav-item {
   justify-content: center;
 }
@@ -144,7 +139,6 @@ nav {
   margin-right: 0;
 }
 
-/* Optional: tooltip on hover when collapsed */
 .sidebar.collapsed .nav-item:hover::after {
   content: attr(data-tooltip);
   position: absolute;
@@ -162,7 +156,6 @@ nav {
   pointer-events: none;
 }
 
-/* HEADER */
 .header {
   position: fixed;
   top: 0;
@@ -216,10 +209,9 @@ nav {
   gap: 1.5rem;
 }
 
-/* THEME TOGGLE */
 .theme-toggle {
   cursor: pointer;
-  /* Remove gray background */
+
   background: none;
   border: none;
   padding: 0;
@@ -230,13 +222,12 @@ nav {
   font-size: 1.25rem;
   transition: transform 0.5s ease, color 0.5s ease;
 }
-/* Add a rotate animation class if you want a more obvious flip/rotate */
+
 .theme-toggle i.switching {
   transform: rotate(180deg);
   transition: transform 0.3s ease;
 }
 
-/* NOTIFICATIONS */
 .notifications {
   position: relative;
   cursor: pointer;
@@ -280,7 +271,6 @@ nav {
   border-bottom: none;
 }
 
-/* PROFILE */
 .profile {
   display: flex;
   align-items: center;
@@ -326,7 +316,6 @@ nav {
   background: var(--bg-secondary);
 }
 
-/* Adding space between main content and sidebar */
 .main-content {
   margin-left: var(--sidebar-width);
   transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
@@ -338,7 +327,6 @@ nav {
   margin-left: var(--sidebar-collapsed-width);
 }
 
-/* Cards grid */
 .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -390,9 +378,7 @@ nav {
   color: var(--text-secondary);
 }
 
-/* SMALLER SCREENS */
 @media (max-width: 768px) {
-  /* Turn sidebar into a sliding drawer */
   .sidebar {
     transform: translateX(-100%);
     position: fixed;
