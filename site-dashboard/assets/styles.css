@@ -1,0 +1,410 @@
+:root {
+  --sidebar-width: 240px;
+  --sidebar-collapsed-width: 80px;
+  --primary-color: #4f6bf6;
+  --border-color: #f0f0f0;
+  --text-primary: #333;
+  --text-secondary: #666;
+  --bg-primary: #fff;
+  --bg-secondary: #f8f9fa;
+}
+
+.dark {
+  --primary-color: #6b7fff;
+  --border-color: #2a2a2a;
+  --text-primary: #999;
+  --text-secondary: #999;
+  --bg-primary: #1a1a1a;
+  --bg-secondary: #242424;
+}
+
+/* Smooth overall transitions for color & background changes */
+html,
+body,
+.sidebar,
+.header,
+.main-content {
+  transition: background-color 0.5s ease, color 0.5s ease;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+body {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  min-height: 100vh;
+}
+
+/* SIDEBAR */
+.sidebar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: var(--sidebar-width);
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  padding: 1.5rem;
+  transition: width 0.35s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.35s;
+  z-index: 1000;
+  overflow-x: hidden; /* Prevent horizontal scroll */
+  overflow-y: auto; /* Allow vertical scroll if needed */
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-collapsed-width);
+  overflow-x: hidden; /* Ensure no overflow when collapsed */
+}
+
+/* Logo text adjustment in collapsed state */
+.sidebar.collapsed .logo-text {
+  display: none; /* Hide text completely in collapsed state */
+}
+
+/* When sidebar is collapsed, hide the nav text entirely and center the icon */
+.sidebar.collapsed .nav-text {
+  display: none; /* Hides the text completely from the layout */
+  opacity: 0; /* You can remove opacity/transform if you want a simple toggle */
+  transform: translateX(-10px);
+  pointer-events: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center; /* Centers the icon in the collapsed sidebar */
+}
+
+.sidebar.collapsed .nav-item i {
+  margin-right: 0; /* Remove any right margin so the icon is neatly centered */
+}
+
+.nav-text {
+  transition: opacity 0.2s ease, transform 0.25s ease;
+}
+
+.sidebar.collapsed .logo-text {
+  display: none;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: var(--primary-color);
+  margin-bottom: 2rem;
+  padding: 0 0.2rem;
+  white-space: nowrap;
+}
+
+nav {
+  margin-top: 1rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 0.5rem;
+  padding: 0.5rem 1rem;
+  margin-bottom: 0.25rem;
+  transition: background 0.2s ease, color 0.2s ease;
+  white-space: nowrap;
+  position: relative; /* for tooltip */
+}
+
+.nav-item i {
+  font-size: 1.25rem;
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.nav-item.active {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+.nav-item:hover:not(.active) {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
+/* In collapsed mode, center just the icon */
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+}
+.sidebar.collapsed .nav-item i {
+  margin-right: 0;
+}
+
+/* Optional: tooltip on hover when collapsed */
+.sidebar.collapsed .nav-item:hover::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: var(--sidebar-collapsed-width);
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  padding: 0.3rem 0.5rem;
+  border-radius: 0.25rem;
+  margin-left: 0.5rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+  font-size: 0.875rem;
+  pointer-events: none;
+}
+
+/* HEADER */
+.header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: var(--sidebar-width);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  height: 64px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  transition: left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 100;
+}
+
+.header.collapsed {
+  left: var(--sidebar-collapsed-width);
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.toggle-sidebar {
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.search-bar {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  width: 300px;
+  max-width: 100%;
+}
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* THEME TOGGLE */
+.theme-toggle {
+  cursor: pointer;
+  /* Remove gray background */
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+.theme-toggle i {
+  font-size: 1.25rem;
+  transition: transform 0.5s ease, color 0.5s ease;
+}
+/* Add a rotate animation class if you want a more obvious flip/rotate */
+.theme-toggle i.switching {
+  transform: rotate(180deg);
+  transition: transform 0.3s ease;
+}
+
+/* NOTIFICATIONS */
+.notifications {
+  position: relative;
+  cursor: pointer;
+}
+
+.notifications-badge {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background: #ef4444;
+  color: white;
+  font-size: 0.5rem;
+  padding: 0.125rem 0.375rem;
+  border-radius: 1rem;
+}
+
+.notifications-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  margin-top: 0.5rem;
+  display: none;
+  z-index: 1000;
+}
+
+.notifications-popup.show {
+  display: block;
+}
+
+.notification-item {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.notification-item:last-child {
+  border-bottom: none;
+}
+
+/* PROFILE */
+.profile {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  position: relative;
+}
+
+.profile img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-menu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 200px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+  margin-top: 0.5rem;
+  display: none;
+  z-index: 1000;
+}
+
+.profile-menu.show {
+  display: block;
+}
+
+.profile-menu a {
+  display: block;
+  padding: 0.5rem 1rem;
+  color: var(--text-primary);
+  text-decoration: none;
+  transition: background-color 0.2s;
+}
+
+.profile-menu a:hover {
+  background: var(--bg-secondary);
+}
+
+/* Adding space between main content and sidebar */
+.main-content {
+  margin-left: var(--sidebar-width);
+  transition: margin-left 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  padding: 2rem;
+  padding-top: calc(64px + 2rem);
+}
+
+.main-content.collapsed {
+  margin-left: var(--sidebar-collapsed-width);
+}
+
+/* Cards grid */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.metric-card {
+  background: var(--bg-primary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+}
+
+.metric-title {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-bottom: 0.5rem;
+}
+
+.metric-value {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.metric-change {
+  font-size: 0.875rem;
+}
+
+.metric-change.positive {
+  color: #22c55e;
+}
+
+.metric-change.negative {
+  color: #ef4444;
+}
+
+.placeholder-box {
+  background: var(--bg-primary);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  border: 1px solid var(--border-color);
+  margin-bottom: 1.5rem;
+  min-height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+}
+
+/* SMALLER SCREENS */
+@media (max-width: 768px) {
+  /* Turn sidebar into a sliding drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    position: fixed;
+    z-index: 9999;
+  }
+  .sidebar.show {
+    transform: translateX(0);
+  }
+  .header {
+    left: 0 !important;
+  }
+  .main-content {
+    margin-left: 0 !important;
+  }
+}
