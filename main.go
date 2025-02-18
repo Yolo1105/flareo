@@ -9,9 +9,9 @@ import (
 
 func main() {
 	e := echo.New()
-	e.Static("/static", "static")
+	e.Static("/static", "internal/static")
 	e.GET("/", func(c echo.Context) error {
-		return views.Hello("World").Render(context.Background(), c.Response().Writer )
+		return views.Hello("BING BING").Render(context.Background(), c.Response().Writer )
 	})
 	e.Logger.Fatal(e.Start(":8080"))
 }
