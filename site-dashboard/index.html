@@ -2,6 +2,8 @@
 <html lang="en" class="light">
   <head>
     <meta charset="UTF-8" />
+    <!-- Base tag to resolve relative URLs -->
+    <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard</title>
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
@@ -16,143 +18,150 @@
     <link rel="stylesheet" href="assets/styles.css" />
   </head>
   <body>
+    <!-- Normalize URL: if pathname ends with "index.html", replace with "/" + hash -->
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        if (window.location.pathname.endsWith("index.html")) {
+          let newHash = window.location.hash || "#dashboard";
+          history.replaceState(null, "", "/" + newHash);
+        }
+      });
+    </script>
+
     <div class="sidebar">
       <div class="logo">
         <i class="fas fa-chart-pie"></i>
         <span class="logo-text">DashStack</span>
       </div>
       <nav>
+        <!-- Nav links use hash-only URLs with explicit hx-push-url values -->
         <a
-          href="#"
+          href="#dashboard"
           class="nav-item active"
           data-tooltip="Dashboard"
-          hx-get="pages/dashboard.html"
-          hx-target="#content"
-          hx-push-url="true"
+          onclick="loadDashboard(); updateActiveNav();"
         >
           <i class="fas fa-home"></i>
           <span class="nav-text">Dashboard</span>
         </a>
         <a
-          href="#"
+          href="#products"
           class="nav-item"
           data-tooltip="Products"
           hx-get="pages/products.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#products"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-box"></i>
           <span class="nav-text">Products</span>
         </a>
         <a
-          href="#"
+          href="#favorites"
           class="nav-item"
           data-tooltip="Favorites"
           hx-get="pages/favorites.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#favorites"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-heart"></i>
           <span class="nav-text">Favorites</span>
         </a>
         <a
-          href="#"
+          href="#inbox"
           class="nav-item"
           data-tooltip="Inbox"
           hx-get="pages/inbox.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#inbox"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-inbox"></i>
           <span class="nav-text">Inbox</span>
         </a>
         <a
-          href="#"
+          href="#orders"
           class="nav-item"
           data-tooltip="Order Lists"
           hx-get="pages/orders.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#orders"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-list"></i>
           <span class="nav-text">Order Lists</span>
         </a>
         <a
-          href="#"
+          href="#stock"
           class="nav-item"
           data-tooltip="Product Stock"
           hx-get="pages/stock.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#stock"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-warehouse"></i>
           <span class="nav-text">Product Stock</span>
         </a>
-        <hr
-          style="
-            margin: 1rem 0;
-            border: none;
-            border-top: 1px solid var(--border-color);
-          "
-        />
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);" />
         <a
-          href="#"
+          href="#explore"
           class="nav-item"
           data-tooltip="Explore"
           hx-get="pages/explore.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#explore"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-compass"></i>
           <span class="nav-text">Explore</span>
         </a>
         <a
-          href="#"
+          href="#news"
           class="nav-item"
           data-tooltip="Tech News"
           hx-get="pages/news.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#news"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-newspaper"></i>
           <span class="nav-text">Tech News</span>
         </a>
         <a
-          href="#"
+          href="#discussion-forum"
           class="nav-item"
           data-tooltip="Discussion Forum"
           hx-get="pages/discussion-forum.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#discussion-forum"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-comments"></i>
           <span class="nav-text">Discussion Forum</span>
         </a>
         <a
-          href="#"
+          href="#contest"
           class="nav-item"
           data-tooltip="Contest"
           hx-get="pages/contest.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#contest"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-file-alt"></i>
           <span class="nav-text">Contest</span>
         </a>
-        <hr
-          style="
-            margin: 1rem 0;
-            border: none;
-            border-top: 1px solid var(--border-color);
-          "
-        />
+        <hr style="margin: 1rem 0; border: none; border-top: 1px solid var(--border-color);" />
         <a
-          href="#"
+          href="#setting"
           class="nav-item"
           data-tooltip="Setting"
           hx-get="pages/setting.html"
           hx-target="#content"
-          hx-push-url="true"
+          hx-push-url="#setting"
+          onclick="updateActiveNav();"
         >
           <i class="fas fa-cogs"></i>
           <span class="nav-text">Setting</span>
@@ -188,10 +197,7 @@
           <img id="profile-image" src="" alt="Profile" />
           <div>
             <div id="user-name" style="font-weight: 500">Guest</div>
-            <div
-              id="user-role"
-              style="font-size: 0.875rem; color: var(--text-secondary)"
-            >
+            <div id="user-role" style="font-size: 0.875rem; color: var(--text-secondary)">
               Not logged in
             </div>
           </div>
@@ -225,6 +231,7 @@
     </header>
     <main class="main-content">
       <div id="content">
+        <!-- Default Dashboard Content -->
         <div class="cards-grid">
           <div class="metric-card">
             <div class="metric-title">Total User</div>
@@ -259,6 +266,28 @@
         <div class="placeholder-box">Deals Details Table Placeholder</div>
       </div>
     </main>
+
+    <!-- Modal for Project Details -->
+    <div id="project-modal" class="modal">
+      <div class="modal-content">
+        <span class="close-button" onclick="closeModal()">×</span>
+        <div id="modal-body"></div>
+      </div>
+    </div>
+
     <script src="assets/script.js"></script>
+    <script>
+      // On load, save default dashboard content and load fragment if needed.
+      document.addEventListener("DOMContentLoaded", () => {
+        window.defaultDashboardContent = document.getElementById("content").innerHTML;
+        let target = window.location.hash.substring(1) || "dashboard";
+        if (target === "dashboard") {
+          loadDashboard();
+        } else {
+          htmx.ajax("GET", "pages/" + target + ".html", "#content");
+        }
+        updateActiveNav();
+      });
+    </script>
   </body>
 </html>
