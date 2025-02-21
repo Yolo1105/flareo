@@ -29,7 +29,7 @@ func Home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><title>ModuleX</title></head><body class=\"bg-gray-100 flex items-center justify-center h-screen\"><div class=\"w-full max-w-md\"><label for=\"search\" class=\"block text-sm font-medium text-gray-700\">Search for a city or country</label><div class=\"mt-1 relative\"><input type=\"text\" name=\"search\" placeholder=\"Type to search...\" class=\"shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md\" hx-get=\"/search/countries\" hx-trigger=\"keyup changed delay:1s\" hx-target=\"#location_autocomplete\"><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm\"></ul></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><title>ModuleX</title></head><body class=\"bg-gray-100 flex items-center justify-center h-screen\"><div class=\"w-full max-w-md\"><label for=\"search\" class=\"block text-sm font-medium text-gray-700\">Search for a city or country</label><div class=\"mt-1 relative\"><input type=\"text\" name=\"search\" placeholder=\"Type to search...\" class=\"shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md\" hx-get=\"/search/countries\" hx-trigger=\"keyup changed delay:1s\" hx-target=\"#location_autocomplete\"><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm\"></ul></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -66,7 +66,7 @@ func CountrySearchList(countries []string) templ.Component {
 			var templ_7745c5c3_Var3 string
 			templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 34, Col: 15}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 35, Col: 15}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 			if templ_7745c5c3_Err != nil {
