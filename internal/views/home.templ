@@ -1,0 +1,36 @@
+package views
+
+templ Home() {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+			<title>ModuleX</title>
+		</head>
+		<body class="bg-gray-100 flex items-center justify-center h-screen">
+			<div class="w-full max-w-md">
+				<label for="search" class="block text-sm font-medium text-gray-700">Search for a city or country</label>
+				<div class="mt-1 relative">
+					<input
+						type="text"
+						name="search"
+						placeholder="Type to search..."
+						class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
+						hx-get="/search/countries"
+						hx-trigger="keyup changed delay:1s"
+						hx-target="#location_autocomplete"
+					/>
+					<ul id="location_autocomplete" class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm"></ul>
+				</div>
+			</div>
+		</body>
+	</html>
+}
+
+templ CountrySearchList(countries []string) {
+	for _, country := range countries {
+		<li>{ country }</li>
+	}
+}

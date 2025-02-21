@@ -1,8 +1,7 @@
 package main
 
 import (
-	"ModuleX/internal/views"
-	"context"
+	"ModuleX/internal/components"
 
 	"github.com/labstack/echo/v4"
 )
@@ -11,7 +10,8 @@ func main() {
 	e := echo.New()
 	e.Static("/static", "internal/static")
 	e.GET("/", func(c echo.Context) error {
-		return views.Hello("BING BING").Render(context.Background(), c.Response().Writer )
+		return components.Home(c)
 	})
+	e.GET("/search/countries", func(c echo.Context) error {return components.CountrySearch(c)})
 	e.Logger.Fatal(e.Start(":8080"))
 }
