@@ -20,7 +20,7 @@ templ Home() {
 						placeholder="Type to search..."
 						class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md"
 						hx-get="/search/countries"
-						hx-trigger="keyup changed delay:1s"
+						hx-trigger="keyup changed delay:300ms"
 						hx-target="#location_autocomplete"
 					/>
 					<ul id="location_autocomplete" class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto sm:text-sm"></ul>
