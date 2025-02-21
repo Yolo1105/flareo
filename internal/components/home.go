@@ -12,6 +12,7 @@ func Home(c echo.Context) error {
 }
 
 func CountrySearch(c echo.Context) error {
-	return views.CountrySearchList([]string{"Spain"}).Render(context.Background(), c.Response().Writer)
+	query := c.QueryParam("search")
+	return views.CountrySearchList([]string{query}).Render(context.Background(), c.Response().Writer)
 }
 
