@@ -13,7 +13,7 @@ func main() {
 		return layout.Home(c)
 	})
 	e.GET("/country/:country", func(c echo.Context) error {
-		return layout.CountryDetails(c)
+		return layout.Ecommerce(c)
 	})
 	e.GET("/search/countries", func(c echo.Context) error {return layout.CountrySearch(c)})
 	e.Logger.Fatal(e.Start(":8080"))

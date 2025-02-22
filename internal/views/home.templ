@@ -62,20 +62,3 @@ templ CountryNotFound() {
 		</body>
 	</html>
 }
-
-templ CountryDetails(country string) {
-	<!DOCTYPE html>
-	<html lang="en">
-		<head>
-			<meta charset="UTF-8"/>
-			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-			<title>{ country } - TravelX</title>
-		</head>
-		<body>
-			<header>
-				<h1 class="text-4xl font-bold text-center mb-8 text-gray-800">{ country }</h1>
-			</header>
-		</body>
-	</html>
-}
