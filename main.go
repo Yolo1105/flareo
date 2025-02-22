@@ -12,7 +12,7 @@ func main() {
 	e.GET("/", func(c echo.Context) error {
 		return layout.Home(c)
 	})
-	e.GET("/country", func(c echo.Context) error {
+	e.GET("/country/:country", func(c echo.Context) error {
 		return layout.CountryDetails(c)
 	})
 	e.GET("/search/countries", func(c echo.Context) error {return layout.CountrySearch(c)})

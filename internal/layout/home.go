@@ -42,8 +42,29 @@ func CountrySearch(c echo.Context) error {
 	return views.CountrySearchList(countries).Render(context.Background(), c.Response().Writer)
 }
 
+func validateCountry(name string) (bool, error) {
+	resp, err := http.Get("https://restcountries.com/v3.1/name/" + name + "?fullText=true")
+	if err != nil {
+		return false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode == 404 {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func CountryDetails(c echo.Context) error {
-	country := c.QueryParam("country")
+	country := c.Param("country")
+	valid, err := validateCountry(country)
+	if err != nil {
+		return c.String(http.StatusInternalServerError, "Error validating country")
+	}
+	if !valid {
+		return views.CountryNotFound().Render(context.Background(), c.Response().Writer)
+	}
 	return views.CountryDetails(country).Render(context.Background(), c.Response().Writer)
 }
 
