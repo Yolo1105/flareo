@@ -28,9 +28,9 @@ func validateCountry(name string) (bool, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode == 404 {
-		return false, nil
+		return false, err
 	}
 
-	return true, nil
+	return true, err
 }
 

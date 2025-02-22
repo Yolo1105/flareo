@@ -22,8 +22,7 @@ templ Home() {
 						class="w-full px-4 py-3 text-lg border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
 						autofocus
 					/>
-					<ul id="location_autocomplete" class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none">
-					</ul>
+					<ul id="location_autocomplete" class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none"></ul>
 				</form>
 				<p class="mt-4 text-center text-gray-600">Start typing to explore countries around the world!</p>
 			</div>
@@ -35,7 +34,7 @@ templ CountrySearchList(countries []string) {
 	for i, country := range countries {
 		if i == 0 {
 			<li class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out">
-				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full" tabindex="-1">
+				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full" tabindex="0">
 					{ country }
 				</a>
 			</li>

@@ -35,6 +35,9 @@ func CountrySearch(c echo.Context) error {
 		if name, ok := country["name"].(map[string]interface{}); ok {
 			if commonName, ok := name["common"].(string); ok {
 				countries = append(countries, commonName)
+				if len(countries) == 5 { // append only the top 5
+					break
+				}
 			}
 		}
 	}

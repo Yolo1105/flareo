@@ -29,7 +29,7 @@ func Home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><title>TravelX - Explore the World</title></head><body class=\"bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen p-4\"><div class=\"w-full max-w-2xl bg-white rounded-xl shadow-2xl p-8\"><h1 class=\"text-4xl font-bold text-center mb-8 text-gray-800\">Discover Your Next Adventure</h1><div class=\"relative\"><label for=\"search\" class=\"block text-lg font-semibold text-gray-700 mb-2\">Where would you like to go?</label> <input type=\"text\" name=\"search\" placeholder=\"Search for a country...\" class=\"w-full px-4 py-3 text-lg border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out\" hx-get=\"/search/countries\" hx-trigger=\"keyup changed delay:300ms\" hx-target=\"#location_autocomplete\"><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto\"></ul></div><p class=\"mt-4 text-center text-gray-600\">Start typing to explore countries around the world!</p></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><title>TravelX - Explore the World</title></head><body class=\"bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen p-4\"><div class=\"w-full max-w-2xl bg-white rounded-xl shadow-2xl p-8\"><h1 class=\"text-4xl font-bold text-center mb-8 text-gray-800\">Discover Your Next Adventure</h1><form class=\"relative\" hx-get=\"/search/countries\" hx-trigger=\"input delay:300ms from:input\" hx-target=\"#location_autocomplete\"><label for=\"search\" class=\"block text-lg font-semibold text-gray-700 mb-2\">Where would you like to go?</label> <input type=\"text\" name=\"search\" placeholder=\"Search for a country...\" class=\"w-full px-4 py-3 text-lg border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out\" autofocus><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none\"></ul></form><p class=\"mt-4 text-center text-gray-600\">Start typing to explore countries around the world!</p></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -58,32 +58,61 @@ func CountrySearchList(countries []string) templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		for _, country := range countries {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li class=\"px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out\"><a href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("/country/" + country)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"block w-full h-full\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var4 string
-			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(country)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 39, Col: 13}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</a></li>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
+		for i, country := range countries {
+			if i == 0 {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li class=\"px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out\"><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var3 templ.SafeURL = templ.SafeURL("/country/" + country)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var3)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\" class=\"block w-full h-full\" tabindex=\"0\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var4 string
+				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(country)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 38, Col: 14}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "</a></li>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<li class=\"px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out\"><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var5 templ.SafeURL = templ.SafeURL("/country/" + country)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var5)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, "\" class=\"block w-full h-full\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var6 string
+				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(country)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 44, Col: 14}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "</a></li>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
 			}
 		}
 		return nil
@@ -106,12 +135,12 @@ func CountryNotFound() templ.Component {
 			}()
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var7 == nil {
+			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><title>Country Not Found - TravelX</title></head><body class=\"bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen p-4\"><div class=\"w-full max-w-2xl bg-white rounded-xl shadow-2xl p-8 text-center\"><h1 class=\"text-4xl font-bold mb-4 text-gray-800\">Country Not Found</h1><p class=\"text-gray-600 mb-6\">Sorry, we couldn't find the country you're looking for.</p><a href=\"/\" class=\"inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200\">Return to Home</a></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><title>Country Not Found - TravelX</title></head><body class=\"bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen p-4\"><div class=\"w-full max-w-2xl bg-white rounded-xl shadow-2xl p-8 text-center\"><h1 class=\"text-4xl font-bold mb-4 text-gray-800\">Country Not Found</h1><p class=\"text-gray-600 mb-6\">Sorry, we couldn't find the country you're looking for.</p><a href=\"/\" class=\"inline-block bg-blue-500 text-white px-6 py-3 rounded-lg hover:bg-blue-600 transition duration-200\">Return to Home</a></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
