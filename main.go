@@ -10,6 +10,9 @@ func main() {
 	e := echo.New()
 	e.Static("/static", "internal/static")
 	e.GET("/", func(c echo.Context) error {
+		if c.QueryParam("search") != "" {
+			return layout.HandleSearch(c)
+		}
 		return layout.Home(c)
 	})
 	e.GET("/country/:country", func(c echo.Context) error {
