@@ -1,5 +1,11 @@
 package views
 
+// Home renders the main search page template
+// Features:
+// - Search input with autocomplete
+// - HTMX-powered live search results
+// - Keyboard navigation support
+// - Mobile-responsive design
 templ Home() {
 	<!DOCTYPE html>
 	<html lang="en">
@@ -30,6 +36,9 @@ templ Home() {
 	</html>
 }
 
+// CountrySearchList renders the dropdown list of matching countries
+// The first result gets special treatment for keyboard navigation
+// Each country links to its detail page
 templ CountrySearchList(countries []string) {
 	for i, country := range countries {
 		if i == 0 {
@@ -48,6 +57,8 @@ templ CountrySearchList(countries []string) {
 	}
 }
 
+// CountryNotFound renders the error page shown when a country doesn't exist
+// Provides a link back to the home page
 templ CountryNotFound() {
 	<!DOCTYPE html>
 	<html lang="en">

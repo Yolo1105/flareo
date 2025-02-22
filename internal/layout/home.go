@@ -9,12 +9,15 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// Home renders the main landing page with the country search interface
 func Home(c echo.Context) error {
 	return views.Home().Render(context.Background(), c.Response().Writer)
 }
 
+// HandleSearch processes the search form submission when user hits enter
+// It finds the first matching country and redirects to its detail page
+// If no match is found, shows the "country not found" page
 func HandleSearch(c echo.Context) error {
-    // Handles enter key pressed in the input field by looking up the first country in the api with those key presses
 	query := c.QueryParam("search")
 	if query == "" {
 		return Home(c)
@@ -45,6 +48,9 @@ func HandleSearch(c echo.Context) error {
 	return views.CountryNotFound().Render(context.Background(), c.Response().Writer)
 }
 
+// CountrySearchAutocomplete handles the HTMX-powered live search functionality
+// It returns up to 5 matching countries as the user types
+// The results are rendered as a dropdown list below the search input
 func CountrySearchAutocomplete(c echo.Context) error {
 	query := c.QueryParam("search")
 	if query == "" {
