@@ -34,6 +34,27 @@ templ Home() {
 
 templ CountrySearchList(countries []string) {
 	for _, country := range countries {
-		<li class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out">{ country }</li>
+		<li class="px-4 py-2 hover:bg-blue-100 cursor-pointer transition duration-150 ease-in-out">
+			<a href={ templ.SafeURL("/country?country=" + country) } class="block w-full h-full">
+				{ country }
+			</a>
+		</li>
 	}
+}
+
+templ CountryDetails(country string) {
+	<!DOCTYPE html>
+	<html lang="en">
+		<head>
+			<meta charset="UTF-8"/>
+			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+			<title>{ country } - TravelX</title>
+		</head>
+		<body class="bg-gradient-to-r from-blue-400 to-purple-500 flex items-center justify-center min-h-screen p-4">
+			<div class="w-full max-w-2xl bg-white rounded-xl shadow-2xl p-8">
+				<h1 class="text-4xl font-bold text-center mb-8 text-gray-800">{ country }</h1>
+			</div>
+		</body>
+	</html>
 }

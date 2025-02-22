@@ -42,3 +42,8 @@ func CountrySearch(c echo.Context) error {
 	return views.CountrySearchList(countries).Render(context.Background(), c.Response().Writer)
 }
 
+func CountryDetails(c echo.Context) error {
+	country := c.QueryParam("country")
+	return views.CountryDetails(country).Render(context.Background(), c.Response().Writer)
+}
+
