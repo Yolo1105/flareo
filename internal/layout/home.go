@@ -14,6 +14,7 @@ func Home(c echo.Context) error {
 }
 
 func HandleSearch(c echo.Context) error {
+    // Handles enter key pressed in the input field by looking up the first country in the api with those key presses
 	query := c.QueryParam("search")
 	if query == "" {
 		return Home(c)
@@ -44,7 +45,7 @@ func HandleSearch(c echo.Context) error {
 	return views.CountryNotFound().Render(context.Background(), c.Response().Writer)
 }
 
-func CountrySearch(c echo.Context) error {
+func CountrySearchAutocomplete(c echo.Context) error {
 	query := c.QueryParam("search")
 	if query == "" {
 		return views.CountrySearchList([]string{}).Render(context.Background(), c.Response().Writer)

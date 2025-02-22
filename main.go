@@ -18,6 +18,6 @@ func main() {
 	e.GET("/country/:country", func(c echo.Context) error {
 		return layout.Ecommerce(c)
 	})
-	e.GET("/search/countries", func(c echo.Context) error {return layout.CountrySearch(c)})
+	e.GET("/search/countries", func(c echo.Context) error {return layout.CountrySearchAutocomplete(c)})
 	e.Logger.Fatal(e.Start(":8080"))
 }
