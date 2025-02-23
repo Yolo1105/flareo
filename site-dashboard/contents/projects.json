@@ -1,0 +1,28 @@
+[
+    {
+      "name": "Customized AI Agent",
+      "description": "An AI assistant that adapts to your needs.",
+      "image": "contents/ai_agent.jpg",
+      "clicks": 120,
+      "likes": 45,
+      "details": "This is a detailed summary of the Customized AI Agent. It highlights key features, capabilities, and potential use cases for personalized assistance."
+    },
+    
+    {
+      "name": "Virtual Garden",
+      "description": "A digital garden that grows as you complete tasks.",
+      "image": "contents/virtual_garden.jpg",
+      "clicks": 150,
+      "likes": 65,
+      "details": "Experience a calming virtual garden that evolves as you complete tasks. Enjoy interactive elements and beautiful visuals."
+    },
+    {
+        "name": "Simple Calculator",
+        "description": "A basic web-based calculator for quick calculations.",
+        "image": "contents/calculator.png",
+        "clicks": 90,
+        "likes": 30,
+        "details": "This project is a simple calculator with a clean, responsive interface for basic arithmetic operations and more."
+    }
+]
+  
