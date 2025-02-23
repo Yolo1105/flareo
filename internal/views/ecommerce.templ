@@ -1,5 +1,7 @@
 package views
 
+import "fmt"
+
 // Ecommerce renders the country detail page template
 // Features:
 // - Country header with hero section
@@ -56,10 +58,10 @@ templ Ecommerce(country string) {
 						<!-- Service Cards -->
 						for i := 0; i < 3; i++ {
 							<div class="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 hover:shadow-xl">
-								<img src="https://source.unsplash.com/800x600/?travel" alt="Service" class="w-full h-48 object-cover"/>
+								<img src="" alt="Service" class="w-full h-48 object-cover"/>
 								<div class="p-6">
 									<div class="flex items-center mb-4">
-										<img src="https://i.pravatar.cc/40?img={ i }" alt="Vendor" class="w-10 h-10 rounded-full mr-3"/>
+										<img src={ fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i) } alt="Vendor" class="w-10 h-10 rounded-full mr-3"/>
 										<div>
 											<h4 class="text-sm font-medium text-gray-600">John Smith</h4>
 											<p class="text-xs text-gray-500">Professional Guide</p>
@@ -100,7 +102,7 @@ templ Ecommerce(country string) {
 								<img src="https://source.unsplash.com/800x600/?{ country }" alt="Service" class="w-full h-40 object-cover"/>
 								<div class="p-4">
 									<div class="flex items-center mb-3">
-										<img src="https://i.pravatar.cc/40?img={ i + 10 }" alt="Vendor" class="w-8 h-8 rounded-full mr-2"/>
+										<img src={ fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i+10) } alt="Vendor" class="w-8 h-8 rounded-full mr-2"/>
 										<div>
 											<h4 class="text-sm font-medium text-gray-600">Sarah Parker</h4>
 											<p class="text-xs text-gray-500">Adventure Guide</p>
