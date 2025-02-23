@@ -1,37 +1,39 @@
 package views
 
 // Ecommerce renders the country detail page template
-// Currently shows just the country name
-// TODO: Add more country details and features
+// Features:
+// - Country header with hero section
+// - Popular and all services sections
+// - Star rating system
+// - Consistent styling with main site
 templ Ecommerce(country string) {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<title>{ country }</title>
-			<script src="https://cdn.tailwindcss.com"></script>
+			<title>{ country } - TravelX</title>
+			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 		</head>
-		<body class="bg-gray-100 text-gray-900">
+		<body class="bg-gradient-to-r from-blue-400 to-purple-500 min-h-screen">
 			<!-- Header -->
-			<header class="bg-white shadow-md">
+			<header class="bg-white shadow-lg">
 				<div class="container mx-auto px-6 py-4 flex justify-between items-center">
-					<h1 class="text-2xl font-bold text-indigo-600">TravelX</h1>
+					<a href="/" class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">TravelX</a>
 					<nav>
 						<ul class="flex space-x-6">
-							<li><a href="#" class="hover:text-indigo-600">Home</a></li>
-							<li><a href="#" class="hover:text-indigo-600">Explore</a></li>
-							<li><a href="#" class="hover:text-indigo-600">Vendors</a></li>
-							<li><a href="#" class="hover:text-indigo-600">Login</a></li>
+							<li><a href="/" class="hover:text-blue-600 transition duration-200">Home</a></li>
+							<li><a href="#services" class="hover:text-blue-600 transition duration-200">Services</a></li>
 						</ul>
 					</nav>
 				</div>
 			</header>
 			<!-- Hero Section -->
-			<section class="bg-indigo-600 text-white py-20 text-center">
-				<div class="container mx-auto">
-					<h2 class="text-4xl font-extrabold">{ country }</h2>
-					<p class="mt-4 text-lg">Start your adventure here.</p>
+			<section class="bg-white/90 backdrop-blur-sm shadow-2xl mt-8 mx-4 md:mx-auto max-w-6xl rounded-xl overflow-hidden">
+				<div class="container mx-auto px-6 py-16 text-center">
+					<h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">Welcome to { country }</h1>
+					<p class="text-xl text-gray-600">Discover amazing local experiences and services</p>
 				</div>
 			</section>
 			<!-- Featured Vendors -->
@@ -92,9 +94,9 @@ templ Ecommerce(country string) {
 				</div>
 			</section>
 			<!-- Footer -->
-			<footer class="bg-white shadow-md mt-12 py-6">
-				<div class="container mx-auto text-center text-gray-600">
-					<p>&copy; 2025 Marketplace. All rights reserved.</p>
+			<footer class="bg-white/90 backdrop-blur-sm shadow-lg py-6">
+				<div class="container mx-auto px-6 text-center text-gray-600">
+					<p>&copy; 2024 TravelX. All rights reserved.</p>
 				</div>
 			</footer>
 		</body>
