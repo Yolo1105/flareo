@@ -9,13 +9,94 @@ templ Ecommerce(country string) {
 		<head>
 			<meta charset="UTF-8"/>
 			<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-			<script src="https://unpkg.com/@tailwindcss/browser@4"></script>
-			<title>{ country } - TravelX</title>
+			<title>{ country }</title>
+			<script src="https://cdn.tailwindcss.com"></script>
 		</head>
-		<body>
-			<header>
-				<h1 class="text-4xl font-bold text-center mb-8 text-gray-800">{ country }</h1>
+		<body class="bg-gray-100 text-gray-900">
+			<!-- Header -->
+			<header class="bg-white shadow-md">
+				<div class="container mx-auto px-6 py-4 flex justify-between items-center">
+					<h1 class="text-2xl font-bold text-indigo-600">TravelX</h1>
+					<nav>
+						<ul class="flex space-x-6">
+							<li><a href="#" class="hover:text-indigo-600">Home</a></li>
+							<li><a href="#" class="hover:text-indigo-600">Explore</a></li>
+							<li><a href="#" class="hover:text-indigo-600">Vendors</a></li>
+							<li><a href="#" class="hover:text-indigo-600">Login</a></li>
+						</ul>
+					</nav>
+				</div>
 			</header>
+			<!-- Hero Section -->
+			<section class="bg-indigo-600 text-white py-20 text-center">
+				<div class="container mx-auto">
+					<h2 class="text-4xl font-extrabold">{ country }</h2>
+					<p class="mt-4 text-lg">Start your adventure here.</p>
+				</div>
+			</section>
+			<!-- Featured Vendors -->
+			<section class="py-12">
+				<div class="container mx-auto">
+					<h3 class="text-3xl font-semibold text-center mb-8">Featured Vendors</h3>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
+						<!-- Vendor Card -->
+						<div class="bg-white p-6 rounded-lg shadow-md text-center">
+							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
+							<h4 class="text-lg font-semibold mt-4">John's Art Studio</h4>
+							<p class="text-gray-600 text-sm">Custom illustrations & graphic design.</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
+						</div>
+						<div class="bg-white p-6 rounded-lg shadow-md text-center">
+							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
+							<h4 class="text-lg font-semibold mt-4">Sarah’s Handmade Crafts</h4>
+							<p class="text-gray-600 text-sm">Handmade jewelry & decor.</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
+						</div>
+						<div class="bg-white p-6 rounded-lg shadow-md text-center">
+							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
+							<h4 class="text-lg font-semibold mt-4">TechFix Solutions</h4>
+							<p class="text-gray-600 text-sm">Website development & IT support.</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Popular Services -->
+			<section class="py-12 bg-gray-200">
+				<div class="container mx-auto">
+					<h3 class="text-3xl font-semibold text-center mb-8">Popular Services</h3>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
+						<!-- Service Card -->
+						<div class="bg-white p-6 rounded-lg shadow-md">
+							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
+							<h4 class="text-lg font-semibold mt-4">Logo Design</h4>
+							<p class="text-gray-600 text-sm">By John's Art Studio</p>
+							<p class="mt-2 font-bold">$50</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
+						</div>
+						<div class="bg-white p-6 rounded-lg shadow-md">
+							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
+							<h4 class="text-lg font-semibold mt-4">Custom Necklace</h4>
+							<p class="text-gray-600 text-sm">By Sarah’s Handmade Crafts</p>
+							<p class="mt-2 font-bold">$25</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
+						</div>
+						<div class="bg-white p-6 rounded-lg shadow-md">
+							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
+							<h4 class="text-lg font-semibold mt-4">Website Audit</h4>
+							<p class="text-gray-600 text-sm">By TechFix Solutions</p>
+							<p class="mt-2 font-bold">$100</p>
+							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
+						</div>
+					</div>
+				</div>
+			</section>
+			<!-- Footer -->
+			<footer class="bg-white shadow-md mt-12 py-6">
+				<div class="container mx-auto text-center text-gray-600">
+					<p>&copy; 2025 Marketplace. All rights reserved.</p>
+				</div>
+			</footer>
 		</body>
 	</html>
 }
