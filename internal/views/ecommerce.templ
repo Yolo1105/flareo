@@ -36,60 +36,71 @@ templ Ecommerce(country string) {
 					<p class="text-xl text-gray-600">Discover amazing local experiences and services</p>
 				</div>
 			</section>
-			<!-- Featured Vendors -->
-			<section class="py-12">
-				<div class="container mx-auto">
-					<h3 class="text-3xl font-semibold text-center mb-8">Featured Vendors</h3>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-						<!-- Vendor Card -->
-						<div class="bg-white p-6 rounded-lg shadow-md text-center">
-							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
-							<h4 class="text-lg font-semibold mt-4">John's Art Studio</h4>
-							<p class="text-gray-600 text-sm">Custom illustrations & graphic design.</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
-						</div>
-						<div class="bg-white p-6 rounded-lg shadow-md text-center">
-							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
-							<h4 class="text-lg font-semibold mt-4">Sarah’s Handmade Crafts</h4>
-							<p class="text-gray-600 text-sm">Handmade jewelry & decor.</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
-						</div>
-						<div class="bg-white p-6 rounded-lg shadow-md text-center">
-							<img src="https://via.placeholder.com/100" alt="Vendor" class="w-24 h-24 mx-auto rounded-full"/>
-							<h4 class="text-lg font-semibold mt-4">TechFix Solutions</h4>
-							<p class="text-gray-600 text-sm">Website development & IT support.</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">View Store</button>
-						</div>
+			<!-- Popular Services -->
+			<section id="services" class="mt-12 mx-4 md:mx-auto max-w-6xl">
+				<div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl p-8">
+					<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Popular Services</h2>
+					<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+						<!-- Service Cards -->
+						for i := 0; i < 3; i++ {
+							<div class="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 hover:shadow-xl">
+								<img src="https://source.unsplash.com/800x600/?travel" alt="Service" class="w-full h-48 object-cover"/>
+								<div class="p-6">
+									<div class="flex justify-between items-center mb-2">
+										<h3 class="text-xl font-semibold text-gray-800">Local Tour Guide</h3>
+										<span class="text-2xl font-bold text-blue-600">$99</span>
+									</div>
+									<div class="flex text-yellow-400 mb-2">
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star-half-alt"></i>
+										<span class="ml-2 text-gray-600">(4.5)</span>
+									</div>
+									<p class="text-gray-600 mb-4">Explore the hidden gems of { country } with our experienced local guides.</p>
+									<button
+										class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+									>
+										Book Now
+									</button>
+								</div>
+							</div>
+						}
 					</div>
 				</div>
 			</section>
-			<!-- Popular Services -->
-			<section class="py-12 bg-gray-200">
-				<div class="container mx-auto">
-					<h3 class="text-3xl font-semibold text-center mb-8">Popular Services</h3>
-					<div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-6">
-						<!-- Service Card -->
-						<div class="bg-white p-6 rounded-lg shadow-md">
-							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
-							<h4 class="text-lg font-semibold mt-4">Logo Design</h4>
-							<p class="text-gray-600 text-sm">By John's Art Studio</p>
-							<p class="mt-2 font-bold">$50</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
-						</div>
-						<div class="bg-white p-6 rounded-lg shadow-md">
-							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
-							<h4 class="text-lg font-semibold mt-4">Custom Necklace</h4>
-							<p class="text-gray-600 text-sm">By Sarah’s Handmade Crafts</p>
-							<p class="mt-2 font-bold">$25</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
-						</div>
-						<div class="bg-white p-6 rounded-lg shadow-md">
-							<img src="https://via.placeholder.com/300x200" alt="Service" class="w-full h-40 object-cover rounded"/>
-							<h4 class="text-lg font-semibold mt-4">Website Audit</h4>
-							<p class="text-gray-600 text-sm">By TechFix Solutions</p>
-							<p class="mt-2 font-bold">$100</p>
-							<button class="mt-4 bg-indigo-600 text-white px-4 py-2 rounded">Order Now</button>
-						</div>
+			<!-- All Services -->
+			<section class="mt-12 mb-12 mx-4 md:mx-auto max-w-6xl">
+				<div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl p-8">
+					<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">All Services</h2>
+					<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+						<!-- More Service Cards -->
+						for i := 0; i < 8; i++ {
+							<div class="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 hover:shadow-xl">
+								<img src="https://source.unsplash.com/800x600/?{ country }" alt="Service" class="w-full h-40 object-cover"/>
+								<div class="p-4">
+									<div class="flex justify-between items-center mb-2">
+										<h3 class="text-lg font-semibold text-gray-800">Adventure Package</h3>
+										<span class="text-lg font-bold text-blue-600">$149</span>
+									</div>
+									<div class="flex text-yellow-400 mb-2">
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="fas fa-star"></i>
+										<i class="far fa-star"></i>
+										<span class="ml-2 text-gray-600">(4.0)</span>
+									</div>
+									<p class="text-sm text-gray-600 mb-4">Experience thrilling adventures in the heart of { country }.</p>
+									<button
+										class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+									>
+										Book Now
+									</button>
+								</div>
+							</div>
+						}
 					</div>
 				</div>
 			</section>
