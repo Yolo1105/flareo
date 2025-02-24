@@ -35,7 +35,7 @@ func Home() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><title>TravelX - Explore the World</title></head><body class=\"bg-gradient-to-b from-sky-100 to-blue-50 min-h-screen\"><div class=\"relative overflow-hidden\"><!-- Background Pattern --><div class=\"absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,transparent)] -z-10\"></div><!-- Hero Section --><div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20\"><div class=\"text-center\"><h1 class=\"text-6xl font-bold text-blue-900 mb-6\">Discover Your Next <span class=\"block text-sky-500\">Adventure</span></h1><p class=\"text-xl text-blue-700 mb-12\">Find local experiences in any country around the world</p><!-- Search Box --><div class=\"max-w-2xl mx-auto\"><form class=\"relative\" hx-get=\"/search/countries\" hx-trigger=\"input delay:300ms from:input\" hx-target=\"#location_autocomplete\"><div class=\"relative\"><input type=\"text\" name=\"search\" placeholder=\"Where would you like to go?\" class=\"w-full px-6 py-4 text-lg bg-white/80 backdrop-blur border-2 border-sky-200 rounded-full shadow-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent transition duration-200 ease-in-out text-blue-900 placeholder-blue-300\" autofocus><div class=\"absolute right-4 top-1/2 -translate-y-1/2 text-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"></path></svg></div></div><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-2 w-full bg-white/95 backdrop-blur shadow-xl rounded-2xl py-2 text-blue-900 overflow-hidden\"></ul></form></div></div></div></div></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><title>TravelX - Explore the World</title></head><body class=\"bg-gradient-to-b from-sky-100 to-blue-50 min-h-screen\"><div class=\"relative overflow-hidden\"><!-- Background Pattern --><div class=\"absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,transparent)] -z-10\"></div><!-- Hero Section --><div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-20\"><div class=\"text-center\"><h1 class=\"text-6xl font-bold text-blue-900 mb-6\">Discover Your Next <span class=\"block text-sky-500\">Adventure</span></h1><p class=\"text-xl text-blue-700 mb-12\">Find local experiences in any country around the world</p><!-- Search Box --><div class=\"max-w-2xl mx-auto\"><form class=\"relative\" hx-get=\"/search/countries\" hx-trigger=\"input delay:300ms from:input\" hx-target=\"#location_autocomplete\"><div class=\"relative\"><input type=\"text\" name=\"search\" placeholder=\"Where would you like to go?\" class=\"w-full px-6 py-4 text-lg bg-white/80 backdrop-blur border-2 border-sky-200 rounded-full shadow-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent transition duration-200 ease-in-out text-blue-900 placeholder-blue-300\" autofocus><div class=\"absolute right-4 top-1/2 -translate-y-1/2 text-blue-400\"><svg xmlns=\"http://www.w3.org/2000/svg\" class=\"h-6 w-6\" fill=\"none\" viewBox=\"0 0 24 24\" stroke=\"currentColor\"><path stroke-linecap=\"round\" stroke-linejoin=\"round\" stroke-width=\"2\" d=\"M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z\"></path></svg></div></div><ul id=\"location_autocomplete\" class=\"absolute z-10 mt-2 w-full bg-white/95 backdrop-blur shadow-xl rounded-2xl overflow-hidden empty:hidden\"></ul></form></div></div></div></div></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -69,7 +69,7 @@ func CountrySearchList(countries []string) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		for i, country := range countries {
 			if i == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100 last:border-0\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -85,7 +85,7 @@ func CountrySearchList(countries []string) templ.Component {
 				var templ_7745c5c3_Var4 string
 				templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 68, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 66, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 				if templ_7745c5c3_Err != nil {
@@ -96,7 +96,7 @@ func CountrySearchList(countries []string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100 last:border-0\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100 last:border-b-0\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -112,7 +112,7 @@ func CountrySearchList(countries []string) templ.Component {
 				var templ_7745c5c3_Var6 string
 				templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 74, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/home.templ`, Line: 72, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 				if templ_7745c5c3_Err != nil {
