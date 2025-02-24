@@ -16,8 +16,12 @@ templ Home() {
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<title>TravelX - Explore the World</title>
 		</head>
-		<body class="bg-gradient-to-b from-sky-100 to-blue-50 min-h-screen">
+		<body class="bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 text-blue-100 min-h-screen">
 			<div class="relative">
+				<div class="absolute inset-0 z-0">
+					<div class="absolute top-0 left-0 w-1/2 h-1/2 bg-blue-800 opacity-20 transform -rotate-45"></div>
+					<div class="absolute bottom-0 right-0 w-2/3 h-2/3 bg-blue-700 opacity-20 transform rotate-45"></div>
+				</div>
 				<!-- Background Pattern -->
 				<div class="absolute inset-0 bg-grid-slate-100 [mask-image:linear-gradient(0deg,white,transparent)] -z-10"></div>
 				<!-- Hero Section -->
@@ -36,7 +40,7 @@ templ Home() {
 										type="text"
 										name="search"
 										placeholder="Where would you like to go?"
-										class="w-full px-6 py-4 text-lg bg-white/80 backdrop-blur border-2 border-sky-200 rounded-full shadow-lg focus:ring-2 focus:ring-sky-400 focus:border-transparent transition duration-200 ease-in-out text-blue-900 placeholder-blue-300"
+										class="w-full px-6 py-4 text-lg bg-blue-800 bg-opacity-80 backdrop-blur border-2 border-blue-700 rounded-full shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out text-blue-100 placeholder-blue-300"
 										autofocus
 									/>
 									<div class="absolute right-4 top-1/2 -translate-y-1/2 text-blue-400">
@@ -45,11 +49,34 @@ templ Home() {
 										</svg>
 									</div>
 								</div>
-								<ul id="location_autocomplete" class="absolute z-10 mt-2 w-full bg-white/95 backdrop-blur shadow-xl rounded-2xl text-blue-900 overflow-hidden"></ul>
+								<ul id="location_autocomplete" class="absolute z-10 mt-2 w-full bg-gradient-to-br from-blue-700 to-blue-500 backdrop-blur shadow-2xl rounded-2xl text-white overflow-hidden transition-all duration-300"></ul>
 							</form>
 						</div>
 					</div>
 				</div>
+				<section class="py-20 relative overflow-hidden">
+					<div class="absolute inset-0 z-0">
+						<div class="absolute top-0 right-0 w-1/3 h-1/3 bg-blue-600 opacity-10 transform rotate-45"></div>
+						<div class="absolute bottom-0 left-0 w-1/4 h-1/4 bg-blue-800 opacity-10 transform -rotate-12"></div>
+					</div>
+					<div class="container mx-auto px-4 relative z-10">
+						<h2 class="text-4xl font-bold mb-12 text-center text-white">Featured Destinations</h2>
+						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
+								<h3 class="text-xl font-semibold text-white mb-4">Destination 1</h3>
+								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
+							</div>
+							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
+								<h3 class="text-xl font-semibold text-white mb-4">Destination 2</h3>
+								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
+							</div>
+							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
+								<h3 class="text-xl font-semibold text-white mb-4">Destination 3</h3>
+								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
+							</div>
+						</div>
+					</div>
+				</section>
 			</div>
 		</body>
 	</html>
