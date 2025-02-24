@@ -18,7 +18,7 @@ templ Ecommerce(country string) {
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"/>
 		</head>
-		<body class="bg-gradient-to-b from-sky-100 to-blue-50 min-h-screen">
+		<body class="bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 text-blue-100 min-h-screen">
 			<!-- Header -->
 			<header class="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
 				<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -30,9 +30,9 @@ templ Ecommerce(country string) {
 									type="text"
 									name="search"
 									placeholder="Search for another country..."
-									class="w-full px-4 py-2 text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out"
+									class="w-full px-6 py-4 text-lg bg-blue-800 bg-opacity-80 backdrop-blur border-2 border-blue-700 rounded-full shadow-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out text-blue-100 placeholder-blue-300"
 								/>
-								<ul id="nav_location_autocomplete" class="absolute z-20 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none"></ul>
+								<ul id="nav_location_autocomplete" class="absolute z-50 mt-2 w-full bg-blue-900 backdrop-blur-sm shadow-lg rounded-lg text-white overflow-hidden transition-all duration-300 divide-y divide-blue-700"></ul>
 							</form>
 						</div>
 						<nav>
@@ -45,10 +45,16 @@ templ Ecommerce(country string) {
 				</div>
 			</header>
 			<!-- Hero Section -->
-			<section class="bg-white/90 backdrop-blur-sm shadow-2xl mt-8 mx-4 md:mx-auto max-w-6xl rounded-xl overflow-hidden">
-				<div class="container mx-auto px-6 py-16 text-center">
-					<h1 class="text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4">Welcome to { country }</h1>
-					<p class="text-xl text-gray-600">Discover amazing local experiences and services</p>
+			<section class="mt-8 mx-4 md:mx-auto max-w-6xl rounded-xl overflow-hidden">
+				<div class="relative">
+					<div class="absolute inset-0 z-0 pointer-events-none">
+						<div class="absolute top-0 left-0 w-1/2 h-1/2 bg-blue-800 opacity-20 transform -rotate-45"></div>
+						<div class="absolute bottom-0 right-0 w-2/3 h-2/3 bg-blue-700 opacity-20 transform rotate-45"></div>
+					</div>
+					<div class="container mx-auto px-6 py-16 relative z-10 text-center">
+						<h1 class="text-5xl font-extrabold text-white mb-4">Welcome to { country }</h1>
+						<p class="text-xl text-blue-200 mb-8">Discover amazing local experiences and services</p>
+					</div>
 				</div>
 			</section>
 			<!-- Popular Services -->
@@ -134,8 +140,13 @@ templ Ecommerce(country string) {
 				</div>
 			</section>
 			<!-- Footer -->
-			<footer class="bg-white/90 backdrop-blur-sm shadow-lg py-6">
-				<div class="container mx-auto px-6 text-center text-gray-600">
+			<footer class="bg-blue-950 text-blue-200 py-16 relative overflow-hidden">
+				<div class="absolute inset-0 z-0 pointer-events-none">
+					<div class="absolute bottom-0 left-0 w-1/3 h-1/3 bg-blue-800 opacity-10 transform rotate-45"></div>
+					<div class="absolute top-0 right-0 w-1/4 h-1/4 bg-blue-700 opacity-10 transform -rotate-12"></div>
+					<div class="absolute top-1/2 left-1/4 w-1/5 h-1/5 bg-blue-600 opacity-10 transform -translate-y-1/2 rotate-45"></div>
+				</div>
+				<div class="container mx-auto px-6 relative z-10 text-center">
 					<p>&copy; 2024 TravelX. All rights reserved.</p>
 				</div>
 			</footer>
