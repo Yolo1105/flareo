@@ -6,14 +6,14 @@ package views
 templ CountrySearchList(countries []string) {
 	for i, country := range countries {
 		if i == 0 {
-			<li class="px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100">
-				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full text-blue-900 hover:text-sky-600" tabindex="0">
+			<li class="px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700">
+				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full text-white hover:text-cyan-300" tabindex="0">
 					{ country }
 				</a>
 			</li>
 		} else {
-			<li class="px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100 last:border-b-0">
-				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full text-blue-900 hover:text-sky-600">
+			<li class="px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700 last:border-b-0">
+				<a href={ templ.SafeURL("/country/" + country) } class="block w-full h-full text-white hover:text-cyan-300">
 					{ country }
 				</a>
 			</li>
