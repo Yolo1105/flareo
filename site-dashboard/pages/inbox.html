@@ -1,0 +1,974 @@
+<!-- Inbox Section -->
+<div class="page-header">
+  <h1>Inbox</h1>
+</div>
+
+<div class="inbox-container">
+  <!-- Left Sidebar -->
+  <div class="inbox-sidebar">
+    <button class="compose-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 4v16m-8-8h16"/>
+      </svg>
+      Compose
+    </button>
+
+    <div class="email-categories">
+      <h2>My Email</h2>
+      <ul>
+        <li class="active" data-category="inbox" hx-get="/api/emails/inbox" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 6c0-1.1-.9-2-2-2H4c-1.1 0-2 .9-2 2m20 0v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6m20 0l-10 7L2 6"/>
+          </svg>
+          Inbox
+          <span class="count">1253</span>
+        </li>
+        <li data-category="starred" hx-get="/api/emails/starred" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+          Starred
+          <span class="count">245</span>
+        </li>
+        <li data-category="sent" hx-get="/api/emails/sent" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+          </svg>
+          Sent
+          <span class="count">24,532</span>
+        </li>
+        <li data-category="draft" hx-get="/api/emails/draft" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+          </svg>
+          Draft
+          <span class="count">09</span>
+        </li>
+        <li data-category="important" hx-get="/api/emails/important" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 2l2.2 6.6h7.1l-5.7 4.2 2.2 6.6-5.8-4.2-5.8 4.2 2.2-6.6-5.7-4.2h7.1z"/>
+          </svg>
+          Important
+          <span class="count">18</span>
+        </li>
+        <li data-category="bin" hx-get="/api/emails/bin" hx-target=".email-list" hx-trigger="click">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+          </svg>
+          Bin
+          <span class="count">9</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="labels">
+      <h2>Label</h2>
+      <ul>
+        <li class="label-primary" data-category="primary" hx-get="/api/emails/label/primary" hx-target=".email-list" hx-trigger="click">Primary</li>
+        <li class="label-social" data-category="social" hx-get="/api/emails/label/social" hx-target=".email-list" hx-trigger="click">Social</li>
+        <li class="label-work" data-category="work" hx-get="/api/emails/label/work" hx-target=".email-list" hx-trigger="click">Work</li>
+        <li class="label-friends" data-category="friends" hx-get="/api/emails/label/friends" hx-target=".email-list" hx-trigger="click">Friends</li>
+        <li class="create-label">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12h14"/>
+          </svg>
+          Create New Label
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="inbox-main">
+    <div class="email-controls">
+      <div class="search-container">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="M21 21l-4.35-4.35"/>
+        </svg>
+        <input type="text" placeholder="Search mail" class="search-input">
+      </div>
+      <div class="view-controls">
+        <button aria-label="Gallery view">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+        </button>
+        <button aria-label="Information">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M12 16v-4"/>
+            <path d="M12 8h.01"/>
+          </svg>
+        </button>
+        <button aria-label="Delete">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+            <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="email-list" hx-get="/api/emails/inbox" hx-trigger="load">
+      <!-- Email items will be populated here -->
+    </div>
+
+    <div class="pagination">
+      <span>Showing 1-12 of 1,253</span>
+      <div class="pagination-controls">
+        <button aria-label="Previous page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button aria-label="Next page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Chat View Template -->
+<template id="chat-view-template">
+  <div class="chat-view">
+    <div class="chat-header">
+      <div class="chat-title">
+        <button class="back-btn">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <h2 class="sender-name"></h2>
+        <span class="label"></span>
+      </div>
+      <div class="chat-actions">
+        <button class="print-btn" aria-label="Print">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M6 9V2h12v7"/>
+            <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/>
+            <path d="M6 14h12v8H6z"/>
+          </svg>
+        </button>
+        <button class="star-btn" aria-label="Star">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/>
+          </svg>
+        </button>
+        <button class="delete-btn" aria-label="Delete">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 6h18"/>
+            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/>
+            <path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="chat-messages"></div>
+    <div class="chat-input">
+      <button class="voice-btn" aria-label="Voice message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+          <path d="M19 10v2a7 7 0 01-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="23"/>
+          <line x1="8" y1="23" x2="16" y2="23"/>
+        </svg>
+      </button>
+      <input type="text" placeholder="Write message..." class="message-input">
+      <button class="attach-btn" aria-label="Attach file">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/>
+        </svg>
+      </button>
+      <button class="send-btn" aria-label="Send message">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="22" y1="2" x2="11" y2="13"/>
+          <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</template>
+
+<!-- Label Modal Template -->
+<template id="label-modal-template">
+  <div class="modal label-modal">
+    <div class="modal-content">
+      <h3>Add Label</h3>
+      <div class="label-list">
+        <label class="label-option">
+          <input type="checkbox" value="primary">
+          <span class="label-color primary"></span>
+          Primary
+        </label>
+        <label class="label-option">
+          <input type="checkbox" value="social">
+          <span class="label-color social"></span>
+          Social
+        </label>
+        <label class="label-option">
+          <input type="checkbox" value="work">
+          <span class="label-color work"></span>
+          Work
+        </label>
+        <label class="label-option">
+          <input type="checkbox" value="friends">
+          <span class="label-color friends"></span>
+          Friends
+        </label>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary cancel-btn">Cancel</button>
+        <button class="btn-primary apply-btn">Apply</button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+  .inbox-container {
+    display: flex;
+    gap: 1.5rem;
+    height: calc(100vh - 8rem);
+    margin: 0 -1.5rem;
+  }
+
+  .inbox-sidebar {
+    width: 280px;
+    padding: 0 1.5rem;
+    border-right: 1px solid var(--border-color, #e2e8f0);
+  }
+
+  .inbox-main {
+    flex: 1;
+    padding: 0 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  .compose-btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--primary-color, #4475F2);
+    color: white;
+    padding: 0.75rem;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 2rem;
+    transition: background-color 0.2s;
+  }
+
+  .compose-btn:hover {
+    background: var(--primary-color-dark, #3461D9);
+  }
+
+  .email-categories h2,
+  .labels h2 {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary, #64748b);
+    margin-bottom: 1rem;
+  }
+
+  .email-categories ul,
+  .labels ul {
+    list-style: none;
+    padding: 0;
+  }
+
+  .email-categories li,
+  .labels li {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: var(--text-secondary, #64748b);
+    transition: background-color 0.2s;
+  }
+
+  .email-categories li:hover,
+  .labels li:hover {
+    background: var(--background-hover, #f1f5f9);
+  }
+
+  .email-categories li.active {
+    background: var(--primary-color-light, #eff6ff);
+    color: var(--primary-color, #4475F2);
+  }
+
+  .count {
+    margin-left: auto;
+    font-size: 0.875rem;
+  }
+
+  .labels {
+    margin-top: 2rem;
+  }
+
+  .label-primary { color: var(--info-color, #0ea5e9); }
+  .label-social { color: var(--secondary-color, #6366f1); }
+  .label-work { color: var(--warning-color, #f97316); }
+  .label-friends { color: var(--accent-color, #ec4899); }
+
+  .create-label {
+    color: var(--text-secondary, #64748b);
+    font-size: 0.875rem;
+  }
+
+  .email-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    position: sticky;
+    top: 0;
+    background: var(--background-secondary, #f8fafc);
+    padding: 0.5rem 0;
+    z-index: 10;
+  }
+
+  .search-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--background-primary, white);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+  }
+
+  .search-input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 0.875rem;
+    background: transparent;
+    color: var(--text-primary);
+  }
+
+  .search-input::placeholder {
+    color: var(--text-secondary, #64748b);
+  }
+
+  .view-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .view-controls button {
+    padding: 0.5rem;
+    background: var(--background-primary, white);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: var(--text-secondary, #64748b);
+    transition: all 0.2s;
+  }
+
+  .view-controls button:hover {
+    background: var(--background-hover, #f1f5f9);
+    color: var(--text-primary);
+  }
+
+  .email-list {
+    background: var(--background-primary, white);
+    border-radius: 0.5rem;
+    border: 1px solid var(--border-color, #e2e8f0);
+    overflow: hidden;
+  }
+
+  .email-item {
+    display: grid;
+    grid-template-columns: auto auto minmax(150px, 200px) auto 1fr auto;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color, #e2e8f0);
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .email-item:hover {
+    background: var(--background-hover, #f8fafc);
+  }
+
+  .checkbox {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.25rem;
+    border: 2px solid var(--border-color, #e2e8f0);
+    cursor: pointer;
+    appearance: none;
+    transition: all 0.2s;
+  }
+
+  .checkbox:checked {
+    background-color: var(--primary-color, #4475F2);
+    border-color: var(--primary-color, #4475F2);
+  }
+
+  .star-btn {
+    background: none;
+    border: none;
+    padding: 0.25rem;
+    cursor: pointer;
+    color: var(--text-secondary, #64748b);
+    transition: transform 0.2s;
+  }
+
+  .star-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .star-btn[data-starred="true"] svg {
+    fill: var(--warning-color, #f59e0b);
+    stroke: var(--warning-color, #f59e0b);
+  }
+
+  .sender {
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .label {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  .label-primary {
+    background: var(--info-color-light, #e0f2fe);
+    color: var(--info-color, #0ea5e9);
+  }
+
+  .label-work {
+    background: var(--warning-color-light, #fff7ed);
+    color: var(--warning-color, #f97316);
+  }
+
+  .subject {
+    color: var(--text-secondary, #64748b);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .time {
+    color: var(--text-secondary, #64748b);
+    font-size: 0.875rem;
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--background-primary, white);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 0.5rem;
+    color: var(--text-secondary, #64748b);
+    font-size: 0.875rem;
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pagination-controls button {
+    padding: 0.5rem;
+    background: var(--background-primary, white);
+    border: 1px solid var(--border-color, #e2e8f0);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    color: var(--text-secondary, #64748b);
+    transition: all 0.2s;
+  }
+
+  .pagination-controls button:hover {
+    background: var(--background-hover, #f1f5f9);
+    color: var(--text-primary);
+  }
+
+  /* Dark theme adjustments */
+  .dark .inbox-container {
+    background: var(--background-primary);
+  }
+
+  .dark .inbox-sidebar {
+    background: var(--background-secondary);
+  }
+
+  .dark .email-list,
+  .dark .pagination {
+    background: var(--background-secondary);
+  }
+
+  /* Chat View Styles */
+  .chat-view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--background-primary);
+    display: flex;
+    flex-direction: column;
+    z-index: 20;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+  }
+
+  .chat-view.active {
+    transform: translateX(0);
+  }
+
+  .chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .chat-title {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    color: var(--text-secondary);
+  }
+
+  .chat-actions {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+  }
+
+  .message {
+    max-width: 70%;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+    line-height: 1.4;
+  }
+
+  .message.received {
+    background: var(--background-secondary);
+    margin-right: auto;
+  }
+
+  .message.sent {
+    background: var(--primary-color);
+    color: white;
+    margin-left: auto;
+  }
+
+  .chat-input {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .message-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    outline: none;
+    font-size: 0.875rem;
+  }
+
+  /* Multi-select Styles */
+  .multi-select-active .email-item {
+    background: var(--background-secondary);
+  }
+
+  .multi-select-active .email-item:hover {
+    background: var(--background-hover);
+  }
+
+  .multi-select-active .email-item.selected {
+    background: var(--primary-color-light);
+  }
+
+  /* Label Modal Styles */
+  .modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 30;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .modal.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .modal-content {
+    background: var(--background-primary);
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 400px;
+  }
+
+  .label-list {
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .label-option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+    cursor: pointer;
+    border-radius: 0.375rem;
+  }
+
+  .label-option:hover {
+    background: var(--background-secondary);
+  }
+
+  .label-color {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 50%;
+  }
+
+  .label-color.primary { background: var(--info-color); }
+  .label-color.social { background: var(--secondary-color); }
+  .label-color.work { background: var(--warning-color); }
+  .label-color.friends { background: var(--accent-color); }
+
+  .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+  }
+</style>
+
+<script>
+  // Sample data - Replace with actual data from your backend
+  const emailsByCategory = {
+    inbox: [
+      {
+        id: 1,
+        sender: 'Juliu Jalal',
+        label: 'Primary',
+        subject: 'Our Bachelor of Commerce program is ACBSP-accredited.',
+        time: '8:38 AM',
+        starred: false
+      },
+      {
+        id: 2,
+        sender: 'Minerva Barnett',
+        label: 'Work',
+        subject: 'Get Best Advertiser In Your Side Pocket',
+        time: '8:13 AM',
+        starred: false
+      },
+      {
+        id: 4,
+        sender: 'Sarah Chen',
+        label: 'Work',
+        subject: 'Project Timeline Update',
+        time: 'Yesterday',
+        starred: false
+      }
+    ],
+    starred: [
+      {
+        id: 3,
+        sender: 'Alex Thompson',
+        label: 'Primary',
+        subject: 'Weekly Team Meeting Notes',
+        time: 'Yesterday',
+        starred: true
+      },
+      {
+        id: 5,
+        sender: 'David Kim',
+        label: 'Primary',
+        subject: 'Important: System Maintenance Notice',
+        time: 'Feb 20',
+        starred: true
+      }
+    ],
+    // Add more categories as needed
+  };
+
+  // State management
+  const state = {
+    selectedEmails: new Set(),
+    multiSelectActive: false,
+    currentChat: null,
+    selectedLabels: new Set()
+  };
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const emailList = document.querySelector('.email-list');
+    const template = document.getElementById('email-template');
+
+    // Initialize email list with inbox emails
+    function initializeEmails(category = 'inbox') {
+      emailList.innerHTML = ''; // Clear existing emails
+      const emails = emailsByCategory[category] || emailsByCategory.inbox;
+      
+      emails.forEach(email => {
+        const clone = template.content.cloneNode(true);
+        const item = clone.querySelector('.email-item');
+        
+        item.querySelector('.sender').textContent = email.sender;
+        item.querySelector('.subject').textContent = email.subject;
+        item.querySelector('.time').textContent = email.time;
+        
+        const label = document.createElement('span');
+        label.className = `label label-${email.label.toLowerCase()}`;
+        label.textContent = email.label;
+        item.querySelector('.label').replaceWith(label);
+        
+        const starBtn = item.querySelector('.star-btn');
+        starBtn.dataset.starred = email.starred;
+        if (email.starred) {
+          starBtn.querySelector('svg').style.fill = '#f59e0b';
+          starBtn.querySelector('svg').style.stroke = '#f59e0b';
+        }
+        
+        // Add HTMX attributes
+        item.setAttribute('hx-get', `/api/emails/${email.id}`);
+        starBtn.setAttribute('hx-post', `/api/emails/${email.id}/star`);
+        starBtn.setAttribute('hx-swap', 'outerHTML');
+        
+        // Prevent star button click from triggering email item click
+        starBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+        });
+        
+        emailList.appendChild(item);
+      });
+
+      // Update active category
+      document.querySelector('.email-categories li.active')?.classList.remove('active');
+      document.querySelector(`[data-category="${category}"]`)?.classList.add('active');
+    }
+
+    // Initialize with inbox
+    initializeEmails();
+
+    // Add event listeners for category navigation
+    document.querySelectorAll('[data-category]').forEach(item => {
+      item.addEventListener('click', () => {
+        const category = item.dataset.category;
+        initializeEmails(category);
+      });
+    });
+
+    // Add event listeners for interactive elements
+    document.querySelector('.compose-btn').addEventListener('click', () => {
+      // TODO: Implement compose functionality
+      console.log('Compose new email');
+    });
+
+    // Search functionality
+    const searchInput = document.querySelector('.search-input');
+    searchInput.addEventListener('input', (e) => {
+      const query = e.target.value.toLowerCase();
+      document.querySelectorAll('.email-item').forEach(item => {
+        const subject = item.querySelector('.subject').textContent.toLowerCase();
+        const sender = item.querySelector('.sender').textContent.toLowerCase();
+        const shouldShow = subject.includes(query) || sender.includes(query);
+        item.style.display = shouldShow ? 'grid' : 'none';
+      });
+    });
+
+    // Initialize chat functionality
+    initializeChat();
+    initializeMultiSelect();
+    initializeLabelModal();
+  });
+
+  // Initialize chat functionality
+  function initializeChat() {
+    const emailItems = document.querySelectorAll('.email-item');
+    const template = document.getElementById('chat-view-template');
+    
+    emailItems.forEach(item => {
+      item.addEventListener('click', () => {
+        if (state.multiSelectActive) {
+          toggleEmailSelection(item);
+          return;
+        }
+
+        const emailId = item.getAttribute('hx-get').split('/').pop();
+        const email = findEmailById(emailId);
+        if (!email) return;
+
+        showChatView(email);
+      });
+    });
+  }
+
+  function showChatView(email) {
+    const chatView = document.getElementById('chat-view-template').content.cloneNode(true);
+    const container = chatView.querySelector('.chat-view');
+    
+    // Populate chat view
+    container.querySelector('.sender-name').textContent = email.sender;
+    const label = container.querySelector('.label');
+    label.className = `label label-${email.label.toLowerCase()}`;
+    label.textContent = email.label;
+
+    // Add mock messages
+    const messages = container.querySelector('.chat-messages');
+    messages.innerHTML = `
+      <div class="message received">
+        <p>${email.subject}</p>
+        <span class="time">${email.time}</span>
+      </div>
+    `;
+
+    // Setup chat input
+    const input = container.querySelector('.message-input');
+    const sendBtn = container.querySelector('.send-btn');
+    
+    input.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') sendMessage(messages, input);
+    });
+    
+    sendBtn.addEventListener('click', () => sendMessage(messages, input));
+
+    // Setup back button
+    container.querySelector('.back-btn').addEventListener('click', () => {
+      container.classList.remove('active');
+      setTimeout(() => container.remove(), 300);
+    });
+
+    // Add to DOM and animate
+    document.body.appendChild(container);
+    requestAnimationFrame(() => container.classList.add('active'));
+  }
+
+  function sendMessage(messages, input) {
+    if (!input.value.trim()) return;
+
+    const message = document.createElement('div');
+    message.className = 'message sent';
+    message.innerHTML = `
+      <p>${input.value}</p>
+      <span class="time">${new Date().toLocaleTimeString()}</span>
+    `;
+    
+    messages.appendChild(message);
+    messages.scrollTop = messages.scrollHeight;
+    input.value = '';
+  }
+
+  // Initialize multi-select functionality
+  function initializeMultiSelect() {
+    const emailList = document.querySelector('.email-list');
+    
+    // Enable multi-select on shift key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Shift' && !state.multiSelectActive) {
+        state.multiSelectActive = true;
+        emailList.classList.add('multi-select-active');
+      }
+    });
+
+    document.addEventListener('keyup', (e) => {
+      if (e.key === 'Shift' && state.multiSelectActive) {
+        state.multiSelectActive = false;
+        emailList.classList.remove('multi-select-active');
+        state.selectedEmails.clear();
+        document.querySelectorAll('.email-item.selected').forEach(item => {
+          item.classList.remove('selected');
+        });
+      }
+    });
+  }
+
+  function toggleEmailSelection(emailItem) {
+    const emailId = emailItem.getAttribute('hx-get').split('/').pop();
+    
+    if (state.selectedEmails.has(emailId)) {
+      state.selectedEmails.delete(emailId);
+      emailItem.classList.remove('selected');
+    } else {
+      state.selectedEmails.add(emailId);
+      emailItem.classList.add('selected');
+    }
+  }
+
+  // Initialize label functionality
+  function initializeLabelModal() {
+    const template = document.getElementById('label-modal-template');
+    const labelButtons = document.querySelectorAll('.label-option input');
+    
+    labelButtons.forEach(button => {
+      button.addEventListener('change', () => {
+        const value = button.value;
+        if (button.checked) {
+          state.selectedLabels.add(value);
+        } else {
+          state.selectedLabels.delete(value);
+        }
+      });
+    });
+  }
+
+  // Helper functions
+  function findEmailById(id) {
+    for (const category in emailsByCategory) {
+      const email = emailsByCategory[category].find(e => e.id.toString() === id);
+      if (email) return email;
+    }
+    return null;
+  }
+</script> 
