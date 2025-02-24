@@ -34,7 +34,7 @@ func CountrySearchList(countries []string) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		for i, country := range countries {
 			if i == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition-colors duration-150 ease-in-out\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -61,7 +61,7 @@ func CountrySearchList(countries []string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700 last:border-b-0\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition-colors duration-150 ease-in-out\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
