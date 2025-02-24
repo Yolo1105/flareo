@@ -49,14 +49,14 @@ func Ecommerce(country string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - TravelX</title><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\"></head><body class=\"bg-gradient-to-r from-blue-400 to-purple-500 min-h-screen\"><!-- Header --><header class=\"bg-white shadow-lg\"><div class=\"container mx-auto px-6 py-4 flex justify-between items-center\"><a href=\"/\" class=\"text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent\">TravelX</a><div class=\"flex-1 max-w-xl mx-8\"><form class=\"relative\" hx-get=\"/search/countries\" hx-trigger=\"input delay:300ms from:input\" hx-target=\"#nav_location_autocomplete\"><input type=\"text\" name=\"search\" placeholder=\"Search for another country...\" class=\"w-full px-4 py-2 text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out\"><ul id=\"nav_location_autocomplete\" class=\"absolute z-20 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none\"></ul></form></div><nav><ul class=\"flex space-x-6\"><li><a href=\"/\" class=\"hover:text-blue-600 transition duration-200\">Home</a></li><li><a href=\"#services\" class=\"hover:text-blue-600 transition duration-200\">Services</a></li></ul></nav></div></header><!-- Hero Section --><section class=\"bg-white/90 backdrop-blur-sm shadow-2xl mt-8 mx-4 md:mx-auto max-w-6xl rounded-xl overflow-hidden\"><div class=\"container mx-auto px-6 py-16 text-center\"><h1 class=\"text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4\">Welcome to ")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, " - TravelX</title><script src=\"https://unpkg.com/@tailwindcss/browser@4\"></script><script src=\"https://unpkg.com/htmx.org@1.9.10\"></script><link rel=\"stylesheet\" href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\"></head><body class=\"bg-gradient-to-b from-sky-100 to-blue-50 min-h-screen\"><!-- Header --><header class=\"bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50\"><div class=\"max-w-7xl mx-auto px-4 sm:px-6 lg:px-8\"><div class=\"flex items-center justify-between h-16\"><a href=\"/\" class=\"text-2xl font-bold text-blue-900\">TravelX</a><div class=\"flex-1 max-w-xl mx-8\"><form class=\"relative\" hx-get=\"/search/countries\" hx-trigger=\"input delay:300ms from:input\" hx-target=\"#nav_location_autocomplete\"><input type=\"text\" name=\"search\" placeholder=\"Search for another country...\" class=\"w-full px-4 py-2 text-sm border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out\"><ul id=\"nav_location_autocomplete\" class=\"absolute z-20 mt-1 w-full bg-white shadow-lg max-h-60 rounded-lg py-1 text-gray-800 overflow-auto focus-within:outline-none\"></ul></form></div><nav><ul class=\"flex space-x-6\"><li><a href=\"/\" class=\"hover:text-blue-600 transition duration-200\">Home</a></li><li><a href=\"#services\" class=\"hover:text-blue-600 transition duration-200\">Services</a></li></ul></nav></div></div></header><!-- Hero Section --><section class=\"bg-white/90 backdrop-blur-sm shadow-2xl mt-8 mx-4 md:mx-auto max-w-6xl rounded-xl overflow-hidden\"><div class=\"container mx-auto px-6 py-16 text-center\"><h1 class=\"text-5xl font-extrabold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-4\">Welcome to ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var3 string
 		templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 48, Col: 141}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 50, Col: 141}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
@@ -74,7 +74,7 @@ func Ecommerce(country string) templ.Component {
 			var templ_7745c5c3_Var4 string
 			templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 63, Col: 70}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 65, Col: 70}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 			if templ_7745c5c3_Err != nil {
@@ -87,7 +87,7 @@ func Ecommerce(country string) templ.Component {
 			var templ_7745c5c3_Var5 string
 			templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 81, Col: 75}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 83, Col: 75}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 			if templ_7745c5c3_Err != nil {
@@ -110,7 +110,7 @@ func Ecommerce(country string) templ.Component {
 			var templ_7745c5c3_Var6 string
 			templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs(fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i+10))
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 104, Col: 73}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 106, Col: 73}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 			if templ_7745c5c3_Err != nil {
@@ -123,7 +123,7 @@ func Ecommerce(country string) templ.Component {
 			var templ_7745c5c3_Var7 string
 			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 122, Col: 104}
+				return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/ecommerce.templ`, Line: 124, Col: 104}
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 			if templ_7745c5c3_Err != nil {
