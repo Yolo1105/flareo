@@ -30,7 +30,7 @@ templ Home() {
 						<p class="text-xl text-blue-700 mb-12">Find local experiences in any country around the world</p>
 						<!-- Search Box -->
 						<div class="max-w-2xl mx-auto">
-							<form class="relative" hx-get="/search/countries" hx-trigger="input delay:300ms from:input" hx-target="#location_autocomplete">
+							<form class="relative" hx-get="/search/countries" hx-trigger="input delay:300ms from:input" hx-target="#location_autocomplete" onsubmit="return false;">
 								<div class="relative">
 									<input
 										type="text"
