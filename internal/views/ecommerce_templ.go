@@ -10,7 +10,7 @@ import templruntime "github.com/a-h/templ/runtime"
 
 import "fmt"
 
-// Ecommerce renders the country detail page template
+// Ecommerce renders the country detail page template with an integrated HTMX search form in the header.
 // Features:
 // - Country header with hero section
 // - Popular and all services sections
