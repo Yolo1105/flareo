@@ -34,7 +34,7 @@ func CountrySearchList(countries []string) templ.Component {
 		ctx = templ.ClearChildren(ctx)
 		for i, country := range countries {
 			if i == 0 {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -43,14 +43,14 @@ func CountrySearchList(countries []string) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"block w-full h-full text-blue-900 hover:text-sky-600\" tabindex=\"0\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 2, "\" class=\"block w-full h-full text-white hover:text-cyan-300\" tabindex=\"0\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var3 string
 				templ_7745c5c3_Var3, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/coutrySearch.templ`, Line: 11, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/countrySearch.templ`, Line: 11, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 				if templ_7745c5c3_Err != nil {
@@ -61,7 +61,7 @@ func CountrySearchList(countries []string) templ.Component {
 					return templ_7745c5c3_Err
 				}
 			} else {
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li class=\"px-6 py-3 hover:bg-sky-50 cursor-pointer transition duration-150 ease-in-out border-b border-sky-100 last:border-b-0\"><a href=\"")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "<li class=\"px-6 py-3 hover:bg-blue-800 cursor-pointer transition duration-150 ease-in-out border-b border-blue-700 last:border-b-0\"><a href=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -70,14 +70,14 @@ func CountrySearchList(countries []string) templ.Component {
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
-				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"block w-full h-full text-blue-900 hover:text-sky-600\">")
+				templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "\" class=\"block w-full h-full text-white hover:text-cyan-300\">")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var5 string
 				templ_7745c5c3_Var5, templ_7745c5c3_Err = templ.JoinStringErrs(country)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/coutrySearch.templ`, Line: 17, Col: 14}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `internal/views/countrySearch.templ`, Line: 17, Col: 14}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 				if templ_7745c5c3_Err != nil {
