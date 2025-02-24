@@ -22,6 +22,9 @@ func main() {
 
 	// Country details page route handler
 	e.GET("/country/:country", func(c echo.Context) error {
+		if c.QueryParam("search") != "" {
+			return layout.HandleSearch(c)
+		}
 		return layout.Ecommerce(c)
 	})
 
