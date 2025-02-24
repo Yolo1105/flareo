@@ -59,24 +59,24 @@ templ Ecommerce(country string) {
 			</section>
 			<!-- Popular Services -->
 			<section id="services" class="mt-12 mx-4 md:mx-auto max-w-6xl">
-				<div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl p-8">
-					<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">Popular Services</h2>
+				<div class="bg-blue-800/80 backdrop-blur-sm shadow-2xl rounded-xl p-8">
+					<h2 class="text-3xl font-bold text-white mb-8 text-center">Popular Services</h2>
 					<div class="grid grid-cols-1 md:grid-cols-3 gap-8">
 						<!-- Service Cards -->
 						for i := 0; i < 3; i++ {
-							<div class="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 hover:shadow-xl">
+							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:shadow-2xl hover:scale-105">
 								<img src="" alt="Service" class="w-full h-48 object-cover"/>
 								<div class="p-6">
 									<div class="flex items-center mb-4">
 										<img src={ fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i) } alt="Vendor" class="w-10 h-10 rounded-full mr-3"/>
 										<div>
-											<h4 class="text-sm font-medium text-gray-600">John Smith</h4>
-											<p class="text-xs text-gray-500">Professional Guide</p>
+											<h4 class="text-sm font-medium text-blue-200">John Smith</h4>
+											<p class="text-xs text-blue-400">Professional Guide</p>
 										</div>
 									</div>
 									<div class="flex justify-between items-center mb-2">
-										<h3 class="text-xl font-semibold text-gray-800">Local Tour Guide</h3>
-										<span class="text-2xl font-bold text-blue-600">$99</span>
+										<h3 class="text-xl font-semibold text-white">Local Tour Guide</h3>
+										<span class="text-2xl font-bold text-cyan-300">$99</span>
 									</div>
 									<div class="flex text-yellow-400 mb-2">
 										<i class="fas fa-star"></i>
@@ -86,9 +86,9 @@ templ Ecommerce(country string) {
 										<i class="fas fa-star-half-alt"></i>
 										<span class="ml-2 text-gray-600">(4.5)</span>
 									</div>
-									<p class="text-gray-600 mb-4">Explore the hidden gems of { country } with our experienced local guides.</p>
+									<p class="text-blue-200 mb-4">Explore the hidden gems of { country } with our experienced local guides.</p>
 									<button
-										class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+										class="w-full bg-cyan-500 hover:bg-cyan-600 text-blue-900 font-bold py-2 px-4 rounded-full transition-colors duration-300 transform hover:scale-105"
 									>
 										Book Now
 									</button>
@@ -100,24 +100,24 @@ templ Ecommerce(country string) {
 			</section>
 			<!-- All Services -->
 			<section class="mt-12 mb-12 mx-4 md:mx-auto max-w-6xl">
-				<div class="bg-white/90 backdrop-blur-sm shadow-2xl rounded-xl p-8">
-					<h2 class="text-3xl font-bold text-gray-800 mb-8 text-center">All Services</h2>
+				<div class="bg-blue-800/80 backdrop-blur-sm shadow-2xl rounded-xl p-8">
+					<h2 class="text-3xl font-bold text-white mb-8 text-center">All Services</h2>
 					<div class="grid grid-cols-1 md:grid-cols-4 gap-6">
 						<!-- More Service Cards -->
 						for i := 0; i < 8; i++ {
-							<div class="bg-white rounded-lg shadow-lg overflow-hidden transition duration-300 hover:shadow-xl">
+							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg overflow-hidden transition-transform duration-300 hover:shadow-2xl hover:scale-105">
 								<img src="https://source.unsplash.com/800x600/?{ country }" alt="Service" class="w-full h-40 object-cover"/>
 								<div class="p-4">
 									<div class="flex items-center mb-3">
 										<img src={ fmt.Sprintf("https://i.pravatar.cc/40?img=%d", i+10) } alt="Vendor" class="w-8 h-8 rounded-full mr-2"/>
 										<div>
-											<h4 class="text-sm font-medium text-gray-600">Sarah Parker</h4>
-											<p class="text-xs text-gray-500">Adventure Guide</p>
+											<h4 class="text-sm font-medium text-blue-200">Sarah Parker</h4>
+											<p class="text-xs text-blue-400">Adventure Guide</p>
 										</div>
 									</div>
 									<div class="flex justify-between items-center mb-2">
-										<h3 class="text-lg font-semibold text-gray-800">Adventure Package</h3>
-										<span class="text-lg font-bold text-blue-600">$149</span>
+										<h3 class="text-lg font-semibold text-white">Adventure Package</h3>
+										<span class="text-lg font-bold text-cyan-300">$149</span>
 									</div>
 									<div class="flex text-yellow-400 mb-2">
 										<i class="fas fa-star"></i>
@@ -127,9 +127,9 @@ templ Ecommerce(country string) {
 										<i class="far fa-star"></i>
 										<span class="ml-2 text-gray-600">(4.0)</span>
 									</div>
-									<p class="text-sm text-gray-600 mb-4">Experience thrilling adventures in the heart of { country }.</p>
+									<p class="text-sm text-blue-200 mb-4">Experience thrilling adventures in the heart of { country }.</p>
 									<button
-										class="w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white py-2 rounded-lg hover:from-blue-600 hover:to-purple-600 transition duration-300"
+										class="w-full bg-cyan-500 hover:bg-cyan-600 text-blue-900 font-bold py-2 px-4 rounded-full transition-colors duration-300 transform hover:scale-105"
 									>
 										Book Now
 									</button>
