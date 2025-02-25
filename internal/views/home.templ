@@ -16,7 +16,7 @@ templ Home() {
 			<script src="https://unpkg.com/htmx.org@1.9.10"></script>
 			<title>TravelX - Explore the World</title>
 		</head>
-		<body class="bg-gradient-to-b from-blue-950 via-blue-900 to-blue-800 text-blue-100 min-h-screen">
+		<body class="bg-gray-100 min-h-screen">
 			<div class="relative">
 				<div class="absolute inset-0 z-0 pointer-events-none">
 					<div class="absolute top-0 left-0 w-1/2 h-1/2 bg-blue-800 opacity-20 transform -rotate-45"></div>
@@ -61,18 +61,96 @@ templ Home() {
 					</div>
 					<div class="container mx-auto px-4 relative z-10">
 						<h2 class="text-4xl font-bold mb-12 text-center text-white">Featured Destinations</h2>
-						<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
-								<h3 class="text-xl font-semibold text-white mb-4">Destination 1</h3>
-								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
-							</div>
-							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
-								<h3 class="text-xl font-semibold text-white mb-4">Destination 2</h3>
-								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
-							</div>
-							<div class="bg-gradient-to-br from-blue-700 to-blue-500 rounded-lg shadow-lg hover:shadow-2xl transition-transform duration-300 transform hover:scale-105 p-6">
-								<h3 class="text-xl font-semibold text-white mb-4">Destination 3</h3>
-								<p class="text-blue-200">Lorem ipsum dolor sit amet.</p>
+						<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+							<div class="city-card group relative aspect-square w-full overflow-hidden rounded-lg cursor-pointer bg-white shadow-lg">
+								<div class="relative h-full w-full">
+									<img
+										src="https://nomads.com/cdn-cgi/image/format=auto,fit=cover,width=600,height=300,quality=75/assets/img/places/bangkok-thailand.jpg"
+										alt="Bangkok cityscape"
+										class="h-full w-full object-cover"
+									/>
+
+									<button
+										class="heart-button absolute top-4 right-4 z-20 rounded-full p-2 transition-all hover:scale-110 active:scale-95 bg-black/20 hover:bg-black/40 aria-[pressed=true]:fill-red-500 aria-[pressed=true]:stroke-red-500"
+										aria-pressed="false"
+										hx-post="/like"
+										hx-trigger="click"
+										hx-swap="none"
+										onclick="this.setAttribute('aria-pressed', this.getAttribute('aria-pressed') === 'true' ? 'false' : 'true')"
+									>
+										<svg 
+											class="h-5 w-5 transition-colors stroke-white stroke-2 fill-none"
+											viewBox="0 0 24 24"
+											xmlns="http://www.w3.org/2000/svg"
+										>
+											<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+										</svg>
+									</button>
+
+									<div class="absolute inset-0 transition-colors duration-300 bg-gradient-to-t from-black/60 to-transparent group-hover:bg-black/70"></div>
+
+									<div class="absolute inset-0 transition-all duration-300 group-hover:opacity-0 group-hover:translate-y-4">
+										<div class="absolute bottom-4 left-4 text-white z-10">
+											<h2 class="text-3xl font-bold">Bangkok</h2>
+											<h3 class="text-lg opacity-90">Thailand</h3>
+										</div>
+
+										<div class="absolute bottom-4 right-4 text-white text-right">
+											<p class="text-2xl font-bold">$1,499 / mo</p>
+											<p class="text-xs tracking-wide opacity-90">FOR A NOMAD</p>
+										</div>
+									</div>
+
+									<div class="absolute inset-0 flex items-center opacity-0 translate-y-4 transition-all duration-300 group-hover:opacity-100 group-hover:translate-y-0">
+										<div class="w-full space-y-6 px-8">
+											<div class="space-y-2">
+												<div class="text-base text-white flex items-center gap-2">
+													<span class="text-lg">⭐️</span>
+													<span class="font-medium">Overall</span>
+												</div>
+												<div class="h-3 w-full rounded-full bg-white/20">
+													<div class="transition-[width] duration-700 ease-out h-full w-0 rounded-full bg-emerald-500 shadow-lg [style*='--target-width:90%']"></div>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="text-base text-white flex items-center gap-2">
+													<span class="text-lg">💵</span>
+													<span class="font-medium">Cost</span>
+												</div>
+												<div class="h-3 w-full rounded-full bg-white/20">
+													<div class="transition-[width] duration-700 ease-out h-full w-0 rounded-full bg-emerald-500 shadow-lg [style*='--target-width:100%']"></div>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="text-base text-white flex items-center gap-2">
+													<span class="text-lg">📡</span>
+													<span class="font-medium">Internet</span>
+												</div>
+												<div class="h-3 w-full rounded-full bg-white/20">
+													<div class="transition-[width] duration-700 ease-out h-full w-0 rounded-full bg-red-500 shadow-lg [style*='--target-width:40%']"></div>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="text-base text-white flex items-center gap-2">
+													<span class="text-lg">👍</span>
+													<span class="font-medium">Liked</span>
+												</div>
+												<div class="h-3 w-full rounded-full bg-white/20">
+													<div class="transition-[width] duration-700 ease-out h-full w-0 rounded-full bg-yellow-500 shadow-lg [style*='--target-width:60%']"></div>
+												</div>
+											</div>
+											<div class="space-y-2">
+												<div class="text-base text-white flex items-center gap-2">
+													<span class="text-lg">👮</span>
+													<span class="font-medium">Safety</span>
+												</div>
+												<div class="h-3 w-full rounded-full bg-white/20">
+													<div class="transition-[width] duration-700 ease-out h-full w-0 rounded-full bg-emerald-500 shadow-lg [style*='--target-width:80%']"></div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
 							</div>
 						</div>
 					</div>
