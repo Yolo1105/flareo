@@ -16,6 +16,8 @@
       rel="stylesheet"
     />
     <link rel="stylesheet" href="assets/styles.css" />
+    <link rel="stylesheet" href="assets/forum-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   </head>
   <body>
     <!-- Normalize URL: if pathname ends with "index.html", replace with "/" + hash -->
@@ -133,7 +135,7 @@
           href="#discussion-forum"
           class="nav-item"
           data-tooltip="Discussion Forum"
-          hx-get="pages/discussion-forum.html"
+          hx-get="pages/Forum/forums.html"
           hx-target="#content"
           hx-push-url="#discussion-forum"
           onclick="updateActiveNav();"
@@ -230,7 +232,7 @@
       </div>
     </header>
     <main class="main-content">
-      <div id="content">
+      <div id="content" hx-boost="true">
         <!-- Default Dashboard Content -->
         <div class="cards-grid">
           <div class="metric-card">
@@ -276,6 +278,7 @@
     </div>
 
     <script src="assets/script.js"></script>
+    <script src="assets/forum-main.js"></script>
     <script>
       // On load, save default dashboard content and load fragment if needed.
       document.addEventListener("DOMContentLoaded", () => {

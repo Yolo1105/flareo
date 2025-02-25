@@ -4,7 +4,7 @@ let userRole = "Seller";
 let userProfileImage = "https://banner2.cleanpng.com/20180324/whq/av077g98s.webp";
 
 // Global handler: override HTMX push-url so only the hash is used.
-document.body.addEventListener("htmx:beforePushUrl", function(evt) {
+document.body.addEventListener("htmx:beforePushUrl", function (evt) {
   const trigger = evt.detail.elt;
   if (trigger && trigger.getAttribute("href")) {
     evt.detail.path = trigger.getAttribute("href");
@@ -37,6 +37,15 @@ function toggleTheme() {
   } else {
     icon.classList.remove("fa-sun");
     icon.classList.add("fa-moon");
+  }
+  const forumContainer = document.querySelector(".forum-content");
+  if (forumContainer) {
+    // dark or undark for forum
+    if (document.documentElement.classList.contains("dark")) {
+      forumContainer.classList.add("dark");
+    } else {
+      forumContainer.classList.remove("dark");
+    }
   }
   setTimeout(() => {
     icon.classList.remove("switching");
@@ -221,7 +230,7 @@ function openProjectModal(project) {
       </button>
     </div>
   `;
-  
+
   document.getElementById("project-modal").style.display = "block";
   document.body.classList.add('modal-open'); // Add this line
 }
