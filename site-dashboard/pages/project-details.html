@@ -1,0 +1,28 @@
+<script>
+    // If this fragment is loaded directly, redirect to index.html with the proper hash.
+    if (window.top === window.self) {
+      window.location.href = "/#project-details" + window.location.search;
+    }
+  </script>
+  
+  <div class="project-detail">
+    <button class="back-button" onclick="goBack()">← Back to Explore</button>
+    <h1 id="project-title">Project Title</h1>
+    <p id="project-description">Project description goes here...</p>
+    <!-- Add more project details as needed -->
+  </div>
+  
+  <script>
+    function goBack() {
+      window.location.href = "/#explore";
+    }
+    // Read query parameter 'id' (which in our case is the project name)
+    const urlParams = new URLSearchParams(window.location.search);
+    const projectName = urlParams.get("id");
+    if (projectName) {
+      document.getElementById("project-title").textContent = projectName;
+      document.getElementById("project-description").textContent =
+        "Detailed description for " + projectName;
+    }
+  </script>
+  
