@@ -568,31 +568,45 @@
         );
       }
 
-      function selectUser(id, name) {
-        // Prevent selecting yourself
-        if (id === googleID) {
-          alert("You cannot chat with yourself");
-          return;
-        }
-
+      function selectUser(id, name, picture) {
+        console.log("User selected:", id, name);
+        console.log("Profile picture URL:", picture);
         currentPartner = id;
-        partnerName = name;
-        document.getElementById("chat-partner").textContent = name;
+        // Update partner information
+        document.querySelector(
+          ".chat-header h3"
+        ).textContent = `Chat with ${name}`;
 
-        // Clear unread count for this user
-        unreadMessages[id] = 0;
-        updateUnreadBadges();
-
-        // Fetch message history
-        fetchMessages(id);
-
-        // Enable input if WebSocket is connected
-        if (ws && ws.readyState === WebSocket.OPEN) {
-          document.getElementById("message-input").disabled = false;
-          document
-            .getElementById("message-form")
-            .querySelector("button").disabled = false;
+        // Clear unread messages for this user
+        if (unreadMessages[id]) {
+          unreadMessages[id] = 0;
+          updateUnreadBadges();
         }
+
+        img.onerror = function () {
+          console.error("Failed to load image:", this.src);
+          this.src = "/static/default-avatar.png";
+        };
+
+        // Store the selected user's picture for use when displaying messages
+        window.currentPartnerPicture = picture || "/static/default-avatar.png";
+
+        // Clear previous messages and show message input
+        const messagesDiv = document.getElementById("messages");
+        messagesDiv.innerHTML = "";
+        document.getElementById("message-input").disabled = false;
+        document.querySelector(".message-form button").disabled = false;
+
+        // Add active class to selected user
+        document.querySelectorAll(".user-item").forEach((item) => {
+          item.classList.remove("active");
+        });
+        document
+          .querySelector(`.user-item[data-id="${id}"]`)
+          .classList.add("active");
+
+        // Load previous messages if needed
+        loadChatHistory(id);
       }
 
       function fetchMessages(partnerId) {
@@ -782,6 +796,10 @@
         const img = document.createElement("img");
         img.src = fromPicture;
         img.alt = fromName;
+        img.onerror = function () {
+          this.src = "/static/default-avatar.png";
+        }; // Add this if missing
+        // ...
 
         const contentDiv = document.createElement("div");
         contentDiv.className = "message-content";
