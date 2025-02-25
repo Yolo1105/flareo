@@ -192,13 +192,22 @@
     return false;
   }
 
+  // Update the addSentMessage function
   function addSentMessage(partnerId, content) {
     const messagesDiv = document.getElementById("messages");
     const messageDiv = document.createElement("div");
     messageDiv.className = "message sent";
     const img = document.createElement("img");
-    img.src = ""; // Placeholder; actual picture handled in chat.html
+
+    // Use the current user's picture from the page
+    img.src =
+      document.querySelector(".self-item .user-pic").src ||
+      "/static/default-avatar.png";
     img.alt = "You";
+    img.onerror = function () {
+      this.src = "/static/default-avatar.png";
+    }; // Fallback
+
     const text = document.createTextNode(`You: ${content}`);
     messageDiv.appendChild(text);
     messageDiv.appendChild(img);
@@ -206,13 +215,20 @@
     messageDiv.scrollIntoView({ behavior: "smooth" });
   }
 
-  function addReceivedMessage(fromId, fromName, content) {
+  // Update the addReceivedMessage function
+  function addReceivedMessage(fromId, fromName, fromPicture, content) {
     const messagesDiv = document.getElementById("messages");
     const messageDiv = document.createElement("div");
     messageDiv.className = "message received";
     const img = document.createElement("img");
-    img.src = ""; // Placeholder; actual picture handled in chat.html
+
+    // Use the fromPicture parameter that's passed
+    img.src = fromPicture || "/static/default-avatar.png";
     img.alt = fromName;
+    img.onerror = function () {
+      this.src = "/static/default-avatar.png";
+    }; // Fallback
+
     const text = document.createTextNode(`${fromName}: ${content}`);
     messageDiv.appendChild(img);
     messageDiv.appendChild(text);

@@ -98,7 +98,12 @@
 {{ if .Self }}
 <div class="self-section">
   <div class="self-item">
-    <img class="user-pic" src="{{ .Self.picture }}" alt="{{ .Self.name }}" />
+    <img
+      class="user-pic"
+      src="{{ if .Self.picture }}{{ .Self.picture }}{{ else }}/static/default-avatar.png{{ end }}"
+      alt="{{ .Self.name }}"
+      onerror="this.src='/static/default-avatar.png'"
+    />
     <span>{{ .Self.name }} <span class="you-label">YOU</span></span>
   </div>
 </div>
@@ -111,9 +116,14 @@
   <li
     class="user-item"
     data-id="{{ .id }}"
-    onclick="selectUser('{{ .id }}', '{{ .name }}')"
+    onclick="selectUser('{{ .id }}', '{{ .name }}', '{{ url .picture }}')"
   >
-    <img class="user-pic" src="{{ .picture }}" alt="{{ .name }}" />
+    <img
+      class="user-pic"
+      src="{{ if .picture }}{{ .picture }}{{ else }}/static/default-avatar.png{{ end }}"
+      alt="{{ .name }}"
+      onerror="this.src='/static/default-avatar.png'"
+    />
     <span>{{ .name }}</span>
     <div class="unread-badge" data-user="{{ .id }}"></div>
     <div
