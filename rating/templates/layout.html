@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ .Title }} - Seller Dashboard</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <!-- HTMX for dynamic content loading -->
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <!-- Bootstrap for styling -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* HTMX loading indicators */
+        .htmx-indicator {
+            opacity: 0;
+            transition: opacity 200ms ease-in;
+        }
+        .htmx-request .htmx-indicator {
+            opacity: 1;
+        }
+        .htmx-request.htmx-indicator {
+            opacity: 1;
+        }
+        
+        /* Star rating styling */
+        .stars {
+            display: inline-flex;
+            color: #ddd;
+        }
+        .stars .filled {
+            color: #ffc107;
+        }
+        
+        /* Responsive table adjustments */
+        @media (max-width: 767px) {
+            .responsive-table {
+                display: block;
+                width: 100%;
+                overflow-x: auto;
+            }
+            
+            .card-stats {
+                margin-bottom: 1rem;
+            }
+        }
+
+        /* Toast notifications */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1050;
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast notification container -->
+    <div class="toast-container"></div>
+    
+    <header class="bg-dark text-white p-3">
+        <div class="container">
+            <div class="d-flex justify-content-between align-items-center">
+                <h1 class="h3 mb-0">Seller Dashboard</h1>
+                <button class="navbar-toggler d-md-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <nav class="d-none d-md-block">
+                    <ul class="nav">
+                        <li class="nav-item"><a class="nav-link text-white {{ if eq .Active "products" }}active{{ end }}" href="/products">Products</a></li>
+                        <li class="nav-item"><a class="nav-link text-white {{ if eq .Active "orders" }}active{{ end }}" href="/orders">Orders</a></li>
+                        <li class="nav-item"><a class="nav-link text-white {{ if eq .Active "ratings" }}active{{ end }}" href="/ratings">Ratings</a></li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+        <!-- Mobile navigation -->
+        <div class="collapse navbar-collapse d-md-none" id="navbarNav">
+            <ul class="navbar-nav">
+                <li class="nav-item"><a class="nav-link text-white" href="/products">Products</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/orders">Orders</a></li>
+                <li class="nav-item"><a class="nav-link text-white" href="/ratings">Ratings</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <main class="container my-4">
+        <h2>{{ .Title }}</h2>
+        <!-- HTMX global loading indicator -->
+        <div class="htmx-indicator text-center py-3">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        {{ template "content" . }}
+    </main>
+
+    <footer class="bg-light p-3 mt-5">
+        <div class="container text-center">
+            <p>&copy; 2023 Seller Dashboard. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Function to show toast notifications
+        function showToast(message, type = 'success') {
+            const toastContainer = document.querySelector('.toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast align-items-center text-white bg-${type} border-0`;
+            toast.setAttribute('role', 'alert');
+            toast.setAttribute('aria-live', 'assertive');
+            toast.setAttribute('aria-atomic', 'true');
+            
+            toast.innerHTML = `
+                <div class="d-flex">
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            `;
+            
+            toastContainer.appendChild(toast);
+            const bsToast = new bootstrap.Toast(toast, { autohide: true, delay: 3000 });
+            bsToast.show();
+            
+            // Remove toast after it's hidden
+            toast.addEventListener('hidden.bs.toast', function () {
+                toast.remove();
+            });
+        }
+        
+        // Listen for HTMX events to show notifications
+        document.body.addEventListener('htmx:afterRequest', function(evt) {
+            if (evt.detail.successful && evt.detail.xhr.status === 200) {
+                // Check for trigger class on the target
+                if (evt.detail.elt.classList.contains('show-success')) {
+                    showToast('Operation completed successfully');
+                }
+            }
+        });
+        
+        document.body.addEventListener('htmx:responseError', function(evt) {
+            showToast('An error occurred. Please try again.', 'danger');
+        });
+    </script>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>

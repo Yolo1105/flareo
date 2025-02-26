@@ -1,0 +1,164 @@
+<div id="order-form-container" class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>{{ if .Order.ID }}Edit Order{{ else }}Create New Order{{ end }}</span>
+        <div>
+            <span class="htmx-indicator spinner-border spinner-border-sm me-2" role="status"></span>
+        </div>
+    </div>
+    <div class="card-body">
+        <form hx-{{ if .Order.ID }}put{{ else }}post{{ end }}="/orders{{ if .Order.ID }}/{{ .Order.ID }}{{ end }}" 
+              hx-target="#orders-table" 
+              hx-swap="beforeend"
+              hx-indicator=".htmx-indicator"
+              class="show-success needs-validation"
+              novalidate>
+            
+            {{ if .Order.ID }}
+            <input type="hidden" name="id" value="{{ .Order.ID }}">
+            {{ end }}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="customerName" class="form-label">Customer Name</label>
+                    <input type="text" 
+                           class="form-control {{ if .Errors.CustomerName }}is-invalid{{ end }}" 
+                           id="customerName" 
+                           name="customerName" 
+                           value="{{ .Order.CustomerName }}" 
+                           required>
+                    {{ if .Errors.CustomerName }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.CustomerName }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please enter customer name
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="col-md-6">
+                    <label for="orderDate" class="form-label">Order Date</label>
+                    <input type="date" 
+                           class="form-control {{ if .Errors.OrderDate }}is-invalid{{ end }}" 
+                           id="orderDate" 
+                           name="orderDate" 
+                           value="{{ .Order.OrderDate }}" 
+                           required>
+                    {{ if .Errors.OrderDate }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.OrderDate }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please select a valid date
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="productName" class="form-label">Product</label>
+                    <select class="form-select {{ if .Errors.ProductName }}is-invalid{{ end }}" 
+                            id="productName" 
+                            name="productName" 
+                            required>
+                        <option value="" disabled {{ if not .Order.ProductName }}selected{{ end }}>Select a product</option>
+                        {{ range .Products }}
+                        <option value="{{ .Name }}" {{ if eq .Name $.Order.ProductName }}selected{{ end }} data-price="{{ .Price }}">
+                            {{ .Name }} ({{ formatMoney .Price }})
+                        </option>
+                        {{ end }}
+                    </select>
+                    {{ if .Errors.ProductName }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.ProductName }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please select a product
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="col-md-6">
+                    <label for="quantity" class="form-label">Quantity</label>
+                    <input type="number" 
+                           class="form-control {{ if .Errors.Quantity }}is-invalid{{ end }}" 
+                           id="quantity" 
+                           name="quantity" 
+                           min="1" 
+                           value="{{ if .Order.Quantity }}{{ .Order.Quantity }}{{ else }}1{{ end }}" 
+                           required>
+                    {{ if .Errors.Quantity }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.Quantity }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please enter a valid quantity (minimum 1)
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="status" class="form-label">Status</label>
+                    <select class="form-select {{ if .Errors.Status }}is-invalid{{ end }}" 
+                            id="status" 
+                            name="status" 
+                            required>
+                        <option value="Pending" {{ if eq .Order.Status "Pending" }}selected{{ end }}>Pending</option>
+                        <option value="Shipped" {{ if eq .Order.Status "Shipped" }}selected{{ end }}>Shipped</option>
+                        <option value="Delivered" {{ if eq .Order.Status "Delivered" }}selected{{ end }}>Delivered</option>
+                        <option value="Completed" {{ if eq .Order.Status "Completed" }}selected{{ end }}>Completed</option>
+                        <option value="Cancelled" {{ if eq .Order.Status "Cancelled" }}selected{{ end }}>Cancelled</option>
+                    </select>
+                    {{ if .Errors.Status }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.Status }}
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="col-md-6">
+                    <label for="totalPrice" class="form-label">Total Price</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text">$</span>
+                        <input type="number" 
+                               class="form-control {{ if .Errors.TotalPrice }}is-invalid{{ end }}" 
+                               id="totalPrice" 
+                               name="totalPrice" 
+                               step="0.01" 
+                               min="0" 
+                               value="{{ .Order.TotalPrice }}" 
+                               required>
+                        {{ if .Errors.TotalPrice }}
+                        <div class="invalid-feedback">
+                            {{ .Errors.TotalPrice }}
+                        </div>
+                        {{ else }}
+                        <div class="invalid-feedback">
+                            Please enter a valid price
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" 
+                        class="btn btn-outline-secondary" 
+                        hx-get="/orders"
+                        hx-target="#order-form-container"
+                        hx-swap="outerHTML"
+                        hx-indicator=".htmx-indicator">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="htmx-indicator spinner-border spinner-border-sm me-1" role="status"></span>
+                    <i class="bi bi-save me-1"></i> {{ if .Order.ID }}Update{{ else }}Create{{ end }} Order
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

@@ -1,0 +1,11 @@
+{{ define "content" }}
+<div class="row mb-4">
+  <div class="col">
+    <!-- Seller performance metrics -->
+    {{ template "seller_table.html" . }}
+  </div>
+</div>
+
+<!-- Rating Form Container (initially empty, filled by HTMX) -->
+<div id="rating-form-container"></div>
+{{ end }}

@@ -1,0 +1,150 @@
+<div id="product-form-container" class="card mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <span>{{ if .Product.ID }}Edit Product{{ else }}Add New Product{{ end }}</span>
+        <div>
+            <span class="htmx-indicator spinner-border spinner-border-sm me-2" role="status"></span>
+        </div>
+    </div>
+    <div class="card-body">
+        <form hx-{{ if .Product.ID }}put{{ else }}post{{ end }}="/products{{ if .Product.ID }}/{{ .Product.ID }}{{ end }}" 
+              hx-target="#products-table" 
+              hx-swap="beforeend"
+              hx-indicator=".htmx-indicator"
+              class="show-success needs-validation"
+              novalidate>
+            
+            {{ if .Product.ID }}
+            <input type="hidden" name="id" value="{{ .Product.ID }}">
+            {{ end }}
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="name" class="form-label">Product Name</label>
+                    <input type="text" 
+                           class="form-control {{ if .Errors.Name }}is-invalid{{ end }}" 
+                           id="name" 
+                           name="name" 
+                           value="{{ .Product.Name }}" 
+                           required>
+                    {{ if .Errors.Name }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.Name }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please enter a product name
+                    </div>
+                    {{ end }}
+                </div>
+                <div class="col-md-6">
+                    <label for="category" class="form-label">Category</label>
+                    <select class="form-select {{ if .Errors.Category }}is-invalid{{ end }}" 
+                            id="category" 
+                            name="category" 
+                            required>
+                        <option value="" {{ if not .Product.Category }}selected{{ end }} disabled>Select a category</option>
+                        <option value="Electronics" {{ if eq .Product.Category "Electronics" }}selected{{ end }}>Electronics</option>
+                        <option value="Clothing" {{ if eq .Product.Category "Clothing" }}selected{{ end }}>Clothing</option>
+                        <option value="Home & Kitchen" {{ if eq .Product.Category "Home & Kitchen" }}selected{{ end }}>Home & Kitchen</option>
+                        <option value="Books" {{ if eq .Product.Category "Books" }}selected{{ end }}>Books</option>
+                        <option value="Beauty" {{ if eq .Product.Category "Beauty" }}selected{{ end }}>Beauty</option>
+                        <option value="Other" {{ if eq .Product.Category "Other" }}selected{{ end }}>Other</option>
+                    </select>
+                    {{ if .Errors.Category }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.Category }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please select a category
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label for="price" class="form-label">Price</label>
+                    <div class="input-group has-validation">
+                        <span class="input-group-text">$</span>
+                        <input type="number" 
+                               class="form-control {{ if .Errors.Price }}is-invalid{{ end }}" 
+                               id="price" 
+                               name="price" 
+                               step="0.01" 
+                               min="0" 
+                               value="{{ .Product.Price }}" 
+                               required>
+                        {{ if .Errors.Price }}
+                        <div class="invalid-feedback">
+                            {{ .Errors.Price }}
+                        </div>
+                        {{ else }}
+                        <div class="invalid-feedback">
+                            Please enter a valid price
+                        </div>
+                        {{ end }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <label for="stockQuantity" class="form-label">Stock Quantity</label>
+                    <input type="number" 
+                           class="form-control {{ if .Errors.StockQuantity }}is-invalid{{ end }}" 
+                           id="stockQuantity" 
+                           name="stockQuantity" 
+                           min="0" 
+                           value="{{ .Product.StockQuantity }}" 
+                           required>
+                    {{ if .Errors.StockQuantity }}
+                    <div class="invalid-feedback">
+                        {{ .Errors.StockQuantity }}
+                    </div>
+                    {{ else }}
+                    <div class="invalid-feedback">
+                        Please enter a valid quantity
+                    </div>
+                    {{ end }}
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea class="form-control {{ if .Errors.Description }}is-invalid{{ end }}" 
+                          id="description" 
+                          name="description" 
+                          rows="3">{{ .Product.Description }}</textarea>
+                {{ if .Errors.Description }}
+                <div class="invalid-feedback">
+                    {{ .Errors.Description }}
+                </div>
+                {{ end }}
+            </div>
+            
+            <div class="form-check mb-3">
+                <input class="form-check-input" 
+                       type="checkbox" 
+                       id="isActive" 
+                       name="isActive" 
+                       {{ if .Product.IsActive }}checked{{ end }}>
+                <label class="form-check-label" for="isActive">
+                    Available for Sale
+                </label>
+            </div>
+            
+            <div class="d-flex justify-content-between mt-4">
+                <button type="button" 
+                        class="btn btn-outline-secondary" 
+                        hx-get="/products"
+                        hx-target="#product-form-container"
+                        hx-swap="outerHTML"
+                        hx-indicator=".htmx-indicator">
+                    <i class="bi bi-x-circle me-1"></i> Cancel
+                </button>
+                <button type="submit" class="btn btn-primary">
+                    <span class="htmx-indicator spinner-border spinner-border-sm me-1" role="status"></span>
+                    <i class="bi bi-save me-1"></i> {{ if .Product.ID }}Update{{ else }}Add{{ end }} Product
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

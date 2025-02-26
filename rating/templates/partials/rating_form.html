@@ -1,0 +1,75 @@
+<div id="rating-form-container" class="card mb-4">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Customer Rating Details</span>
+    <div>
+      <span
+        class="htmx-indicator spinner-border spinner-border-sm me-2"
+        role="status"
+      ></span>
+      <div class="stars">
+        {{ range $i := range_int 1 5 }}
+        <span class="star {{ if le $i $.Rating.Rating }}filled{{ end }}"
+          >★</span
+        >
+        {{ end }}
+        <span class="rating-value ms-2">{{ .Rating.Rating }}/5</span>
+      </div>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="mb-3">
+      <h5>Customer Feedback</h5>
+      <div class="p-3 bg-light rounded">
+        <p>{{ .Rating.Comment }}</p>
+        <div class="text-muted small">
+          <strong>{{ .Rating.CustomerName }}</strong> • {{ .Rating.Date }}
+          <span class="ms-2">Order: {{ .Rating.OrderID }}</span>
+        </div>
+      </div>
+    </div>
+
+    <form
+      hx-put="/ratings/{{ .Rating.ID }}/response"
+      hx-target="#rating-{{ .Rating.ID }}"
+      hx-indicator=".htmx-indicator"
+      class="show-success needs-validation"
+      novalidate
+    >
+      <div class="mb-3">
+        <label for="response" class="form-label">Your Response</label>
+        <textarea
+          class="form-control {{ if .Errors.Response }}is-invalid{{ end }}"
+          id="response"
+          name="response"
+          rows="3"
+          placeholder="Thank the customer or address their concerns..."
+        >
+{{ .Rating.SellerResponse }}</textarea
+        >
+        {{ if .Errors.Response }}
+        <div class="invalid-feedback">{{ .Errors.Response }}</div>
+        {{ end }}
+      </div>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button
+          type="button"
+          class="btn btn-outline-secondary"
+          hx-get="/ratings"
+          hx-target="#rating-form-container"
+          hx-swap="outerHTML"
+          hx-indicator=".htmx-indicator"
+        >
+          <i class="bi bi-x-circle me-1"></i> Close
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <span
+            class="htmx-indicator spinner-border spinner-border-sm me-1"
+            role="status"
+          ></span>
+          <i class="bi bi-check-circle me-1"></i> Submit Response
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

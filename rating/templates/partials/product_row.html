@@ -1,0 +1,39 @@
+<tr id="product-{{ .ID }}">
+  <td data-label="ID">{{ .ProductID }}</td>
+  <td data-label="Name">{{ .Name }}</td>
+  <td data-label="Category">{{ .Category }}</td>
+  <td data-label="Price">{{ formatMoney .Price }}</td>
+  <td data-label="Stock">{{ .StockQuantity }}</td>
+  <td data-label="Status">
+    <span
+      class="badge {{ if gt .StockQuantity 10 }}bg-success{{ else if gt .StockQuantity 0 }}bg-warning{{ else }}bg-danger{{ end }}"
+    >
+      {{ if gt .StockQuantity 10 }}In Stock{{ else if gt .StockQuantity 0 }}Low
+      Stock{{ else }}Out of Stock{{ end }}
+    </span>
+  </td>
+  <td data-label="Actions">
+    <div class="d-flex gap-1 flex-wrap">
+      <button
+        class="btn btn-sm btn-outline-primary"
+        hx-get="/products/{{ .ID }}/edit"
+        hx-target="#product-form-container"
+        hx-indicator=".htmx-indicator"
+      >
+        <span class="d-none d-md-inline">Edit</span>
+        <span class="d-md-none"><i class="bi bi-pencil"></i></span>
+      </button>
+      <button
+        class="btn btn-sm btn-outline-danger show-success"
+        hx-delete="/products/{{ .ID }}"
+        hx-confirm="Are you sure you want to delete this product?"
+        hx-target="#product-{{ .ID }}"
+        hx-swap="outerHTML"
+        hx-indicator=".htmx-indicator"
+      >
+        <span class="d-none d-md-inline">Delete</span>
+        <span class="d-md-none"><i class="bi bi-trash"></i></span>
+      </button>
+    </div>
+  </td>
+</tr>

@@ -1,0 +1,214 @@
+<div id="seller-stats" class="card">
+  <div class="card-header d-flex justify-content-between align-items-center">
+    <span>Seller Performance</span>
+    <div>
+      <span
+        class="htmx-indicator spinner-border spinner-border-sm me-2"
+        role="status"
+      ></span>
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="row mb-4">
+      <div class="col-md-4">
+        <div class="card text-white bg-primary h-100 mb-3 mb-md-0">
+          <div class="card-body text-center">
+            <h3 class="card-title">{{ .OverallRating }}</h3>
+            <p class="card-text">Overall Rating</p>
+            <div class="stars">
+              {{ range $i := range_int 1 5 }}
+              <span class="star {{ if le $i $.OverallRating }}filled{{ end }}"
+                >★</span
+              >
+              {{ end }}
+            </div>
+            <p class="mt-2">From {{ .TotalRatings }} ratings</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-success h-100 mb-3 mb-md-0">
+          <div class="card-body text-center">
+            <h3 class="card-title">{{ .TotalSales }}</h3>
+            <p class="card-text">Total Sales</p>
+            <p class="card-text">{{ formatMoney .TotalRevenue }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card text-white bg-info h-100 mb-3 mb-md-0">
+          <div class="card-body text-center">
+            <h3 class="card-title">{{ .ResponseRate }}%</h3>
+            <p class="card-text">Response Rate</p>
+            <p class="card-text">Avg response time: {{ .AvgResponseTime }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <h5 class="mb-3">Rating Distribution</h5>
+    <div class="rating-bars mb-4">
+      {{ range $i, $count := .RatingDistribution }}
+      <div class="rating-bar mb-2">
+        <div class="d-flex align-items-center">
+          <div class="rating-label me-2">{{ add $i 1 }} Stars</div>
+          <div class="progress flex-grow-1">
+            <div
+              class="progress-bar"
+              role="progressbar"
+              style="width: {{ percentage $count $.TotalRatings }}%;"
+              aria-valuenow="{{ percentage $count $.TotalRatings }}"
+              aria-valuemin="0"
+              aria-valuemax="100"
+            >
+              {{ $count }}
+            </div>
+          </div>
+        </div>
+      </div>
+      {{ end }}
+    </div>
+
+    <!-- Filter for feedback -->
+    <div class="card mb-3">
+      <div class="card-body">
+        <form
+          class="row g-3"
+          hx-get="/ratings/filter"
+          hx-target="#feedback-container"
+          hx-indicator=".htmx-indicator"
+          hx-trigger="change, submit"
+        >
+          <div class="col-md-4">
+            <label for="rating" class="form-label">Filter by Rating</label>
+            <select id="rating" name="rating" class="form-select">
+              <option value="">All Ratings</option>
+              <option value="5">5 Stars</option>
+              <option value="4">4 Stars</option>
+              <option value="3">3 Stars</option>
+              <option value="2">2 Stars</option>
+              <option value="1">1 Star</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="date-range" class="form-label">Date Range</label>
+            <select id="date-range" name="dateRange" class="form-select">
+              <option value="">All Time</option>
+              <option value="30">Last 30 Days</option>
+              <option value="90">Last 90 Days</option>
+              <option value="365">Last Year</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label for="response" class="form-label">Response Status</label>
+            <select id="response" name="responseStatus" class="form-select">
+              <option value="">All</option>
+              <option value="responded">Responded</option>
+              <option value="not-responded">Not Responded</option>
+            </select>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <h5 class="mb-3">Recent Feedback</h5>
+    <div id="feedback-container" class="recent-feedback">
+      {{ if .RecentFeedback }} {{ range .RecentFeedback }}
+      <div id="rating-{{ .ID }}" class="feedback-item card mb-2">
+        <div class="card-body">
+          <div class="d-flex justify-content-between flex-wrap">
+            <h6 class="mb-1">{{ .CustomerName }}</h6>
+            <div class="stars">
+              {{ range $i := range_int 1 5 }}
+              <span class="star {{ if le $i $.Rating }}filled{{ end }}">★</span>
+              {{ end }}
+            </div>
+          </div>
+          <p class="card-text">{{ .Comment }}</p>
+          <div class="text-muted small">
+            {{ .Date }} • Order #{{ .OrderID }}
+          </div>
+
+          {{ if .SellerResponse }}
+          <div class="seller-response mt-2 p-2 bg-light rounded">
+            <small class="text-muted">Your response:</small>
+            <p class="mb-0">{{ .SellerResponse }}</p>
+          </div>
+          {{ else }}
+          <button
+            class="btn btn-sm btn-outline-primary mt-2 show-success"
+            hx-get="/ratings/{{ .ID }}/respond"
+            hx-target="#rating-form-container"
+            hx-indicator=".htmx-indicator"
+          >
+            <i class="bi bi-reply me-1"></i> Respond
+          </button>
+          {{ end }}
+        </div>
+      </div>
+      {{ end }}
+
+      <!-- Pagination controls -->
+      <div class="d-flex justify-content-between align-items-center mt-3">
+        <div>
+          Showing {{ .PaginationInfo.StartItem }}-{{ .PaginationInfo.EndItem }}
+          of {{ .PaginationInfo.TotalItems }}
+        </div>
+        <nav aria-label="Feedback pagination">
+          <ul class="pagination pagination-sm">
+            <li
+              class="page-item {{ if eq .PaginationInfo.CurrentPage 1 }}disabled{{ end }}"
+            >
+              <a
+                class="page-link"
+                href="#"
+                hx-get="/ratings?page={{ sub .PaginationInfo.CurrentPage 1 }}"
+                hx-target="#feedback-container"
+                hx-indicator=".htmx-indicator"
+              >
+                Previous
+              </a>
+            </li>
+
+            {{ range $i := .PaginationInfo.Pages }} {{ if eq $i -1 }}
+            <li class="page-item disabled">
+              <span class="page-link">...</span>
+            </li>
+            {{ else }}
+            <li
+              class="page-item {{ if eq $i $.PaginationInfo.CurrentPage }}active{{ end }}"
+            >
+              <a
+                class="page-link"
+                href="#"
+                hx-get="/ratings?page={{ $i }}"
+                hx-target="#feedback-container"
+                hx-indicator=".htmx-indicator"
+              >
+                {{ $i }}
+              </a>
+            </li>
+            {{ end }} {{ end }}
+
+            <li
+              class="page-item {{ if eq .PaginationInfo.CurrentPage .PaginationInfo.TotalPages }}disabled{{ end }}"
+            >
+              <a
+                class="page-link"
+                href="#"
+                hx-get="/ratings?page={{ add .PaginationInfo.CurrentPage 1 }}"
+                hx-target="#feedback-container"
+                hx-indicator=".htmx-indicator"
+              >
+                Next
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+      {{ else }}
+      <p class="text-muted">No feedback received yet.</p>
+      {{ end }}
+    </div>
+  </div>
+</div>

@@ -1,0 +1,187 @@
+{{ define "content" }}
+<div class="row mb-4">
+  <div class="col">
+    <div class="card">
+      <div
+        class="card-header d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0">Product Inventory</h5>
+        <button
+          class="btn btn-sm btn-primary"
+          hx-get="/products/new"
+          hx-target="#product-form-container"
+          hx-indicator=".htmx-indicator"
+        >
+          <i class="bi bi-plus-circle me-1"></i> Add New Product
+        </button>
+      </div>
+      <div class="card-body">
+        <!-- Product Filters -->
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <form
+              class="row g-3"
+              hx-get="/products/filter"
+              hx-target="#products-table-container"
+              hx-indicator=".htmx-indicator"
+              hx-trigger="change, submit"
+            >
+              <div class="col-md-4">
+                <label for="category-filter" class="form-label">Category</label>
+                <select
+                  id="category-filter"
+                  name="category"
+                  class="form-select"
+                >
+                  <option value="">All Categories</option>
+                  <option value="Electronics">Electronics</option>
+                  <option value="Clothing">Clothing</option>
+                  <option value="Home & Kitchen">Home & Kitchen</option>
+                  <option value="Books">Books</option>
+                  <option value="Beauty">Beauty</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="stock-filter" class="form-label"
+                  >Stock Status</label
+                >
+                <select id="stock-filter" name="stock" class="form-select">
+                  <option value="">All</option>
+                  <option value="in-stock">In Stock</option>
+                  <option value="low-stock">Low Stock (< 10)</option>
+                  <option value="out-of-stock">Out of Stock</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="sort-by" class="form-label">Sort By</label>
+                <select id="sort-by" name="sort" class="form-select">
+                  <option value="name-asc">Name (A-Z)</option>
+                  <option value="name-desc">Name (Z-A)</option>
+                  <option value="price-asc">Price (Low to High)</option>
+                  <option value="price-desc">Price (High to Low)</option>
+                  <option value="stock-asc">Stock (Low to High)</option>
+                  <option value="stock-desc">Stock (High to Low)</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <label for="product-search" class="form-label"
+              >Search Products</label
+            >
+            <div class="input-group">
+              <input
+                type="text"
+                id="product-search"
+                name="search"
+                class="form-control"
+                placeholder="Search by name..."
+                hx-get="/products/search"
+                hx-trigger="keyup changed delay:500ms, search"
+                hx-target="#products-table-container"
+                hx-indicator=".htmx-indicator"
+              />
+              <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="text-center htmx-indicator py-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Product table -->
+        <div id="products-table-container">
+          <div class="table-responsive responsive-table">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Category</th>
+                  <th>Price</th>
+                  <th>Stock</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="products-table">
+                {{ range .Products }} {{ template "product_row.html" . }} {{ end
+                }}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination controls -->
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              Showing {{ .PaginationInfo.StartItem }}-{{ .PaginationInfo.EndItem
+              }} of {{ .PaginationInfo.TotalItems }}
+            </div>
+            <nav aria-label="Product pagination">
+              <ul class="pagination pagination-sm">
+                <li
+                  class="page-item {{ if eq .PaginationInfo.CurrentPage 1 }}disabled{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/products?page={{ sub .PaginationInfo.CurrentPage 1 }}"
+                    hx-target="#products-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    Previous
+                  </a>
+                </li>
+
+                {{ range $i := .PaginationInfo.Pages }} {{ if eq $i -1 }}
+                <li class="page-item disabled">
+                  <span class="page-link">...</span>
+                </li>
+                {{ else }}
+                <li
+                  class="page-item {{ if eq $i $.PaginationInfo.CurrentPage }}active{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/products?page={{ $i }}"
+                    hx-target="#products-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    {{ $i }}
+                  </a>
+                </li>
+                {{ end }} {{ end }}
+
+                <li
+                  class="page-item {{ if eq .PaginationInfo.CurrentPage .PaginationInfo.TotalPages }}disabled{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/products?page={{ add .PaginationInfo.CurrentPage 1 }}"
+                    hx-target="#products-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    Next
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Product Form Container (initially empty, filled by HTMX) -->
+<div id="product-form-container"></div>
+{{ end }}

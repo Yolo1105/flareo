@@ -1,0 +1,35 @@
+<tr id="order-{{ .ID }}">
+    <td data-label="Order ID">{{ .OrderID }}</td>
+    <td data-label="Customer">{{ .CustomerName }}</td>
+    <td data-label="Product">{{ .ProductName }}</td>
+    <td data-label="Quantity">{{ .Quantity }}</td>
+    <td data-label="Price">{{ formatMoney .TotalPrice }}</td>
+    <td data-label="Date">{{ .OrderDate }}</td>
+    <td data-label="Status">
+        <span class="badge {{ if eq .Status "Pending" }}bg-warning{{ else if eq .Status "Shipped" }}bg-info{{ else if eq .Status "Delivered" }}bg-success{{ else if eq .Status "Completed" }}bg-secondary{{ else }}bg-danger{{ end }}">
+            {{ .Status }}
+        </span>
+    </td>
+    <td data-label="Actions">
+        <div class="d-flex gap-1 flex-wrap">
+            <button class="btn btn-sm btn-outline-primary" 
+                    hx-get="/orders/{{ .ID }}/edit" 
+                    hx-target="#order-form-container"
+                    hx-indicator=".htmx-indicator">
+                <span class="d-none d-md-inline">Edit</span>
+                <span class="d-md-none"><i class="bi bi-pencil"></i></span>
+            </button>
+            <button class="btn btn-sm btn-outline-success show-success" 
+                    hx-put="/orders/{{ .ID }}/status" 
+                    hx-vals='{"status": "{{ if eq .Status "Pending" }}Shipped{{ else if eq .Status "Shipped" }}Delivered{{ else if eq .Status "Delivered" }}Completed{{ else }}Completed{{ end }}"}' 
+                    hx-target="#order-{{ .ID }}"
+                    hx-swap="outerHTML"
+                    hx-indicator=".htmx-indicator">
+                <span class="d-none d-md-inline">
+                    {{ if eq .Status "Pending" }}Ship{{ else if eq .Status "Shipped" }}Deliver{{ else if eq .Status "Delivered" }}Complete{{ else }}Update{{ end }}
+                </span>
+                <span class="d-md-none"><i class="bi bi-box-seam"></i></span>
+            </button>
+        </div>
+    </td>
+</tr>

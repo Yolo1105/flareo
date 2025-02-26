@@ -1,0 +1,134 @@
+/* Mobile-responsive tables */
+@media (max-width: 767px) {
+  .responsive-table table {
+    border: 0;
+  }
+
+  .responsive-table table thead {
+    border: none;
+    clip: rect(0 0 0 0);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute;
+    width: 1px;
+  }
+
+  .responsive-table table tr {
+    border-bottom: 3px solid #ddd;
+    display: block;
+    margin-bottom: 0.625em;
+  }
+
+  .responsive-table table td {
+    border-bottom: 1px solid #ddd;
+    display: block;
+    font-size: 0.8em;
+    text-align: right;
+  }
+
+  .responsive-table table td::before {
+    content: attr(data-label);
+    float: left;
+    font-weight: bold;
+    text-transform: uppercase;
+  }
+
+  .responsive-table table td:last-child {
+    border-bottom: 0;
+  }
+}
+
+/* Star ratings */
+.stars {
+  display: inline-flex;
+  font-size: 1.2rem;
+  line-height: 1;
+  color: #e4e5e9;
+}
+
+.stars .star {
+  position: relative;
+}
+
+.stars .filled {
+  color: #ffc107;
+}
+
+/* Form validation styling */
+.form-control.is-invalid,
+.was-validated .form-control:invalid {
+  background-image: none;
+}
+
+/* Loading indicators */
+.htmx-request .htmx-indicator {
+  opacity: 1;
+}
+.htmx-request.htmx-indicator {
+  opacity: 1;
+}
+
+/* Card hover effects */
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Badge styling */
+.badge {
+  font-weight: 500;
+  padding: 0.4em 0.6em;
+}
+
+/* Pagination styling */
+.pagination {
+  margin-bottom: 0;
+}
+
+/* Filter section styling */
+.filter-section {
+  background-color: #f8f9fa;
+  border-radius: 0.25rem;
+  padding: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+/* Transitions for feedback items */
+.feedback-item {
+  transition: all 0.3s ease;
+}
+
+.feedback-item:hover {
+  background-color: #f8f9fa;
+}
+
+/* Toast notifications */
+.toast {
+  opacity: 1;
+}
+
+/* Active nav link */
+.nav-link.active {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Rating distribution bars */
+.progress {
+  height: 1.5rem;
+}
+
+.rating-label {
+  min-width: 60px;
+}
+
+/* Order status badges */
+.badge.bg-warning {
+  color: #000;
+}

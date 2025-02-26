@@ -1,0 +1,179 @@
+{{ define "content" }}
+<div class="row mb-4">
+  <div class="col">
+    <div class="card">
+      <div
+        class="card-header d-flex justify-content-between align-items-center"
+      >
+        <h5 class="mb-0">Order Management</h5>
+        <button
+          class="btn btn-sm btn-primary"
+          hx-get="/orders/new"
+          hx-target="#order-form-container"
+          hx-indicator=".htmx-indicator"
+        >
+          <i class="bi bi-plus-circle me-1"></i> Create New Order
+        </button>
+      </div>
+      <div class="card-body">
+        <!-- Order Filters -->
+        <div class="row mb-3">
+          <div class="col-md-8">
+            <form
+              class="row g-3"
+              hx-get="/orders/filter"
+              hx-target="#orders-table-container"
+              hx-indicator=".htmx-indicator"
+              hx-trigger="change, submit"
+            >
+              <div class="col-md-4">
+                <label for="status-filter" class="form-label">Status</label>
+                <select id="status-filter" name="status" class="form-select">
+                  <option value="">All Statuses</option>
+                  <option value="Pending">Pending</option>
+                  <option value="Shipped">Shipped</option>
+                  <option value="Delivered">Delivered</option>
+                  <option value="Completed">Completed</option>
+                  <option value="Cancelled">Cancelled</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="date-filter" class="form-label">Date Range</label>
+                <select id="date-filter" name="dateRange" class="form-select">
+                  <option value="">All Time</option>
+                  <option value="today">Today</option>
+                  <option value="yesterday">Yesterday</option>
+                  <option value="week">This Week</option>
+                  <option value="month">This Month</option>
+                  <option value="30">Last 30 Days</option>
+                  <option value="90">Last 90 Days</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label for="sort-orders" class="form-label">Sort By</label>
+                <select id="sort-orders" name="sort" class="form-select">
+                  <option value="date-desc">Date (Newest First)</option>
+                  <option value="date-asc">Date (Oldest First)</option>
+                  <option value="price-desc">Price (High to Low)</option>
+                  <option value="price-asc">Price (Low to High)</option>
+                </select>
+              </div>
+            </form>
+          </div>
+          <div class="col-md-4">
+            <label for="order-search" class="form-label">Search Orders</label>
+            <div class="input-group">
+              <input
+                type="text"
+                id="order-search"
+                name="search"
+                class="form-control"
+                placeholder="Order ID or customer name..."
+                hx-get="/orders/search"
+                hx-trigger="keyup changed delay:500ms, search"
+                hx-target="#orders-table-container"
+                hx-indicator=".htmx-indicator"
+              />
+              <button class="btn btn-outline-secondary" type="button">
+                <i class="bi bi-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Loading indicator -->
+        <div class="text-center htmx-indicator py-3">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+
+        <!-- Order table -->
+        <div id="orders-table-container">
+          <div class="table-responsive responsive-table">
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th>Order ID</th>
+                  <th>Customer</th>
+                  <th>Product</th>
+                  <th>Quantity</th>
+                  <th>Price</th>
+                  <th>Date</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="orders-table">
+                {{ range .Orders }} {{ template "order_row.html" . }} {{ end }}
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Pagination controls -->
+          <div class="d-flex justify-content-between align-items-center mt-3">
+            <div>
+              Showing {{ .PaginationInfo.StartItem }}-{{ .PaginationInfo.EndItem
+              }} of {{ .PaginationInfo.TotalItems }}
+            </div>
+            <nav aria-label="Order pagination">
+              <ul class="pagination pagination-sm">
+                <li
+                  class="page-item {{ if eq .PaginationInfo.CurrentPage 1 }}disabled{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/orders?page={{ sub .PaginationInfo.CurrentPage 1 }}"
+                    hx-target="#orders-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    Previous
+                  </a>
+                </li>
+
+                {{ range $i := .PaginationInfo.Pages }} {{ if eq $i -1 }}
+                <li class="page-item disabled">
+                  <span class="page-link">...</span>
+                </li>
+                {{ else }}
+                <li
+                  class="page-item {{ if eq $i $.PaginationInfo.CurrentPage }}active{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/orders?page={{ $i }}"
+                    hx-target="#orders-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    {{ $i }}
+                  </a>
+                </li>
+                {{ end }} {{ end }}
+
+                <li
+                  class="page-item {{ if eq .PaginationInfo.CurrentPage .PaginationInfo.TotalPages }}disabled{{ end }}"
+                >
+                  <a
+                    class="page-link"
+                    href="#"
+                    hx-get="/orders?page={{ add .PaginationInfo.CurrentPage 1 }}"
+                    hx-target="#orders-table-container"
+                    hx-indicator=".htmx-indicator"
+                  >
+                    Next
+                  </a>
+                </li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Order Form Container (initially empty, filled by HTMX) -->
+<div id="order-form-container"></div>
+{{ end }}
