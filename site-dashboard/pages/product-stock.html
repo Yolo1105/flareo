@@ -1,0 +1,832 @@
+<!-- Product Stock Page -->
+<div class="page-header">
+  <h1>Product Stock</h1>
+  <div class="actions">
+    <button class="btn-primary" onclick="showAddProductModal()">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M12 5v14M5 12h14"/>
+      </svg>
+      Add Product
+    </button>
+    <div class="search">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="8"/>
+        <path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="text" placeholder="Search product name" 
+             hx-get="/api/products/search"
+             hx-trigger="keyup changed delay:500ms"
+             hx-target="#product-table-body">
+    </div>
+  </div>
+</div>
+
+<div class="content-wrapper">
+  <div class="table-container">
+    <table class="product-table">
+      <thead>
+        <tr>
+          <th>Image</th>
+          <th>Product Name</th>
+          <th>Category</th>
+          <th>Price</th>
+          <th>Piece</th>
+          <th>Available Color</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody id="product-table-body">
+        <template id="product-row-template">
+          <tr>
+            <td class="product-image">
+              <img src="/placeholder.svg" alt="Product Image">
+            </td>
+            <td class="product-name"></td>
+            <td class="category"></td>
+            <td class="price"></td>
+            <td class="piece"></td>
+            <td class="colors">
+              <div class="color-dots"></div>
+            </td>
+            <td class="actions">
+              <button class="edit-btn" aria-label="Edit product">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="delete-btn" aria-label="Delete product">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M3 6h18"/>
+                  <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/>
+                  <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
+                </svg>
+              </button>
+            </td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+
+    <div class="pagination">
+      <span>Showing 1-09 of 78</span>
+      <div class="pagination-controls">
+        <button class="prev" aria-label="Previous page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M15 18l-6-6 6-6"/>
+          </svg>
+        </button>
+        <button class="next" aria-label="Next page">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 18l6-6-6-6"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div id="add-product-modal" class="modal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>Add New Product</h2>
+      <button class="close-btn" onclick="hideAddProductModal()">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6L6 18M6 6l12 12"/>
+        </svg>
+      </button>
+    </div>
+    <form id="add-product-form" class="modal-body">
+      <div class="form-group">
+        <label for="product-image">Product Image</label>
+        <div class="image-upload">
+          <input type="file" id="product-image" accept="image/*" class="hidden">
+          <div class="upload-placeholder">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+              <polyline points="17 8 12 3 7 8"/>
+              <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            <span>Click to upload or drag and drop</span>
+            <span class="text-sm">SVG, PNG, JPG or GIF (max. 800x400px)</span>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="product-name">Product Name</label>
+        <input type="text" id="product-name" required>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="product-category">Category</label>
+          <select id="product-category" required>
+            <option value="">Select category</option>
+            <option value="Digital Product">Digital Product</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Mobile Phone">Mobile Phone</option>
+            <option value="Audio">Audio</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Accessories">Accessories</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Smart Home">Smart Home</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="product-price">Price</label>
+          <input type="number" id="product-price" min="0" step="0.01" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="product-piece">Stock Quantity</label>
+          <input type="number" id="product-piece" min="0" required>
+        </div>
+        <div class="form-group">
+          <label>Available Colors</label>
+          <div class="color-picker">
+            <input type="color" value="#000000">
+            <button type="button" class="add-color-btn">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </button>
+          </div>
+          <div class="selected-colors"></div>
+        </div>
+      </div>
+    </form>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="hideAddProductModal()">Cancel</button>
+      <button class="btn-primary" onclick="submitProduct()">Add Product</button>
+    </div>
+  </div>
+</div>
+
+<style>
+  .page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding: 0 2rem;
+  }
+
+  .content-wrapper {
+    padding: 0 2rem;
+  }
+
+  .page-header h1 {
+    font-size: 1.875rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .search {
+    position: relative;
+    width: 300px;
+  }
+
+  .search svg {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-secondary);
+    width: 16px;
+    height: 16px;
+    pointer-events: none;
+  }
+
+  .search input {
+    width: 100%;
+    padding: 2.75rem;
+    padding-left: 2.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--background-primary);
+    font-size: 0.875rem;
+    color: var(--text-primary);
+  }
+
+  .search input::placeholder {
+    color: var(--text-secondary);
+  }
+
+  .table-container {
+    background: var(--background-primary);
+    border-radius: 0.5rem;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+  }
+
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .product-table th {
+    text-align: left;
+    padding: 1rem;
+    background: var(--background-secondary);
+    color: var(--text-secondary);
+    font-weight: 500;
+    white-space: nowrap;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .product-table td {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    color: var(--text-primary);
+  }
+
+  .product-image img {
+    width: 48px;
+    height: 48px;
+    border-radius: 0.375rem;
+    object-fit: cover;
+  }
+
+  .product-name {
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  .category {
+    color: var(--text-secondary);
+  }
+
+  .price {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .piece {
+    color: var(--text-secondary);
+  }
+
+  .color-dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .color-dot {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--background-primary);
+    box-shadow: 0 0 0 1px var(--border-color);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .edit-btn,
+  .delete-btn {
+    padding: 0.5rem;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: 0.375rem;
+    color: var(--text-secondary);
+    transition: all 0.2s;
+  }
+
+  .edit-btn:hover {
+    color: var(--primary-color);
+    background: var(--primary-color-light);
+  }
+
+  .delete-btn:hover {
+    color: var(--error-color);
+    background: var(--error-color-light);
+  }
+
+  .pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    color: var(--text-secondary);
+  }
+
+  .pagination-controls {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .pagination-controls button {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background: var(--background-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .pagination-controls button:hover {
+    background: var(--background-hover);
+    color: var(--text-primary);
+  }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+  }
+
+  .btn-primary:hover {
+    background: var(--primary-color-dark);
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1rem;
+    background: var(--background-secondary);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--background-hover);
+  }
+
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal.active {
+    display: flex;
+  }
+
+  .modal-content {
+    background: white;
+    border-radius: 0.5rem;
+    width: 100%;
+    max-width: 600px;
+    max-height: 90vh;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .modal-header h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .close-btn {
+    padding: 0.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-radius: 0.375rem;
+    transition: all 0.2s;
+  }
+
+  .close-btn:hover {
+    background: var(--background-hover);
+    color: var(--text-primary);
+  }
+
+  .modal-body {
+    padding: 1.5rem;
+  }
+
+  .modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+    padding: 1.5rem;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+    font-weight: 500;
+  }
+
+  input[type="text"],
+  input[type="number"],
+  select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    background: var(--background-primary);
+    color: var(--text-primary);
+    font-size: 0.875rem;
+  }
+
+  .image-upload {
+    border: 2px dashed var(--border-color);
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .image-upload:hover {
+    border-color: var(--primary-color);
+  }
+
+  .upload-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+  }
+
+  .text-sm {
+    font-size: 0.875rem;
+    opacity: 0.7;
+  }
+
+  .hidden {
+    display: none;
+  }
+
+  .color-picker {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  input[type="color"] {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+  }
+
+  .add-color-btn {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border-color);
+    border-radius: 0.375rem;
+    background: var(--background-primary);
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .add-color-btn:hover {
+    background: var(--background-hover);
+    color: var(--text-primary);
+  }
+
+  .selected-colors {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .selected-color {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    position: relative;
+    cursor: pointer;
+  }
+
+  .selected-color::after {
+    content: '×';
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 20px;
+    height: 20px;
+    background: var(--error-color);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .selected-color:hover::after {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  // Sample product data with more realistic examples
+  const products = [
+    {
+      id: 1,
+      image: 'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-ikPYOfX6XwMDFqJCGabrE59Y61q9T8.png',
+      name: 'Apple Watch Series 4',
+      category: 'Digital Product',
+      price: 690.00,
+      piece: 63,
+      colors: ['#000000', '#CCCCCC', '#FFB5B5']
+    },
+    {
+      id: 2,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp-spacegray-select-202206?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1664497359481',
+      name: 'MacBook Pro 14"',
+      category: 'Laptop',
+      price: 1999.00,
+      piece: 28,
+      colors: ['#1E1E1E', '#CCCCCC']
+    },
+    {
+      id: 3,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/iphone-15-pro-finish-select-202309-6-7inch-naturaltitanium?wid=5120&hei=2880&fmt=p-jpg&qlt=80&.v=1692845702708',
+      name: 'iPhone 15 Pro',
+      category: 'Mobile Phone',
+      price: 999.00,
+      piece: 156,
+      colors: ['#454545', '#FFD700', '#C0C0C0', '#000000']
+    },
+    {
+      id: 4,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/airpods-max-select-silver-202009?wid=940&hei=1112&fmt=png-alpha&.v=1604021221000',
+      name: 'AirPods Max',
+      category: 'Audio',
+      price: 549.00,
+      piece: 42,
+      colors: ['#FFFFFF', '#000000', '#FFB5B5', '#90EE90', '#87CEEB']
+    },
+    {
+      id: 5,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/ipad-pro-12-select-wifi-spacegray-202104?wid=940&hei=1112&fmt=p-jpg&qlt=95&.v=1617126613000',
+      name: 'iPad Pro 12.9"',
+      category: 'Tablet',
+      price: 1099.00,
+      piece: 89,
+      colors: ['#1E1E1E', '#CCCCCC']
+    },
+    {
+      id: 6,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MHLM3?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1623348211000',
+      name: 'Magic Keyboard',
+      category: 'Accessories',
+      price: 299.00,
+      piece: 124,
+      colors: ['#FFFFFF', '#000000']
+    },
+    {
+      id: 7,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/MK0C3?wid=2000&hei=2000&fmt=jpeg&qlt=95&.v=1632951542000',
+      name: 'Magic Mouse',
+      category: 'Accessories',
+      price: 79.00,
+      piece: 231,
+      colors: ['#FFFFFF', '#000000']
+    },
+    {
+      id: 8,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/apple-tv-4k-hero-select-202210?wid=940&hei=1112&fmt=jpeg&qlt=90&.v=1664896361408',
+      name: 'Apple TV 4K',
+      category: 'Entertainment',
+      price: 179.00,
+      piece: 67,
+      colors: ['#000000']
+    },
+    {
+      id: 9,
+      image: 'https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/homepod-mini-select-blue-202110?wid=940&hei=1112&fmt=png-alpha&.v=1632925511000',
+      name: 'HomePod Mini',
+      category: 'Smart Home',
+      price: 99.00,
+      piece: 183,
+      colors: ['#FFFFFF', '#FFB5B5', '#90EE90', '#87CEEB', '#000000']
+    }
+  ];
+
+  // Initialize product table
+  function initializeTable() {
+    const template = document.getElementById('product-row-template');
+    const tbody = document.getElementById('product-table-body');
+    tbody.innerHTML = ''; // Clear existing rows
+    
+    products.forEach(product => {
+      const clone = template.content.cloneNode(true);
+      
+      clone.querySelector('img').src = product.image;
+      clone.querySelector('.product-name').textContent = product.name;
+      clone.querySelector('.category').textContent = product.category;
+      clone.querySelector('.price').textContent = `$${product.price.toFixed(2)}`;
+      clone.querySelector('.piece').textContent = product.piece;
+      
+      const colorDots = clone.querySelector('.color-dots');
+      product.colors.forEach(color => {
+        const dot = document.createElement('div');
+        dot.className = 'color-dot';
+        dot.style.backgroundColor = color;
+        colorDots.appendChild(dot);
+      });
+      
+      // Add HTMX attributes for actions
+      const editBtn = clone.querySelector('.edit-btn');
+      editBtn.setAttribute('hx-get', `/api/products/${product.id}/edit`);
+      editBtn.setAttribute('hx-target', '#edit-modal');
+      
+      const deleteBtn = clone.querySelector('.delete-btn');
+      deleteBtn.setAttribute('hx-delete', `/api/products/${product.id}`);
+      deleteBtn.setAttribute('hx-confirm', 'Are you sure you want to delete this product?');
+      deleteBtn.setAttribute('hx-target', 'closest tr');
+      
+      tbody.appendChild(clone);
+    });
+
+    updatePagination();
+  }
+
+  // Search functionality
+  function setupSearch() {
+    const searchInput = document.querySelector('.search input');
+    searchInput.addEventListener('input', (e) => {
+      const searchTerm = e.target.value.toLowerCase();
+      let visibleCount = 0;
+      
+      document.querySelectorAll('#product-table-body tr').forEach(row => {
+        const productName = row.querySelector('.product-name').textContent.toLowerCase();
+        const show = productName.includes(searchTerm);
+        row.style.display = show ? '' : 'none';
+        if (show) visibleCount++;
+      });
+
+      updatePagination(visibleCount);
+    });
+  }
+
+  // Update pagination text
+  function updatePagination(visibleCount = products.length) {
+    const paginationText = document.querySelector('.pagination span');
+    paginationText.textContent = `Showing 1-${visibleCount} of ${products.length}`;
+  }
+
+  // Initialize when DOM is loaded
+  document.addEventListener('DOMContentLoaded', () => {
+    initializeTable();
+    setupSearch();
+  });
+
+  let selectedColors = new Set();
+
+  function showAddProductModal() {
+    document.getElementById('add-product-modal').classList.add('active');
+  }
+
+  function hideAddProductModal() {
+    document.getElementById('add-product-modal').classList.remove('active');
+    resetForm();
+  }
+
+  function resetForm() {
+    document.getElementById('add-product-form').reset();
+    selectedColors.clear();
+    document.querySelector('.selected-colors').innerHTML = '';
+  }
+
+  function setupImageUpload() {
+    const uploadArea = document.querySelector('.image-upload');
+    const fileInput = document.getElementById('product-image');
+
+    uploadArea.addEventListener('click', () => fileInput.click());
+    uploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--primary-color)';
+    });
+
+    uploadArea.addEventListener('dragleave', () => {
+      uploadArea.style.borderColor = 'var(--border-color)';
+    });
+
+    uploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      uploadArea.style.borderColor = 'var(--border-color)';
+      fileInput.files = e.dataTransfer.files;
+      handleImageUpload(e.dataTransfer.files[0]);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+      handleImageUpload(e.target.files[0]);
+    });
+  }
+
+  function handleImageUpload(file) {
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const uploadArea = document.querySelector('.image-upload');
+        uploadArea.innerHTML = `<img src="${e.target.result}" style="max-width: 100%; max-height: 200px; border-radius: 0.375rem;">`;
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function setupColorPicker() {
+    const colorInput = document.querySelector('input[type="color"]');
+    const addColorBtn = document.querySelector('.add-color-btn');
+    const selectedColorsContainer = document.querySelector('.selected-colors');
+
+    addColorBtn.addEventListener('click', () => {
+      const color = colorInput.value;
+      if (!selectedColors.has(color)) {
+        selectedColors.add(color);
+        const colorElement = document.createElement('div');
+        colorElement.className = 'selected-color';
+        colorElement.style.backgroundColor = color;
+        colorElement.onclick = () => {
+          selectedColors.delete(color);
+          colorElement.remove();
+        };
+        selectedColorsContainer.appendChild(colorElement);
+      }
+    });
+  }
+
+  function submitProduct() {
+    const form = document.getElementById('add-product-form');
+    const formData = new FormData(form);
+    
+    // Add selected colors to form data
+    formData.append('colors', Array.from(selectedColors));
+
+    // Here you would typically send the data to your server
+    console.log('Submitting product:', Object.fromEntries(formData));
+    
+    // For demo purposes, we'll just add it to the table
+    const newProduct = {
+      id: products.length + 1,
+      image: document.querySelector('.image-upload img')?.src || '/placeholder.svg',
+      name: formData.get('product-name'),
+      category: formData.get('product-category'),
+      price: parseFloat(formData.get('product-price')),
+      piece: parseInt(formData.get('product-piece')),
+      colors: Array.from(selectedColors)
+    };
+
+    products.push(newProduct);
+    initializeTable();
+    hideAddProductModal();
+  }
+
+  // Initialize modal functionality
+  document.addEventListener('DOMContentLoaded', () => {
+    setupImageUpload();
+    setupColorPicker();
+  });
+</script>
