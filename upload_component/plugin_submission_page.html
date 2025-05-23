@@ -1,0 +1,712 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>插件上传与发布 - Plugin as a Service Hub</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* 插件上传页面特定样式 */
+        .upload-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .steps-container {
+            margin-bottom: 2rem;
+        }
+        
+        .step-content {
+            background-color: white;
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            box-shadow: var(--shadow-md);
+            margin-bottom: 2rem;
+        }
+        
+        .upload-methods {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .upload-method-card {
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-method-card:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-4px);
+        }
+        
+        .upload-method-card.active {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .upload-method-card h3 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .upload-method-card p {
+            margin-bottom: 0;
+            opacity: 0.8;
+        }
+        
+        .form-section {
+            margin-bottom: 2rem;
+        }
+        
+        .form-section h3 {
+            margin-bottom: 1rem;
+            color: var(--neutral-700);
+            border-bottom: 1px solid var(--neutral-200);
+            padding-bottom: 0.5rem;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .preview-container {
+            background-color: var(--neutral-100);
+            border-radius: var(--radius-lg);
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .preview-plugin-card {
+            background-color: white;
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            box-shadow: var(--shadow-sm);
+        }
+        
+        .image-upload-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .image-upload-box {
+            aspect-ratio: 16/9;
+            border: 2px dashed var(--neutral-300);
+            border-radius: var(--radius-md);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .image-upload-box:hover {
+            border-color: var(--primary-color);
+            background-color: var(--neutral-100);
+        }
+        
+        .pricing-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .pricing-option {
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .pricing-option:hover {
+            border-color: var(--primary-light);
+        }
+        
+        .pricing-option.active {
+            border-color: var(--primary-color);
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .action-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+        
+        .tab-container {
+            margin-bottom: 2rem;
+        }
+        
+        .tab-content {
+            padding: 1.5rem;
+            background-color: white;
+            border-radius: 0 0 var(--radius-md) var(--radius-md);
+            border: 1px solid var(--neutral-200);
+            border-top: none;
+        }
+        
+        .deployment-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .deployment-option {
+            border: 2px solid var(--neutral-200);
+            border-radius: var(--radius-md);
+            padding: 1.5rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .deployment-option:hover {
+            border-color: var(--primary-light);
+            transform: translateY(-4px);
+        }
+        
+        .deployment-option.active {
+            border-color: var(--primary-color);
+        }
+        
+        .deployment-option h4 {
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .deployment-option p {
+            margin-bottom: 0;
+            opacity: 0.8;
+            font-size: 0.9rem;
+        }
+        
+        .checklist-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
+            border-radius: var(--radius-md);
+            background-color: var(--neutral-100);
+        }
+        
+        .checklist-item.success {
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+        
+        .checklist-item.warning {
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+        
+        .checklist-item.error {
+            background-color: rgba(239, 68, 68, 0.1);
+        }
+    </style>
+</head>
+<body>
+    <header class="navbar">
+        <div class="container">
+            <a href="/" class="navbar-brand">Plugin Hub</a>
+            <nav class="navbar-nav">
+                <a href="/marketplace" class="nav-link">插件市场</a>
+                <a href="/docs" class="nav-link">开发文档</a>
+                <a href="/community" class="nav-link">开发者社区</a>
+                <a href="/dashboard" class="nav-link active">我的控制台</a>
+            </nav>
+            <div class="navbar-actions">
+                <button class="btn btn-outline">切换角色</button>
+                <div class="avatar-dropdown">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="用户头像" class="avatar">
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="upload-container">
+        <div class="page-header">
+            <h1>上传与发布插件</h1>
+            <p>通过以下步骤完成插件的上传、配置和发布，让您的创意为更多用户所用。</p>
+        </div>
+
+        <div class="steps-container">
+            <div class="steps">
+                <div class="step active">
+                    <div class="step-number">1</div>
+                    <div class="step-label">上传插件</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-label">基本信息</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-label">部署配置</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-label">定价与销售</div>
+                </div>
+                <div class="step">
+                    <div class="step-number">5</div>
+                    <div class="step-label">发布确认</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 步骤1：上传插件 -->
+        <div class="step-content">
+            <h2>选择上传方式</h2>
+            <p>请选择一种方式上传您的插件代码。我们支持多种上传方式，选择最适合您的开发流程的方式。</p>
+
+            <div class="upload-methods">
+                <div class="upload-method-card active">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7M16 11V7"/></svg> Dockerfile 上传</h3>
+                    <p>上传包含 Dockerfile 的项目目录，我们将自动构建并部署您的插件。</p>
+                </div>
+                <div class="upload-method-card">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/></svg> 镜像 TAR 包</h3>
+                    <p>上传预先构建好的 Docker 镜像 TAR 包，适合有特殊构建需求的插件。</p>
+                </div>
+                <div class="upload-method-card">
+                    <h3><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65-.17.6-.22 1.23-.15 1.85v4"/><path d="M9 18c-4.51 2-5-2-7-2"/></svg> GitHub 仓库</h3>
+                    <p>直接关联 GitHub 仓库，我们将自动拉取最新代码并构建部署。</p>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>上传文件</h3>
+                <div class="upload-area">
+                    <div class="upload-dropzone" style="border: 2px dashed var(--neutral-300); border-radius: var(--radius-lg); padding: 3rem; text-align: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 1rem;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                        <h3>拖放文件到此处或点击上传</h3>
+                        <p>支持 .zip, .tar.gz 格式，最大文件大小 500MB</p>
+                        <button class="btn btn-primary" style="margin-top: 1rem;">选择文件</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-secondary">保存草稿</button>
+                <button class="btn btn-primary">下一步：基本信息</button>
+            </div>
+        </div>
+
+        <!-- 步骤2：基本信息（隐藏状态，实际使用时通过JS控制显示） -->
+        <div class="step-content" style="display: none;">
+            <h2>填写插件基本信息</h2>
+            <p>详细的插件信息有助于用户更好地了解您的插件功能和使用方式。</p>
+
+            <div class="form-section">
+                <h3>基础信息</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="plugin-name">插件名称 *</label>
+                        <input type="text" id="plugin-name" class="form-control" placeholder="输入插件名称，最多30个字符">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="plugin-id">插件标识符 *</label>
+                        <input type="text" id="plugin-id" class="form-control" placeholder="英文字母、数字和连字符，如my-awesome-plugin">
+                        <span class="form-hint">唯一标识符，发布后不可更改</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="plugin-desc">插件简介 *</label>
+                    <textarea id="plugin-desc" class="form-control" rows="3" placeholder="简要描述插件的主要功能和价值，最多200个字符"></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label" for="plugin-tags">标签</label>
+                    <input type="text" id="plugin-tags" class="form-control" placeholder="输入标签，用逗号分隔，如：API,网关,微服务">
+                    <span class="form-hint">最多添加5个标签，有助于用户搜索发现</span>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>详细描述</h3>
+                <div class="form-group">
+                    <label class="form-label" for="plugin-detail">功能详情 *</label>
+                    <div style="border: 1px solid var(--neutral-300); border-radius: var(--radius-md); padding: 0.5rem; min-height: 200px;">
+                        <!-- 富文本编辑器占位 -->
+                        <div style="padding: 0.5rem; color: var(--neutral-500);">
+                            支持Markdown格式，可插入图片、代码块和表格等
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>插件截图</h3>
+                <p>上传至少一张截图展示插件界面或功能，建议尺寸1280x720px</p>
+                <div class="image-upload-container">
+                    <div class="image-upload-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span style="margin-top: 0.5rem; font-size: 0.875rem;">添加截图</span>
+                    </div>
+                    <div class="image-upload-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span style="margin-top: 0.5rem; font-size: 0.875rem;">添加截图</span>
+                    </div>
+                    <div class="image-upload-box">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span style="margin-top: 0.5rem; font-size: 0.875rem;">添加截图</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="preview-container">
+                <div class="preview-header">
+                    <h3>预览效果</h3>
+                    <span class="tag">实时更新</span>
+                </div>
+                <div class="preview-plugin-card">
+                    <h3 id="preview-name">插件名称</h3>
+                    <p id="preview-desc">插件简介将显示在这里...</p>
+                    <div style="display: flex; gap: 0.5rem; margin-top: 1rem;">
+                        <span class="tag">标签1</span>
+                        <span class="tag">标签2</span>
+                        <span class="tag">标签3</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div>
+                    <button class="btn btn-secondary">上一步</button>
+                    <button class="btn btn-secondary" style="margin-left: 0.5rem;">保存草稿</button>
+                </div>
+                <button class="btn btn-primary">下一步：部署配置</button>
+            </div>
+        </div>
+
+        <!-- 步骤3：部署配置（隐藏状态） -->
+        <div class="step-content" style="display: none;">
+            <h2>配置插件部署方式</h2>
+            <p>设置插件的部署和集成方式，让用户能够轻松地将您的插件集成到他们的系统中。</p>
+
+            <div class="tab-container">
+                <div class="tabs">
+                    <div class="tab active">基础配置</div>
+                    <div class="tab">环境变量</div>
+                    <div class="tab">网络设置</div>
+                    <div class="tab">存储配置</div>
+                    <div class="tab">高级选项</div>
+                </div>
+                <div class="tab-content">
+                    <div class="form-section">
+                        <h3>部署方式</h3>
+                        <p>选择您希望支持的部署方式，可多选</p>
+                        <div class="deployment-options">
+                            <div class="deployment-option active">
+                                <h4><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2H3v16h5v4l4-4h5l4-4V2zM11 11V7M16 11V7"/></svg> Docker 容器</h4>
+                                <p>以 Docker 容器方式部署，用户可通过 Docker 命令或 Compose 文件运行</p>
+                            </div>
+                            <div class="deployment-option">
+                                <h4><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Kubernetes</h4>
+                                <p>提供 Helm Chart 或 YAML 配置，支持在 Kubernetes 集群中部署</p>
+                            </div>
+                            <div class="deployment-option">
+                                <h4><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></svg> iframe 嵌入</h4>
+                                <p>提供 iframe 嵌入代码，用户可直接嵌入到网页中使用</p>
+                            </div>
+                            <div class="deployment-option">
+                                <h4><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> API 接入</h4>
+                                <p>提供 API 接口，用户可通过 API 调用使用插件功能</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>资源需求</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="cpu-request">CPU 需求</label>
+                                <select id="cpu-request" class="form-control">
+                                    <option value="0.5">0.5 核 (最小)</option>
+                                    <option value="1" selected>1 核 (推荐)</option>
+                                    <option value="2">2 核</option>
+                                    <option value="4">4 核</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="memory-request">内存需求</label>
+                                <select id="memory-request" class="form-control">
+                                    <option value="256">256MB (最小)</option>
+                                    <option value="512">512MB</option>
+                                    <option value="1024" selected>1GB (推荐)</option>
+                                    <option value="2048">2GB</option>
+                                    <option value="4096">4GB</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section">
+                        <h3>端口配置</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label class="form-label" for="port-number">主要服务端口</label>
+                                <input type="number" id="port-number" class="form-control" value="8080">
+                                <span class="form-hint">插件主要服务的端口号</span>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" for="port-protocol">协议</label>
+                                <select id="port-protocol" class="form-control">
+                                    <option value="http" selected>HTTP</option>
+                                    <option value="https">HTTPS</option>
+                                    <option value="tcp">TCP</option>
+                                    <option value="udp">UDP</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-outline" style="margin-top: 0.5rem;">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 0.5rem;"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                            添加更多端口
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div>
+                    <button class="btn btn-secondary">上一步</button>
+                    <button class="btn btn-secondary" style="margin-left: 0.5rem;">保存草稿</button>
+                </div>
+                <button class="btn btn-primary">下一步：定价与销售</button>
+            </div>
+        </div>
+
+        <!-- 步骤4：定价与销售（隐藏状态） -->
+        <div class="step-content" style="display: none;">
+            <h2>设置定价与销售模式</h2>
+            <p>选择适合您插件的销售模式和定价策略，最大化您的收益。</p>
+
+            <div class="form-section">
+                <h3>销售模式</h3>
+                <div class="pricing-options">
+                    <div class="pricing-option active">
+                        <h4>免费</h4>
+                        <p>免费提供给所有用户使用</p>
+                    </div>
+                    <div class="pricing-option">
+                        <h4>一次性付费</h4>
+                        <p>用户支付一次费用后永久使用</p>
+                    </div>
+                    <div class="pricing-option">
+                        <h4>订阅制</h4>
+                        <p>用户按月/年订阅使用</p>
+                    </div>
+                    <div class="pricing-option">
+                        <h4>SLA增值服务</h4>
+                        <p>基础版免费，高级功能和支持付费</p>
+                    </div>
+                    <div class="pricing-option">
+                        <h4>源码出售</h4>
+                        <p>出售插件源代码的完整所有权</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>定价设置</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="price-amount">价格 (¥)</label>
+                        <input type="number" id="price-amount" class="form-control" placeholder="0.00" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="price-cycle">计费周期</label>
+                        <select id="price-cycle" class="form-control" disabled>
+                            <option value="one-time">一次性</option>
+                            <option value="monthly">每月</option>
+                            <option value="yearly">每年</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>试用设置</h3>
+                <div class="form-row">
+                    <div class="form-group" style="display: flex; align-items: center;">
+                        <input type="checkbox" id="enable-trial" style="margin-right: 0.5rem;">
+                        <label for="enable-trial">启用免费试用</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="trial-days">试用天数</label>
+                        <input type="number" id="trial-days" class="form-control" value="14" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>促销设置</h3>
+                <div class="form-row">
+                    <div class="form-group" style="display: flex; align-items: center;">
+                        <input type="checkbox" id="enable-promotion" style="margin-right: 0.5rem;">
+                        <label for="enable-promotion">启用促销价格</label>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="promotion-price">促销价格 (¥)</label>
+                        <input type="number" id="promotion-price" class="form-control" placeholder="0.00" disabled>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label" for="promotion-start">促销开始日期</label>
+                        <input type="date" id="promotion-start" class="form-control" disabled>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="promotion-end">促销结束日期</label>
+                        <input type="date" id="promotion-end" class="form-control" disabled>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div>
+                    <button class="btn btn-secondary">上一步</button>
+                    <button class="btn btn-secondary" style="margin-left: 0.5rem;">保存草稿</button>
+                </div>
+                <button class="btn btn-primary">下一步：发布确认</button>
+            </div>
+        </div>
+
+        <!-- 步骤5：发布确认（隐藏状态） -->
+        <div class="step-content" style="display: none;">
+            <h2>发布前确认</h2>
+            <p>在正式发布前，请确认以下检查项，确保您的插件符合平台要求。</p>
+
+            <div class="form-section">
+                <h3>发布前检查</h3>
+                <div class="checklist-item success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div>
+                        <h4>基本信息完整</h4>
+                        <p>插件名称、描述和标签已填写完整</p>
+                    </div>
+                </div>
+                <div class="checklist-item success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div>
+                        <h4>插件文件已上传</h4>
+                        <p>插件源代码或镜像文件已成功上传</p>
+                    </div>
+                </div>
+                <div class="checklist-item success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                    <div>
+                        <h4>部署配置已设置</h4>
+                        <p>已配置插件的部署方式和资源需求</p>
+                    </div>
+                </div>
+                <div class="checklist-item warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div>
+                        <h4>插件截图不足</h4>
+                        <p>建议上传至少3张截图展示插件功能</p>
+                    </div>
+                </div>
+                <div class="checklist-item warning">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                    <div>
+                        <h4>详细文档不足</h4>
+                        <p>建议提供更详细的使用文档和示例</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-section">
+                <h3>发布协议</h3>
+                <div style="background-color: var(--neutral-100); padding: 1.5rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; max-height: 200px; overflow-y: auto;">
+                    <h4>插件发布协议</h4>
+                    <p>通过发布插件，您同意以下条款：</p>
+                    <ol style="padding-left: 1.5rem;">
+                        <li>您拥有或已获授权发布此插件的所有内容</li>
+                        <li>您的插件不包含恶意代码或侵犯他人知识产权的内容</li>
+                        <li>您同意平台对每笔交易收取15%的服务费</li>
+                        <li>您将及时响应用户的问题和反馈</li>
+                        <li>您同意遵守平台的社区准则和服务条款</li>
+                    </ol>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 1.5rem;">
+                    <input type="checkbox" id="agree-terms" style="margin-right: 0.5rem;">
+                    <label for="agree-terms">我已阅读并同意《插件发布协议》</label>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <div>
+                    <button class="btn btn-secondary">上一步</button>
+                    <button class="btn btn-secondary" style="margin-left: 0.5rem;">保存草稿</button>
+                </div>
+                <button class="btn btn-primary" disabled>发布插件</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; padding: 2rem 0;">
+                <div>
+                    <h3>Plugin Hub</h3>
+                    <p>打造前后端通用的插件分发与部署平台</p>
+                </div>
+                <div style="display: flex; gap: 2rem;">
+                    <div>
+                        <h4>产品</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">插件市场</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">开发者中心</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">部署方案</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>资源</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">开发文档</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">API参考</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">示例插件</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4>关于</h4>
+                        <ul style="list-style: none; padding: 0;">
+                            <li><a href="#" style="color: inherit; text-decoration: none;">关于我们</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">联系方式</a></li>
+                            <li><a href="#" style="color: inherit; text-decoration: none;">服务条款</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div style="border-top: 1px solid var(--neutral-200); padding: 1.5rem 0; text-align: center;">
+                <p>© 2025 Plugin Hub. 保留所有权利。</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
