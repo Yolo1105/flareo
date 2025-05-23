@@ -40,7 +40,7 @@ export default function Navbar() {
             </Link>
           </li>
           <li>
-            <Link href="/upload" className="nav-link">
+            <Link href="#" className="nav-link">
               定制服务
             </Link>
           </li>
