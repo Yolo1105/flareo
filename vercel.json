@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "landingpage/.next",
+  "rewrites": [
+    {
+      "source": "/upload",
+      "destination": "http://localhost:3001"
+    },
+    {
+      "source": "/plugin/:path*",
+      "destination": "http://localhost:3002/plugin/:path*"
+    }
+  ]
+} 

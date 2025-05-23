@@ -1,5 +1,0 @@
-# 使用官方 Nginx 镜像（Alpine 版本）作为基础镜像
-FROM nginx:alpine
-
-# 将当前目录下的 index.html 复制到 Nginx 默认的静态资源目录中
-COPY index.html /usr/share/nginx/html/index.html

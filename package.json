@@ -1,0 +1,17 @@
+{
+  "name": "plugin-hub",
+  "version": "1.0.0",
+  "private": true,
+  "workspaces": [
+    "landingpage",
+    "upload_component",
+    "plugindetailui"
+  ],
+  "scripts": {
+    "dev:landing": "cd landingpage && npm run dev",
+    "dev:upload": "cd upload_component && npm run dev",
+    "dev:detail": "cd plugindetailui && npm run dev",
+    "build": "cd landingpage && npm run build",
+    "start": "cd landingpage && npm run start"
+  }
+} 
