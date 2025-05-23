@@ -1,7 +1,8 @@
 {
   "version": 2,
-  "buildCommand": "npm run build",
+  "buildCommand": "cd landingpage && npm install && npm run build",
   "outputDirectory": "landingpage/.next",
+  "installCommand": "npm install",
   "rewrites": [
     {
       "source": "/upload",
