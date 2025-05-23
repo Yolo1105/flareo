@@ -1,17 +1,21 @@
 {
-  "name": "plugin-hub",
+  "name": "modulex",
   "version": "1.0.0",
   "private": true,
   "workspaces": [
     "landingpage",
-    "upload_component",
-    "plugindetailui"
+    "upload-component"
   ],
   "scripts": {
     "dev:landing": "cd landingpage && npm run dev",
-    "dev:upload": "cd upload_component && npm run dev",
-    "dev:detail": "cd plugindetailui && npm run dev",
-    "build": "cd landingpage && npm run build",
-    "start": "cd landingpage && npm run start"
+    "dev:upload": "cd upload-component && npm run dev",
+    "build:landing": "cd landingpage && npm run build",
+    "build:upload": "cd upload-component && npm run build",
+    "start:landing": "cd landingpage && npm run start",
+    "start:upload": "cd upload-component && npm run start"
+  },
+  "dependencies": {
+    "date-fns": "^2.30.0",
+    "react-day-picker": "8.10.1"
   }
 } 
