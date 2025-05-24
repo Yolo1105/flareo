@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback, memo } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { HeaderProps } from '@/types/layout';
 
 // 将导航链接数据抽离为常量
@@ -33,6 +34,7 @@ const styles = {
 
 const Header: React.FC<HeaderProps> = memo(({ className = '' }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const router = useRouter();
 
   const toggleMobileMenu = useCallback(() => {
     setMobileMenuOpen(prev => !prev);
@@ -41,6 +43,10 @@ const Header: React.FC<HeaderProps> = memo(({ className = '' }) => {
   const closeMobileMenu = useCallback(() => {
     setMobileMenuOpen(false);
   }, []);
+
+  const handleSignIn = useCallback(() => {
+    router.push('/signin');
+  }, [router]);
 
   return (
     <header className={`${styles.header} ${className}`}>
@@ -70,7 +76,10 @@ const Header: React.FC<HeaderProps> = memo(({ className = '' }) => {
           <i className="ri-menu-line"></i>
         </button>
 
-        <button className={styles.signInButton}>
+        <button 
+          className={styles.signInButton}
+          onClick={handleSignIn}
+        >
           <i className={styles.signInIcon}></i>
           Sign In
         </button>
@@ -90,7 +99,10 @@ const Header: React.FC<HeaderProps> = memo(({ className = '' }) => {
                 </li>
               ))}
               <li className="pt-4 border-t border-gray-200">
-                <button className={styles.mobileSignIn}>
+                <button 
+                  className={styles.mobileSignIn}
+                  onClick={handleSignIn}
+                >
                   <i className={styles.signInIcon}></i>
                   Sign In
                 </button>

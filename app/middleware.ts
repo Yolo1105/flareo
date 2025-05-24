@@ -3,8 +3,8 @@ import { NextRequest } from 'next/server';
 
 // 获取登录状态的函数
 function isUserLoggedIn(req: NextRequest): boolean {
-  const token = req.cookies.get('token');  // 假设你用 cookie 存储 JWT
-  return Boolean(token);
+  const userId = req.cookies.get('user_id');
+  return Boolean(userId);
 }
 
 // 处理页面访问的中间件

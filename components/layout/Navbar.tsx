@@ -3,7 +3,7 @@
 import type React from "react"
 import Link from "next/link"
 import { useState } from "react"
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 
 const navItems = [
   { name: "探索", href: "/explore" },
@@ -16,6 +16,7 @@ const navItems = [
 const Header: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
 
   return (
     <header className="navbar" style={{ padding: "var(--spacing-3, 1rem) 0", minHeight: "60px" }}>
@@ -82,6 +83,7 @@ const Header: React.FC = () => {
             cursor: "pointer",
             textDecoration: "none",
           }}
+          onClick={() => router.push('/profile')}
         >
           <i className="ri-login-circle-line" style={{ marginRight: "var(--spacing-2, 0.5rem)" }}></i>
           Sign In
@@ -121,6 +123,10 @@ const Header: React.FC = () => {
                     borderRadius: "0.375rem",
                     background: "transparent",
                     cursor: "pointer",
+                  }}
+                  onClick={() => {
+                    setMobileMenuOpen(false);
+                    router.push('/profile');
                   }}
                 >
                   <i className="ri-login-circle-line" style={{ marginRight: "var(--spacing-2, 0.5rem)" }}></i>
