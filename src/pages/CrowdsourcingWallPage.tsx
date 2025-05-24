@@ -49,14 +49,14 @@ const CrowdsourcingCard: React.FC<CrowdsourcingCardProps> = ({
       </CardHeader>
       <CardContent className="pb-2">
         <p className="text-gray-600 text-sm line-clamp-2 mb-3">{description}</p>
-        <div className="flex flex-wrap gap-2 mb-3">
+        <div className="flex flex-wrap gap-2 mb-2">
           {tags.map((tag, index) => (
             <Badge key={index} variant="outline" className="bg-gray-50">
               {tag}
             </Badge>
           ))}
         </div>
-        <div className="flex flex-wrap gap-4 text-sm text-gray-500">
+        <div className="flex flex-wrap gap-6 text-sm text-gray-500">
           <div className="flex items-center">
             <DollarSign className="h-4 w-4 mr-1 text-green-600" />
             <span>{budget}</span>
@@ -95,11 +95,11 @@ const CrowdsourcingWallPage: React.FC = () => {
         <p className="text-gray-600 mt-1">发布您的插件需求，或接取开发任务赚取报酬</p>
       </div>
 
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-row gap-6 overflow-x-auto">
         {/* Main Content Area */}
-        <div className="w-full md:w-2/3">
+        <div className="flex-1 max-w-3xl">
           {/* Search and Filter */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6 max-w-3xl w-full mx-auto">
             <div className="flex flex-col sm:flex-row gap-4 mb-4">
               <div className="relative flex-1">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -111,34 +111,34 @@ const CrowdsourcingWallPage: React.FC = () => {
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
                 />
               </div>
-              <Button variant="outline" className="flex items-center">
+              <Button variant="outline" className="flex items-center whitespace-nowrap">
                 <Filter className="h-4 w-4 mr-2" />
                 高级筛选
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-3">
-              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+            <div className="flex flex-wrap gap-2">
+              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md w-auto min-w-[120px]">
                 <option>插件标签</option>
                 <option>数据处理</option>
                 <option>AI模型</option>
                 <option>图像处理</option>
                 <option>文本分析</option>
               </select>
-              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md w-auto min-w-[120px]">
                 <option>预算区间</option>
                 <option>¥1000以下</option>
                 <option>¥1000-5000</option>
                 <option>¥5000-10000</option>
                 <option>¥10000以上</option>
               </select>
-              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md w-auto min-w-[100px]">
                 <option>状态</option>
                 <option>开放</option>
                 <option>进行中</option>
                 <option>已完成</option>
               </select>
-              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md">
+              <select className="pl-3 pr-10 py-2 text-sm border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 rounded-md w-auto min-w-[100px]">
                 <option>排序</option>
                 <option>最新发布</option>
                 <option>预算高低</option>
@@ -216,7 +216,7 @@ const CrowdsourcingWallPage: React.FC = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full md:w-1/3">
+        <div className="w-[640px] flex-shrink-0">
           {/* Create Task Button */}
           <div className="mb-6">
             <Button className="w-full" size="lg">

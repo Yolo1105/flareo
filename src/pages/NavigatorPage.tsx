@@ -90,9 +90,9 @@ const NavigatorPage: React.FC = () => {
         <p className="text-gray-600 mt-1">发现最佳插件组合，一键部署完整工作流</p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
+      <div className="flex flex-row gap-6 overflow-x-auto">
         {/* Main Content Area */}
-        <div className="w-full lg:w-2/3">
+        <div className="flex-1 min-w-0 mb-0">
           {/* Search and Filter */}
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
             <div className="flex flex-col sm:flex-row gap-4">
@@ -312,7 +312,7 @@ const NavigatorPage: React.FC = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full lg:w-1/3">
+        <div className="w-[320px] flex-shrink-0">
           {/* Plugin Categories */}
           <Card className="mb-6">
             <CardHeader className="pb-3">

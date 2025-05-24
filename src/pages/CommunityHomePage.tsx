@@ -74,7 +74,7 @@ const PostCard: React.FC<PostCardProps> = ({ title, excerpt, tags, author, timeA
         </div>
       </CardContent>
       <CardFooter className="pt-2 flex items-center justify-between text-sm text-gray-500">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-3">
           <img src={author.avatar || "/placeholder.svg"} alt={author.name} className="w-6 h-6 rounded-full" />
           <span>{author.name}</span>
           <span>•</span>
@@ -83,7 +83,7 @@ const PostCard: React.FC<PostCardProps> = ({ title, excerpt, tags, author, timeA
             {timeAgo}
           </span>
         </div>
-        <div className="flex items-center space-x-3">
+        <div className="flex items-center gap-4">
           <button className="flex items-center hover:text-blue-600 transition-colors" onClick={handleLikeClick}>
             <ThumbsUp className="h-4 w-4 mr-1" />
             {likes}
@@ -250,9 +250,9 @@ const CommunityHomePage: React.FC = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex flex-col md:flex-row gap-6">
+      <div className="flex flex-row gap-6 overflow-x-auto">
         {/* Main Content Area */}
-        <div className="w-full md:w-2/3">
+        <div className="flex-1 max-w-3xl">
           {/* Search and Filter */}
           <div className="flex flex-col sm:flex-row gap-4 mb-6">
             <div className="relative flex-1">
@@ -455,7 +455,7 @@ const CommunityHomePage: React.FC = () => {
         </div>
 
         {/* Sidebar */}
-        <div className="w-full md:w-1/3">
+        <div className="w-[560px] flex-shrink-0">
           {/* Create Post Button */}
           <div className="mb-6">
             <Link href="/create-post">

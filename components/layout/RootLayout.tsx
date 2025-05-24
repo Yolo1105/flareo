@@ -29,7 +29,9 @@ export default function RootLayout({
             <main className="flex-grow pt-8">
               {children}
             </main>
-            <Footer />
+            <div className="mt-8">
+              <Footer />
+            </div>
           </div>
         </ThemeProviderWrapper>
       </body>

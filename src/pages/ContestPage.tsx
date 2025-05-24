@@ -163,199 +163,206 @@ const SubmissionCard: React.FC<SubmissionCardProps> = ({
 const ContestPage: React.FC = () => {
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="mb-6">
+      <div className="mb-6 max-w-7xl mx-auto">
         <h1 className="text-2xl font-bold text-gray-900">极客演武场</h1>
         <p className="text-gray-600 mt-1">参与插件开发竞赛，展示您的创意和技术，赢取丰厚奖励</p>
       </div>
 
-      <Tabs defaultValue="active" className="mb-8">
-        <TabsList className="w-full grid grid-cols-3 mb-6">
-          <TabsTrigger value="active">进行中</TabsTrigger>
-          <TabsTrigger value="upcoming">即将开始</TabsTrigger>
-          <TabsTrigger value="past">往期竞赛</TabsTrigger>
-        </TabsList>
+      <div className="max-w-7xl mx-auto mb-10">
+        <Tabs defaultValue="active" className="mb-8">
+          <TabsList className="w-full grid grid-cols-3 mb-6">
+            <TabsTrigger value="active">进行中</TabsTrigger>
+            <TabsTrigger value="upcoming">即将开始</TabsTrigger>
+            <TabsTrigger value="past">往期竞赛</TabsTrigger>
+          </TabsList>
 
-        <TabsContent value="active" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ContestCard
-              title="AI辅助工具创新挑战赛"
-              description="设计并开发创新的AI辅助工具插件，提升用户工作效率和创造力。参赛作品将由专业评委和社区用户共同评选。"
-              image="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-              startDate="2025-05-01"
-              endDate="2025-06-15"
-              participants={128}
-              prizes={["¥20,000", "¥10,000", "¥5,000", "¥2,000"]}
-              status="active"
-            />
-
-            <ContestCard
-              title="数据可视化创意大赛"
-              description="打造创新的数据可视化插件，帮助用户更直观地理解和分析数据。要求美观实用，支持多种数据源和自定义配置。"
-              image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-              startDate="2025-04-15"
-              endDate="2025-05-30"
-              participants={96}
-              prizes={["¥15,000", "¥8,000", "¥3,000"]}
-              status="active"
-            />
-          </div>
-
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">热门参赛作品</h2>
-              <Button variant="outline">查看全部</Button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <SubmissionCard
-                title="智能文档助手"
-                author={{
-                  name: "王小明",
-                  avatar:
-                    "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
-                image="https://images.unsplash.com/photo-1555421689-3f034debb7a6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                description="自动分析文档结构，提取关键信息，生成摘要，并提供智能编辑建议。"
-                likes={86}
-                comments={24}
-                ranking={1}
+          <TabsContent value="active" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ContestCard
+                title="AI辅助工具创新挑战赛"
+                description="设计并开发创新的AI辅助工具插件，提升用户工作效率和创造力。参赛作品将由专业评委和社区用户共同评选。"
+                image="https://images.unsplash.com/photo-1620712943543-bcc4688e7485?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                startDate="2025-05-01"
+                endDate="2025-06-15"
+                participants={128}
+                prizes={["¥20,000", "¥10,000", "¥5,000", "¥2,000"]}
+                status="active"
               />
 
-              <SubmissionCard
-                title="多模态AI创作工具"
-                author={{
-                  name: "李小华",
-                  avatar:
-                    "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
-                image="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                description="结合文本、图像和音频生成能力，一站式创作多媒体内容。"
-                likes={72}
-                comments={18}
-                ranking={2}
-              />
-
-              <SubmissionCard
-                title="代码智能助手"
-                author={{
-                  name: "张大明",
-                  avatar:
-                    "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
-                image="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                description="实时代码分析、错误检测、性能优化建议，支持多种编程语言。"
-                likes={65}
-                comments={15}
-                ranking={3}
-              />
-
-              <SubmissionCard
-                title="数据故事生成器"
-                author={{
-                  name: "赵小红",
-                  avatar:
-                    "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
+              <ContestCard
+                title="数据可视化创意大赛"
+                description="打造创新的数据可视化插件，帮助用户更直观地理解和分析数据。要求美观实用，支持多种数据源和自定义配置。"
                 image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                description="将枯燥的数据转化为引人入胜的可视化故事，自动生成洞察和解释。"
-                likes={58}
-                comments={12}
+                startDate="2025-04-15"
+                endDate="2025-05-30"
+                participants={96}
+                prizes={["¥15,000", "¥8,000", "¥3,000"]}
+                status="active"
               />
             </div>
-          </div>
-        </TabsContent>
 
-        <TabsContent value="upcoming" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ContestCard
-              title="插件性能优化挑战赛"
-              description="针对现有插件进行性能优化，提高运行速度、降低资源消耗。参赛者可以选择平台上的开源插件进行优化。"
-              image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-              startDate="2025-07-01"
-              endDate="2025-08-15"
-              participants={64}
-              prizes={["¥18,000", "¥9,000", "¥4,500"]}
-              status="upcoming"
-            />
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">热门参赛作品</h2>
+                <Button variant="outline">查看全部</Button>
+              </div>
 
-            <ContestCard
-              title="跨平台插件开发大赛"
-              description="开发能够在多个平台无缝运行的插件，提供一致的用户体验。重点考察兼容性设计和适配能力。"
-              image="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-              startDate="2025-06-20"
-              endDate="2025-08-05"
-              participants={82}
-              prizes={["¥25,000", "¥12,000", "¥6,000", "¥3,000"]}
-              status="upcoming"
-            />
-          </div>
-        </TabsContent>
-
-        <TabsContent value="past" className="mt-0">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <ContestCard
-              title="智能办公插件创新赛"
-              description="开发提升办公效率的创新插件，包括文档处理、日程管理、团队协作等方向。"
-              image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-              startDate="2025-01-15"
-              endDate="2025-03-01"
-              participants={156}
-              prizes={["¥30,000", "¥15,000", "¥8,000", "¥4,000", "¥2,000"]}
-              status="ended"
-            />
-
-            <ContestCard
-              title="教育类插件开发大赛"
-              description="开发面向教育领域的创新插件，包括学习辅助、知识管理、教学工具等方向。"
-              image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1722&q=80"
-              startDate="2024-11-01"
-              endDate="2024-12-15"
-              participants={124}
-              prizes={["¥20,000", "¥10,000", "¥5,000"]}
-              status="ended"
-            />
-          </div>
-
-          <div className="mt-8">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold text-gray-900">往期获奖作品</h2>
-              <Button variant="outline">查看全部</Button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
+                <div className="w-full max-w-xs">
+                  <SubmissionCard
+                    title="智能文档助手"
+                    author={{
+                      name: "王小明",
+                      avatar:
+                        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                    }}
+                    image="https://images.unsplash.com/photo-1555421689-3f034debb7a6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                    description="自动分析文档结构，提取关键信息，生成摘要，并提供智能编辑建议。"
+                    likes={86}
+                    comments={24}
+                    ranking={1}
+                  />
+                </div>
+                <div className="w-full max-w-xs">
+                  <SubmissionCard
+                    title="多模态AI创作工具"
+                    author={{
+                      name: "李小华",
+                      avatar:
+                        "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                    }}
+                    image="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                    description="结合文本、图像和音频生成能力，一站式创作多媒体内容。"
+                    likes={72}
+                    comments={18}
+                    ranking={2}
+                  />
+                </div>
+                <div className="w-full max-w-xs">
+                  <SubmissionCard
+                    title="代码智能助手"
+                    author={{
+                      name: "张大明",
+                      avatar:
+                        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                    }}
+                    image="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                    description="实时代码分析、错误检测、性能优化建议，支持多种编程语言。"
+                    likes={65}
+                    comments={15}
+                    ranking={3}
+                  />
+                </div>
+                <div className="w-full max-w-xs">
+                  <SubmissionCard
+                    title="数据故事生成器"
+                    author={{
+                      name: "赵小红",
+                      avatar:
+                        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                    }}
+                    image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                    description="将枯燥的数据转化为引人入胜的可视化故事，自动生成洞察和解释。"
+                    likes={58}
+                    comments={12}
+                  />
+                </div>
+              </div>
             </div>
+          </TabsContent>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <SubmissionCard
-                title="智能会议助手"
-                author={{
-                  name: "陈明亮",
-                  avatar:
-                    "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
-                image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                description="自动记录会议内容，生成会议纪要，提取行动项，并进行任务分配。"
-                likes={124}
-                comments={36}
-                ranking={1}
+          <TabsContent value="upcoming" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ContestCard
+                title="插件性能优化挑战赛"
+                description="针对现有插件进行性能优化，提高运行速度、降低资源消耗。参赛者可以选择平台上的开源插件进行优化。"
+                image="https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                startDate="2025-07-01"
+                endDate="2025-08-15"
+                participants={64}
+                prizes={["¥18,000", "¥9,000", "¥4,500"]}
+                status="upcoming"
               />
 
-              <SubmissionCard
-                title="个性化学习路径生成器"
-                author={{
-                  name: "林小雨",
-                  avatar:
-                    "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                }}
+              <ContestCard
+                title="跨平台插件开发大赛"
+                description="开发能够在多个平台无缝运行的插件，提供一致的用户体验。重点考察兼容性设计和适配能力。"
+                image="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                startDate="2025-06-20"
+                endDate="2025-08-05"
+                participants={82}
+                prizes={["¥25,000", "¥12,000", "¥6,000", "¥3,000"]}
+                status="upcoming"
+              />
+            </div>
+          </TabsContent>
+
+          <TabsContent value="past" className="mt-0">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              <ContestCard
+                title="智能办公插件创新赛"
+                description="开发提升办公效率的创新插件，包括文档处理、日程管理、团队协作等方向。"
+                image="https://images.unsplash.com/photo-1497215728101-856f4ea42174?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                startDate="2025-01-15"
+                endDate="2025-03-01"
+                participants={156}
+                prizes={["¥30,000", "¥15,000", "¥8,000", "¥4,000", "¥2,000"]}
+                status="ended"
+              />
+
+              <ContestCard
+                title="教育类插件开发大赛"
+                description="开发面向教育领域的创新插件，包括学习辅助、知识管理、教学工具等方向。"
                 image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1722&q=80"
-                description="基于学习者能力和目标，自动生成个性化学习路径和资源推荐。"
-                likes={108}
-                comments={29}
-                ranking={2}
+                startDate="2024-11-01"
+                endDate="2024-12-15"
+                participants={124}
+                prizes={["¥20,000", "¥10,000", "¥5,000"]}
+                status="ended"
               />
             </div>
-          </div>
-        </TabsContent>
-      </Tabs>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+            <div className="mt-8">
+              <div className="flex justify-between items-center mb-6">
+                <h2 className="text-xl font-semibold text-gray-900">往期获奖作品</h2>
+                <Button variant="outline">查看全部</Button>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <SubmissionCard
+                  title="智能会议助手"
+                  author={{
+                    name: "陈明亮",
+                    avatar:
+                      "https://images.unsplash.com/photo-1599566150163-29194dcaad36?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                  description="自动记录会议内容，生成会议纪要，提取行动项，并进行任务分配。"
+                  likes={124}
+                  comments={36}
+                  ranking={1}
+                />
+
+                <SubmissionCard
+                  title="个性化学习路径生成器"
+                  author={{
+                    name: "林小雨",
+                    avatar:
+                      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1503676260728-1c00da094a0b?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1722&q=80"
+                  description="基于学习者能力和目标，自动生成个性化学习路径和资源推荐。"
+                  likes={108}
+                  comments={29}
+                  ranking={2}
+                />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
+      </div>
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-10 max-w-7xl mx-auto">
         <div className="flex flex-col md:flex-row items-start md:items-center gap-4">
           <div className="flex-shrink-0">
             <Trophy className="h-12 w-12 text-blue-600" />
@@ -379,7 +386,7 @@ const ContestPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="mb-8">
+      <div className="mb-10 max-w-7xl mx-auto">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">竞赛日历</h2>
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -419,7 +426,7 @@ const ContestPage: React.FC = () => {
         </div>
       </div>
 
-      <div>
+      <div className="max-w-7xl mx-auto">
         <h2 className="text-xl font-semibold text-gray-900 mb-6">常见问题</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <Card>
