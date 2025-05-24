@@ -1,17 +1,7 @@
 "use client";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
-
-interface Tab {
-  id: string;
-  label: string;
-  count?: number;
-}
-
-interface PluginDetailTabsProps {
-  tabs: Tab[];
-  children: React.ReactNode[];
-}
+import { type PluginDetailTabsProps, type Tab } from '@/types/features';
 
 export function PluginDetailTabs({ tabs, children }: PluginDetailTabsProps) {
   const [activeTab, setActiveTab] = useState(tabs[0].id);

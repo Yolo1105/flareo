@@ -1,39 +1,9 @@
 import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation, useReducedMotion } from 'framer-motion';
 import { useRouter } from 'next/router';
-
-interface PageTransitionProps {
-  children: React.ReactNode;
-  className?: string;
-  disableAnimation?: boolean;
-  transitionType?: 'fade' | 'slide' | 'scale' | 'custom';
-  customTransition?: {
-    duration?: number;
-    ease?: [number, number, number, number];
-    scale?: number;
-    blur?: number;
-  };
-  onTransitionStart?: () => void;
-  onTransitionEnd?: () => void;
-  abTest?: {
-    enabled: boolean;
-    variant: 'A' | 'B';
-    onVariantChange?: (variant: 'A' | 'B') => void;
-  };
-}
+import { type PageTransitionProps, type ABTestConfig } from '@/types/ui';
 
 // A/B 测试配置
-interface ABTestConfig {
-  variant: 'A' | 'B';
-  transitionType: 'fade' | 'slide' | 'scale' | 'custom';
-  customTransition?: {
-    duration: number;
-    ease: [number, number, number, number];
-    scale: number;
-    blur: number;
-  };
-}
-
 const abTestConfigs: Record<'A' | 'B', ABTestConfig> = {
   A: {
     variant: 'A',

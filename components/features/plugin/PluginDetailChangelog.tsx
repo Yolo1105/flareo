@@ -1,13 +1,5 @@
 import { Card } from "@/components/ui/card";
-
-interface ChangelogEntry {
-  version: string;
-  date: string;
-  changes: {
-    type: "feature" | "fix" | "improvement" | "breaking";
-    description: string;
-  }[];
-}
+import { type ChangelogEntry } from '@/types/features';
 
 interface PluginDetailChangelogProps {
   entries: ChangelogEntry[];

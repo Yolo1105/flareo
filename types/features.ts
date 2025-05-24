@@ -30,4 +30,36 @@ export interface ExplorePageProps {
 export interface PluginsPageProps {
   plugins: Plugin[];
   className?: string;
+}
+
+// Plugin Types
+export interface ChangelogEntry {
+  version: string;
+  date: string;
+  changes: {
+    type: 'feature' | 'fix' | 'improvement' | 'breaking';
+    description: string;
+  }[];
+}
+
+export interface PluginDetailTabsProps {
+  tabs: Tab[];
+  children: React.ReactNode[];
+}
+
+export interface SpecCategory {
+  title: string;
+  items: {
+    name: string;
+    value: string;
+  }[];
+}
+
+// Tab Type
+export interface Tab {
+  id: string;
+  label: string;
+  icon?: React.ComponentType;
+  disabled?: boolean;
+  count?: number;
 } 

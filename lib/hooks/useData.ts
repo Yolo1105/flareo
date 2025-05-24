@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { get } from '../api';
 import { cache } from '../cache';
+import { type UseDataResult } from '@/types/hooks';
 
 interface UseDataOptions<T> {
   url: string;
@@ -9,14 +10,6 @@ interface UseDataOptions<T> {
   onError?: (error: Error) => void;
   onSuccess?: (data: T) => void;
   prefetch?: boolean;
-}
-
-interface UseDataResult<T> {
-  data: T | undefined;
-  isLoading: boolean;
-  error: Error | null;
-  refetch: () => Promise<void>;
-  invalidateCache: () => void;
 }
 
 export function useData<T>({

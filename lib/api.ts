@@ -1,27 +1,20 @@
 import { cache } from './cache';
+import { type RequestOptions, type ApiError as ApiErrorType } from '@/types/api';
 
-interface RequestOptions extends RequestInit {
-  retries?: number;
-  retryDelay?: number;
-  cacheTime?: number;
-}
-
-interface ApiError extends Error {
-  status?: number;
-  data?: any;
+async function delay(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 class ApiError extends Error {
+  status?: number;
+  data?: any;
+
   constructor(message: string, status?: number, data?: any) {
     super(message);
     this.name = 'ApiError';
     this.status = status;
     this.data = data;
   }
-}
-
-async function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms));
 }
 
 export async function fetchWithRetry(

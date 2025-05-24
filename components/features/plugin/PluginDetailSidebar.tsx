@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { type Plugin } from '@/types/plugin';
 
 interface PricingOption {
   id: string;

@@ -1,12 +1,5 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
-
-interface VirtualScrollProps<T> {
-  items: T[];
-  height: number;
-  itemHeight: number;
-  renderItem: (item: T, index: number) => React.ReactNode;
-  className?: string;
-}
+import { type VirtualScrollProps } from '@/types/ui';
 
 export function VirtualScroll<T>({
   items,

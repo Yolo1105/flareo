@@ -1,7 +1,7 @@
 "use client";
 
 import { PluginCard } from "./PluginCard";
-import { type Plugin } from "@/lib/mock-data";
+import { type Plugin } from '@/types/plugin';
 
 interface PluginListProps {
   plugins: Plugin[];

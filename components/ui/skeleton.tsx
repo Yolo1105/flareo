@@ -1,5 +1,6 @@
 import React from 'react';
 import { cn } from "@/lib/utils"
+import { type SkeletonCardProps } from '@/types/ui';
 
 interface SkeletonProps {
   className?: string;
@@ -41,11 +42,7 @@ export const Skeleton: React.FC<SkeletonProps> = ({
   );
 };
 
-interface SkeletonCardProps {
-  className?: string;
-}
-
-export const SkeletonCard: React.FC<SkeletonCardProps> = ({ className = '' }) => {
+export function SkeletonCard({ className }: SkeletonCardProps) {
   return (
     <div className={`p-4 space-y-4 ${className}`}>
       <div className="flex items-start space-x-4">
@@ -69,4 +66,4 @@ export const SkeletonCard: React.FC<SkeletonCardProps> = ({ className = '' }) =>
       </div>
     </div>
   );
-};
+}

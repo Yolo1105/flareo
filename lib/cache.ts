@@ -1,8 +1,4 @@
-interface CacheItem<T> {
-  data: T;
-  timestamp: number;
-  expiresIn: number;
-}
+import { type CacheItem } from '@/types/cache';
 
 class Cache {
   private static instance: Cache;

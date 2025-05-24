@@ -27,4 +27,6 @@ export const NAVIGATION = {
       { name: "Contact Us", href: "/contact" },
     ],
   },
-} as const; 
+} as const;
+
+export const EXPLORE_MARKETPLACE_DESCRIPTION = "探索市场是一个开放的平台，让开发者可以分享和发现各种工具和资源。"; 

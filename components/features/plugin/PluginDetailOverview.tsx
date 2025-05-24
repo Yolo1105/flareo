@@ -1,3 +1,4 @@
+import { type Plugin } from '@/types/plugin';
 import { PluginDetailGallery } from "./PluginDetailGallery";
 
 interface PluginDetailOverviewProps {

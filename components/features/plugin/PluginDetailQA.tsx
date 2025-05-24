@@ -1,6 +1,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { MessageSquarePlus } from "lucide-react";
+import { type Plugin } from '@/types/plugin';
 
 interface Question {
   id: string;

@@ -1,5 +1,6 @@
 import { Star } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { type Plugin } from '@/types/plugin';
 
 interface Review {
   id: string;

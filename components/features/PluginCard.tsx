@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import Image from "next/image";
-import { type Plugin } from "@/lib/mock-data";
+import { type Plugin } from '@/types/plugin';
 
 interface PluginCardProps {
   plugin: Plugin;

@@ -1,12 +1,5 @@
 import { Card } from "@/components/ui/card";
-
-interface SpecCategory {
-  title: string;
-  items: {
-    name: string;
-    value: string;
-  }[];
-}
+import { type SpecCategory } from '@/types/features';
 
 interface PluginDetailSpecsProps {
   categories: SpecCategory[];
