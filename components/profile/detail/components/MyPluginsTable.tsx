@@ -60,7 +60,7 @@ export default function MyPluginsTable() {
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-semibold text-gray-900">我的插件 ({total})</h3>
         <Link
-          href="/plugins/create"
+          href="/plugin/upload"
           className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md transition-all duration-200"
         >
           创建插件
@@ -172,7 +172,7 @@ export default function MyPluginsTable() {
           <h3 className="text-lg font-medium text-gray-900 mb-2">暂无插件</h3>
           <p className="text-gray-600 mb-4">创建你的第一个插件吧！</p>
           <Link
-            href="/plugins/create"
+            href="/plugin/upload"
             className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 hover:shadow-md transition-all duration-200"
           >
             创建插件
