@@ -1,171 +1,97 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, useCallback, memo } from 'react';
 import Link from 'next/link';
 import { HeaderProps } from '@/types/layout';
 
-const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+// 将导航链接数据抽离为常量
+const NAV_LINKS = [
+  { href: '/explore', label: '探索市场' },
+  { href: '/navigator', label: '工坊' },
+  { href: '/community', label: '社区' },
+  { href: '/crowdsourcing', label: '众包' },
+  { href: '/contest', label: '竞赛' },
+];
+
+// 将样式抽离为常量
+const styles = {
+  header: 'navbar',
+  container: 'container mx-auto px-4 flex justify-between items-center',
+  brand: 'navbar-brand flex items-center text-xl no-underline',
+  brandIcon: 'ri-flashlight-line mr-2 text-xl text-indigo-500',
+  nav: 'navbar-nav hidden md:flex items-center text-sm gap-8 m-0 p-0 list-none',
+  navLink: 'nav-link no-underline py-2',
+  mobileToggle: 'mobile-nav-toggle md:hidden bg-transparent border-none text-2xl cursor-pointer',
+  signInButton: 'btn btn-outline hidden md:flex items-center text-sm px-4 py-2 border border-gray-300 rounded-md bg-transparent cursor-pointer no-underline',
+  signInIcon: 'ri-login-circle-line mr-2',
+  mobileMenu: 'absolute top-full left-0 w-full bg-white border-t border-gray-200 md:hidden z-50',
+  mobileNav: 'navbar-nav p-4 text-sm list-none m-0',
+  mobileNavItem: 'mb-2',
+  mobileNavLink: 'nav-link block py-2 no-underline',
+  mobileSignIn: 'btn btn-outline flex items-center w-full justify-center text-sm px-4 py-2 border border-gray-300 rounded-md bg-transparent cursor-pointer',
+};
+
+const Header: React.FC<HeaderProps> = memo(({ className = '' }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
+  const toggleMobileMenu = useCallback(() => {
+    setMobileMenuOpen(prev => !prev);
+  }, []);
+
+  const closeMobileMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
   return (
-    <header className={`navbar ${className}`} style={{ padding: "var(--spacing-3, 1rem) 0", minHeight: "60px" }}>
-      <div className="container mx-auto px-4 flex justify-between items-center" style={{ height: "100%" }}>
-        <div className="flex items-center" style={{ gap: "var(--spacing-6, 2rem)" }}>
-          <Link
-            href="/"
-            className="navbar-brand flex items-center"
-            style={{ fontSize: "1.25rem", textDecoration: "none" }}
-          >
-            <i
-              className="ri-flashlight-line"
-              style={{ marginRight: "var(--spacing-2, 0.5rem)", fontSize: "1.25rem", color: "#6366f1" }}
-            ></i>
+    <header className={`${styles.header} ${className}`}>
+      <div className={styles.container}>
+        <div className="flex items-center gap-8">
+          <Link href="/" className={styles.brand}>
+            <i className={styles.brandIcon}></i>
             Flareo
           </Link>
 
-          <ul
-            className="navbar-nav hidden md:flex items-center"
-            style={{ fontSize: "0.95rem", gap: "var(--spacing-6, 2rem)", margin: 0, padding: 0, listStyle: "none" }}
-          >
-            <li>
-              <Link
-                href="/explore"
-                className="nav-link"
-                style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
-              >
-                探索市场
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/navigator"
-                className="nav-link"
-                style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
-              >
-                工坊
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/community"
-                className="nav-link active"
-                style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
-              >
-                社区
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/crowdsourcing"
-                className="nav-link"
-                style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
-              >
-                众包
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="/contest"
-                className="nav-link"
-                style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
-              >
-                竞赛
-              </Link>
-            </li>
+          <ul className={styles.nav}>
+            {NAV_LINKS.map(({ href, label }) => (
+              <li key={href}>
+                <Link href={href} className={styles.navLink}>
+                  {label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
         <button
-          className="mobile-nav-toggle md:hidden"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          style={{ background: "none", border: "none", fontSize: "1.5rem", cursor: "pointer" }}
+          className={styles.mobileToggle}
+          onClick={toggleMobileMenu}
+          aria-label="Toggle mobile menu"
         >
           <i className="ri-menu-line"></i>
         </button>
 
-        <button
-          className="btn btn-outline hidden md:flex items-center"
-          style={{
-            fontSize: "0.95rem",
-            padding: "var(--spacing-2, 0.5rem) var(--spacing-4, 1rem)",
-            border: "1px solid #d1d5db",
-            borderRadius: "0.375rem",
-            background: "transparent",
-            cursor: "pointer",
-            textDecoration: "none",
-          }}
-        >
-          <i className="ri-login-circle-line" style={{ marginRight: "var(--spacing-2, 0.5rem)" }}></i>
+        <button className={styles.signInButton}>
+          <i className={styles.signInIcon}></i>
           Sign In
         </button>
 
-        {/* Mobile menu */}
         {mobileMenuOpen && (
-          <div className="absolute top-full left-0 w-full bg-white border-t border-gray-200 md:hidden z-50">
-            <ul className="navbar-nav p-4" style={{ fontSize: "0.95rem", listStyle: "none", margin: 0 }}>
-              <li className="mb-2">
-                <Link
-                  href="/explore"
-                  className="nav-link block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ textDecoration: "none" }}
-                >
-                  探索市场
-                </Link>
-              </li>
-              <li className="mb-2">
-                <Link
-                  href="/navigator"
-                  className="nav-link block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ textDecoration: "none" }}
-                >
-                  工坊
-                </Link>
-              </li>
-              <li className="mb-2">
-                <Link
-                  href="/community"
-                  className="nav-link active block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ textDecoration: "none" }}
-                >
-                  社区
-                </Link>
-              </li>
-              <li className="mb-2">
-                <Link
-                  href="/crowdsourcing"
-                  className="nav-link block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ textDecoration: "none" }}
-                >
-                  众包
-                </Link>
-              </li>
-              <li className="mb-2">
-                <Link
-                  href="/contest"
-                  className="nav-link block py-2"
-                  onClick={() => setMobileMenuOpen(false)}
-                  style={{ textDecoration: "none" }}
-                >
-                  竞赛
-                </Link>
-              </li>
+          <div className={styles.mobileMenu}>
+            <ul className={styles.mobileNav}>
+              {NAV_LINKS.map(({ href, label }) => (
+                <li key={href} className={styles.mobileNavItem}>
+                  <Link
+                    href={href}
+                    className={styles.mobileNavLink}
+                    onClick={closeMobileMenu}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
               <li className="pt-4 border-t border-gray-200">
-                <button
-                  className="btn btn-outline flex items-center w-full justify-center"
-                  style={{
-                    fontSize: "0.95rem",
-                    padding: "var(--spacing-2, 0.5rem) var(--spacing-4, 1rem)",
-                    border: "1px solid #d1d5db",
-                    borderRadius: "0.375rem",
-                    background: "transparent",
-                    cursor: "pointer",
-                  }}
-                >
-                  <i className="ri-login-circle-line" style={{ marginRight: "var(--spacing-2, 0.5rem)" }}></i>
+                <button className={styles.mobileSignIn}>
+                  <i className={styles.signInIcon}></i>
                   Sign In
                 </button>
               </li>
@@ -175,6 +101,8 @@ const Header: React.FC<HeaderProps> = ({ className = '' }) => {
       </div>
     </header>
   );
-};
+});
+
+Header.displayName = 'Header';
 
 export default Header; 
