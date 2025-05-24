@@ -1,10 +1,7 @@
-import type React from "react"
-import Header from "./Header"
-import Footer from "./Footer"
-
-interface LayoutProps {
-  children: React.ReactNode
-}
+import React from 'react';
+import { LayoutProps } from '@/types/layout';
+import Header from './Header';
+import Footer from './Footer';
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
@@ -13,7 +10,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <main className="flex-grow bg-gray-50">{children}</main>
       <Footer />
     </div>
-  )
-}
+  );
+};
 
-export default Layout
+export default Layout; 

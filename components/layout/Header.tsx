@@ -1,14 +1,14 @@
 "use client"
 
-import type React from "react"
-import Link from "next/link"
-import { useState } from "react"
+import React, { useState } from 'react';
+import Link from 'next/link';
+import { HeaderProps } from '@/types/layout';
 
-const Header: React.FC = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+const Header: React.FC<HeaderProps> = ({ className = '' }) => {
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
-    <header className="navbar" style={{ padding: "var(--spacing-3, 1rem) 0", minHeight: "60px" }}>
+    <header className={`navbar ${className}`} style={{ padding: "var(--spacing-3, 1rem) 0", minHeight: "60px" }}>
       <div className="container mx-auto px-4 flex justify-between items-center" style={{ height: "100%" }}>
         <div className="flex items-center" style={{ gap: "var(--spacing-6, 2rem)" }}>
           <Link
@@ -174,7 +174,7 @@ const Header: React.FC = () => {
         )}
       </div>
     </header>
-  )
-}
+  );
+};
 
-export default Header
+export default Header; 
