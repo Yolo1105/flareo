@@ -29,11 +29,11 @@ const Header: React.FC = () => {
           >
             <li>
               <Link
-                href="/plugins"
+                href="/explore"
                 className="nav-link"
                 style={{ textDecoration: "none", padding: "var(--spacing-2, 0.5rem) 0" }}
               >
-                探索
+                探索市场
               </Link>
             </li>
             <li>
@@ -105,12 +105,12 @@ const Header: React.FC = () => {
             <ul className="navbar-nav p-4" style={{ fontSize: "0.95rem", listStyle: "none", margin: 0 }}>
               <li className="mb-2">
                 <Link
-                  href="/plugins"
+                  href="/explore"
                   className="nav-link block py-2"
                   onClick={() => setMobileMenuOpen(false)}
                   style={{ textDecoration: "none" }}
                 >
-                  探索
+                  探索市场
                 </Link>
               </li>
               <li className="mb-2">

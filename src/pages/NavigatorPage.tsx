@@ -5,6 +5,17 @@ import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowRight, Zap, Database, FileText, ImageIcon, Code, BarChart, Share2, Clock } from "lucide-react"
 
+interface Explore {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  tags: string[];
+  rating: number;
+  downloads: number;
+}
+
 interface PluginFlowCardProps {
   title: string
   description: string

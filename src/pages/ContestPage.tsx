@@ -207,66 +207,58 @@ const ContestPage: React.FC = () => {
                 <Button variant="outline">查看全部</Button>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 justify-items-center">
-                <div className="w-full max-w-xs">
-                  <SubmissionCard
-                    title="智能文档助手"
-                    author={{
-                      name: "王小明",
-                      avatar:
-                        "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                    }}
-                    image="https://images.unsplash.com/photo-1555421689-3f034debb7a6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                    description="自动分析文档结构，提取关键信息，生成摘要，并提供智能编辑建议。"
-                    likes={86}
-                    comments={24}
-                    ranking={1}
-                  />
-                </div>
-                <div className="w-full max-w-xs">
-                  <SubmissionCard
-                    title="多模态AI创作工具"
-                    author={{
-                      name: "李小华",
-                      avatar:
-                        "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                    }}
-                    image="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                    description="结合文本、图像和音频生成能力，一站式创作多媒体内容。"
-                    likes={72}
-                    comments={18}
-                    ranking={2}
-                  />
-                </div>
-                <div className="w-full max-w-xs">
-                  <SubmissionCard
-                    title="代码智能助手"
-                    author={{
-                      name: "张大明",
-                      avatar:
-                        "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                    }}
-                    image="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                    description="实时代码分析、错误检测、性能优化建议，支持多种编程语言。"
-                    likes={65}
-                    comments={15}
-                    ranking={3}
-                  />
-                </div>
-                <div className="w-full max-w-xs">
-                  <SubmissionCard
-                    title="数据故事生成器"
-                    author={{
-                      name: "赵小红",
-                      avatar:
-                        "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
-                    }}
-                    image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
-                    description="将枯燥的数据转化为引人入胜的可视化故事，自动生成洞察和解释。"
-                    likes={58}
-                    comments={12}
-                  />
-                </div>
+              <div className="grid grid-cols-4 gap-6">
+                <SubmissionCard
+                  title="智能文档助手"
+                  author={{
+                    name: "王小明",
+                    avatar:
+                      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1555421689-3f034debb7a6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                  description="自动分析文档结构，提取关键信息，生成摘要，并提供智能编辑建议。"
+                  likes={86}
+                  comments={24}
+                  ranking={1}
+                />
+                <SubmissionCard
+                  title="多模态AI创作工具"
+                  author={{
+                    name: "李小华",
+                    avatar:
+                      "https://images.unsplash.com/photo-1550525811-e5869dd03032?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                  description="结合文本、图像和音频生成能力，一站式创作多媒体内容。"
+                  likes={72}
+                  comments={18}
+                  ranking={2}
+                />
+                <SubmissionCard
+                  title="代码智能助手"
+                  author={{
+                    name: "张大明",
+                    avatar:
+                      "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1542831371-29b0f74f9713?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                  description="实时代码分析、错误检测、性能优化建议，支持多种编程语言。"
+                  likes={65}
+                  comments={15}
+                  ranking={3}
+                />
+                <SubmissionCard
+                  title="数据故事生成器"
+                  author={{
+                    name: "赵小红",
+                    avatar:
+                      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80",
+                  }}
+                  image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1740&q=80"
+                  description="将枯燥的数据转化为引人入胜的可视化故事，自动生成洞察和解释。"
+                  likes={58}
+                  comments={12}
+                />
               </div>
             </div>
           </TabsContent>

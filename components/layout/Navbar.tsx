@@ -6,7 +6,7 @@ import { useState } from "react"
 import { usePathname } from "next/navigation"
 
 const navItems = [
-  { name: "探索", href: "/plugins" },
+  { name: "探索", href: "/explore" },
   { name: "工坊", href: "/navigator" },
   { name: "社区", href: "/community" },
   { name: "众包", href: "/crowdsourcing" },

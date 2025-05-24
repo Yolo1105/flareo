@@ -14,7 +14,7 @@ const CreatePostPage: React.FC = () => {
   const [title, setTitle] = useState("")
   const [content, setContent] = useState("")
   const [postType, setPostType] = useState("question")
-  const [relatedPlugins, setRelatedPlugins] = useState<string[]>(["数据分析助手", "CSV处理工具"])
+  const [relatedExplores, setRelatedExplores] = useState<string[]>([])
 
   const recommendedTags = ["CSV", "内存优化", "流式处理", "批量处理", "API集成", "文档处理"]
 
@@ -28,8 +28,8 @@ const CreatePostPage: React.FC = () => {
     setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove))
   }
 
-  const handleRemovePlugin = (pluginToRemove: string) => {
-    setRelatedPlugins(relatedPlugins.filter((plugin) => plugin !== pluginToRemove))
+  const handleRemoveExplore = (exploreToRemove: string) => {
+    setRelatedExplores(relatedExplores.filter((explore) => explore !== exploreToRemove))
   }
 
   const handleTagInputKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -174,12 +174,12 @@ const CreatePostPage: React.FC = () => {
         {/* Plugin Reference */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            关联插件 <span className="text-gray-500 font-normal">(可选)</span>
+            关联探索 <span className="text-gray-500 font-normal">(可选)</span>
           </label>
           <div className="relative">
             <input
               type="text"
-              placeholder="搜索插件名称..."
+              placeholder="搜索探索名称..."
               className="block w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
             />
             <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
@@ -199,16 +199,16 @@ const CreatePostPage: React.FC = () => {
             </div>
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
-            {relatedPlugins.map((plugin, index) => (
+            {relatedExplores.map((explore, index) => (
               <Badge key={index} className="bg-blue-100 text-blue-800 hover:bg-blue-200 flex items-center gap-1">
-                {plugin}
-                <button className="ml-1 text-blue-600 hover:text-blue-800" onClick={() => handleRemovePlugin(plugin)}>
+                {explore}
+                <button className="ml-1 text-blue-600 hover:text-blue-800" onClick={() => handleRemoveExplore(explore)}>
                   ×
                 </button>
               </Badge>
             ))}
           </div>
-          <p className="mt-2 text-sm text-gray-500">关联相关插件可以帮助更多用户找到您的帖子</p>
+          <p className="mt-2 text-sm text-gray-500">关联相关探索可以帮助更多用户找到您的帖子</p>
         </div>
 
         {/* Title Input */}
@@ -374,6 +374,18 @@ const CreatePostPage: React.FC = () => {
                   </Badge>
                 ))}
             </div>
+          </div>
+        </div>
+
+        {/* Related Explores */}
+        <div className="related-explores">
+          <h3 className="text-lg font-semibold mb-4">相关探索</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {relatedExplores.map((exploreId) => (
+              <div key={exploreId} className="explore-card">
+                {/* Explore card content */}
+              </div>
+            ))}
           </div>
         </div>
 

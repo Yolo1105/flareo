@@ -12,13 +12,13 @@ export const SITE_CONFIG = {
 export const NAVIGATION = {
   main: [
     { name: "Home", href: "/" },
-    { name: "Plugins", href: "/plugin" },
+    { name: "Explore", href: "/explore" },
     { name: "Deployment", href: "/deployment" },
   ],
   footer: {
     platform: [
       { name: "Home", href: "/" },
-      { name: "Plugins", href: "/plugin" },
+      { name: "Explore", href: "/explore" },
       { name: "Deployment", href: "/deployment" },
     ],
     support: [

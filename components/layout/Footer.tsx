@@ -7,7 +7,7 @@ export function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div>
             <h3 className="text-white font-semibold mb-8">Flareo</h3>
-            <p className="mb-8">前后端通用的插件分发与部署平台，连接开发者与用户的桥梁。</p>
+            <p className="mb-8">前后端通用的探索分发与部署平台，连接开发者与用户的桥梁。</p>
             <div className="flex gap-4">
               <Link href="#" className="text-neutral-400 text-xl"><i className="ri-github-fill"></i></Link>
               <Link href="#" className="text-neutral-400 text-xl"><i className="ri-twitter-fill"></i></Link>
@@ -18,7 +18,7 @@ export function Footer() {
           <div>
             <h4 className="text-white font-semibold mb-8">产品</h4>
             <ul className="list-none p-0">
-              <li className="mb-4"><Link href="#" className="text-neutral-400 no-underline">插件市场</Link></li>
+              <li className="mb-4"><Link href="#" className="text-neutral-400 no-underline">探索市场</Link></li>
               <li className="mb-4"><Link href="#" className="text-neutral-400 no-underline">部署服务</Link></li>
               <li className="mb-4"><Link href="#" className="text-neutral-400 no-underline">定制开发</Link></li>
               <li className="mb-4"><Link href="#" className="text-neutral-400 no-underline">企业方案</Link></li>

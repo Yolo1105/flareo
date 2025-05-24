@@ -220,7 +220,7 @@ const PostDetailPage: React.FC = () => {
                 <div className="mt-6 p-4 bg-blue-50 rounded-md border border-blue-200">
                   <div className="flex items-start">
                     <div className="flex-shrink-0">
-                      <img src="https://via.placeholder.com/40" alt="Plugin Icon" className="w-10 h-10 rounded-md" />
+                      <img src="https://via.placeholder.com/40" alt="Explore Icon" className="w-10 h-10 rounded-md" />
                     </div>
                     <div className="ml-3">
                       <h3 className="text-sm font-medium text-blue-800">数据分析助手</h3>
@@ -493,7 +493,7 @@ const PostDetailPage: React.FC = () => {
             <CardContent className="pt-0">
               <div className="space-y-4">
                 <div className="flex items-start space-x-3">
-                  <img src="https://via.placeholder.com/40" alt="Plugin Icon" className="w-10 h-10 rounded-md" />
+                  <img src="https://via.placeholder.com/40" alt="Explore Icon" className="w-10 h-10 rounded-md" />
                   <div className="flex-1">
                     <h3 className="font-medium text-gray-900">数据分析助手</h3>
                     <p className="text-sm text-gray-500">强大的数据处理和可视化工具</p>

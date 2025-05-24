@@ -125,6 +125,17 @@ const TopicTag: React.FC<TopicTagProps> = ({ name, count }) => {
   )
 }
 
+interface Explore {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  category: string;
+  tags: string[];
+  rating: number;
+  downloads: number;
+}
+
 interface PluginCardProps {
   name: string
   description: string
@@ -522,7 +533,7 @@ const CommunityHomePage: React.FC = () => {
             <CardContent className="pt-0">
               <div className="space-y-1">
                 {displayedPlugins.map((plugin, index) => (
-                  <Link key={index} href={`/plugins/${plugin.name.replace(/\s+/g, "-").toLowerCase()}`}>
+                  <Link key={index} href={`/explore/${plugin.name.replace(/\s+/g, "-").toLowerCase()}`}>
                     <PluginCard
                       name={plugin.name}
                       description={plugin.description}

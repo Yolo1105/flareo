@@ -105,7 +105,7 @@ export default function UserProfile() {
         </header>
 
         <div className="module-body">
-          <ul className="plugin-list">
+          <ul className="explore-list">
             {[
               {
                 id: 1,
@@ -132,17 +132,17 @@ export default function UserProfile() {
                 price: "¥299/年",
               },
             ].map((plugin) => (
-              <li key={plugin.id} className="plugin-item">
+              <li key={plugin.id} className="explore-item">
                 <Image
                   src={plugin.img}
                   alt={plugin.title}
-                  className="plugin-item-image"
+                  className="explore-item-image"
                   width={60}
                   height={60}
                 />
-                <div className="plugin-item-info">
-                  <h3 className="plugin-item-title">{plugin.title}</h3>
-                  <div className="plugin-item-meta">
+                <div className="explore-item-info">
+                  <h3 className="explore-item-title">{plugin.title}</h3>
+                  <div className="explore-item-meta">
                     <span>
                       <i className="ri-download-line" /> {plugin.installs}{" "}
                       部署
@@ -154,7 +154,7 @@ export default function UserProfile() {
                       <i className="ri-price-tag-3-line" /> {plugin.price}
                     </span>
                   </div>
-                  <div className="plugin-item-actions">
+                  <div className="explore-item-actions">
                     <Link href="#" className="btn btn-sm btn-outline">
                       编辑
                     </Link>

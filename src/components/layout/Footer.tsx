@@ -73,13 +73,13 @@ const Footer: React.FC = () => {
             <h3 className="text-sm font-semibold text-gray-900 tracking-wider uppercase">联系我们</h3>
             <ul className="mt-4 space-y-4">
               <li>
-                <a href="mailto:support@pluginplatform.com" className="text-base text-gray-500 hover:text-gray-900">
-                  support@pluginplatform.com
+                <a href="mailto:support@flareo.com" className="text-base text-gray-500 hover:text-gray-900">
+                  support@flareo.com
                 </a>
               </li>
               <li>
                 <a
-                  href="https://github.com/pluginplatform"
+                  href="https://github.com/flareo"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base text-gray-500 hover:text-gray-900"
@@ -89,7 +89,7 @@ const Footer: React.FC = () => {
               </li>
               <li>
                 <a
-                  href="https://twitter.com/pluginplatform"
+                  href="https://twitter.com/flareo"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-base text-gray-500 hover:text-gray-900"
@@ -104,7 +104,7 @@ const Footer: React.FC = () => {
         <div className="mt-8 border-t border-gray-200 pt-8 md:flex md:items-center md:justify-between">
           <div className="flex space-x-6 md:order-2">
             <a
-              href="https://github.com/pluginplatform"
+              href="https://github.com/flareo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-gray-500"
@@ -119,7 +119,7 @@ const Footer: React.FC = () => {
               </svg>
             </a>
             <a
-              href="https://twitter.com/pluginplatform"
+              href="https://twitter.com/flareo"
               target="_blank"
               rel="noopener noreferrer"
               className="text-gray-400 hover:text-gray-500"
@@ -131,7 +131,7 @@ const Footer: React.FC = () => {
             </a>
           </div>
           <p className="mt-8 text-base text-gray-400 md:mt-0 md:order-1">
-            &copy; 2025 Plugin Platform. All rights reserved.
+            &copy; 2025 Flareo. All rights reserved.
           </p>
         </div>
       </div>
