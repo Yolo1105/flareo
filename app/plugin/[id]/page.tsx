@@ -1,88 +1,78 @@
 import Image from "next/image"
 import Link from "next/link"
-import Navbar from "@/components/navbar"
-import Footer from "@/components/footer"
 
 export default function PluginDetail() {
   return (
-    <>
-      <Navbar />
-      <main className="container" style={{ paddingTop: "var(--spacing-6)", paddingBottom: "var(--spacing-6)" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "var(--spacing-6)" }}>
-          <div>
-            {/* 插件头部信息 */}
-            <section className="plugin-header">
-              <Image
-                src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80"
-                alt="API 网关"
-                className="plugin-image"
-                width={120}
-                height={120}
-              />
+    <main className="container" style={{ paddingTop: "var(--spacing-6)", paddingBottom: "var(--spacing-6)" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "var(--spacing-6)" }}>
+        <div>
+          {/* 插件头部信息 */}
+          <section className="plugin-header">
+            <Image
+              src="https://images.unsplash.com/photo-1551434678-e076c223a692?ixlib=rb-1.2.1&auto=format&fit=crop&w=2850&q=80"
+              alt="API 网关"
+              className="plugin-image"
+              width={120}
+              height={120}
+            />
 
-              <div className="plugin-info">
-                <h1 className="plugin-title">API 网关</h1>
+            <div className="plugin-info">
+              <h1 className="plugin-title">API 网关</h1>
 
-                <div className="plugin-meta">
-                  <div className="plugin-meta-item">
-                    <i className="ri-user-line plugin-meta-icon"></i>由{" "}
-                    <Link
-                      href="#"
-                      style={{ color: "var(--primary-color)", textDecoration: "none", marginLeft: "var(--spacing-1)" }}
-                    >
-                      CloudNative
-                    </Link>{" "}
-                    开发
-                  </div>
-                  <div className="plugin-meta-item">
-                    <i className="ri-calendar-line plugin-meta-icon"></i>
-                    最近更新: 2025-04-15
-                  </div>
-                  <div className="plugin-meta-item">
-                    <i className="ri-download-line plugin-meta-icon"></i>
-                    3.5k 部署
-                  </div>
-                  <div className="plugin-meta-item">
-                    <div className="rating">
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-fill"></i>
-                      <i className="ri-star-line"></i>
-                      <span>4.0 (125 评价)</span>
-                    </div>
-                  </div>
+              <div className="plugin-meta">
+                <div className="plugin-meta-item">
+                  <i className="ri-user-line plugin-meta-icon"></i>由{" "}
+                  <Link
+                    href="#"
+                    style={{ color: "var(--primary-color)", textDecoration: "none", marginLeft: "var(--spacing-1)" }}
+                  >
+                    CloudNative
+                  </Link>{" "}
+                  开发
                 </div>
-
-                <div className="plugin-tags">
-                  <div className="tag">API</div>
-                  <div className="tag">网关</div>
-                  <div className="tag">微服务</div>
-                  <div className="tag">后端</div>
-                  <div className="tag">云原生</div>
+                <div className="plugin-meta-item">
+                  <i className="ri-calendar-line plugin-meta-icon"></i>
+                  最近更新: 2025-04-15
                 </div>
-
-                <div className="plugin-actions">
-                  <button className="btn btn-primary">
-                    <i className="ri-download-cloud-line"></i>
-                    立即部署
-                  </button>
-                  <button className="btn btn-outline">
-                    <i className="ri-heart-line"></i>
-                    收藏
-                  </button>
-                  <button className="btn btn-outline">
-                    <i className="ri-share-line"></i>
-                    分享
-                  </button>
+                <div className="plugin-meta-item">
+                  <i className="ri-download-line plugin-meta-icon"></i>
+                  3.5k 部署
+                </div>
+                <div className="plugin-meta-item">
+                  <div className="rating">
+                    <i className="ri-star-fill"></i>
+                    <i className="ri-star-fill"></i>
+                    <i className="ri-star-fill"></i>
+                    <i className="ri-star-fill"></i>
+                    <i className="ri-star-line"></i>
+                    <span>4.0 (125 评价)</span>
+                  </div>
                 </div>
               </div>
 
-              <div className="plugin-price">
-                <div className="price-value">免费</div>
-                <div className="price-type">开源项目</div>
+              <div className="plugin-tags">
+                <div className="tag">API</div>
+                <div className="tag">网关</div>
+                <div className="tag">微服务</div>
+                <div className="tag">后端</div>
+                <div className="tag">云原生</div>
               </div>
-            </section>
+
+              <div className="plugin-actions">
+                <button className="btn btn-primary">
+                  <i className="ri-download-cloud-line"></i>
+                  立即部署
+                </button>
+                <button className="btn btn-outline">
+                  <i className="ri-heart-line"></i>
+                  收藏
+                </button>
+                <button className="btn btn-outline">
+                  <i className="ri-share-line"></i>
+                  分享
+                </button>
+              </div>
+            </div>
 
             {/* 内容标签页 */}
             <div className="content-tabs">
@@ -481,8 +471,7 @@ export default function PluginDetail() {
             </div>
           </div>
         </div>
-      </main>
-      <Footer />
-    </>
+      </div>
+    </main>
   )
 }
