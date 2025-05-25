@@ -39,7 +39,7 @@ const Header: React.FC = () => {
             style={{ fontSize: "0.95rem", gap: "var(--spacing-6, 2rem)", margin: 0, padding: 0, listStyle: "none" }}
           >
             {navItems.map((item) => {
-              const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+              const isActive = pathname && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)))
               return (
                 <li key={item.href}>
                   <Link
@@ -94,7 +94,7 @@ const Header: React.FC = () => {
           <div className="absolute top-full left-0 w-full bg-white border-t border-gray-200 md:hidden z-50">
             <ul className="navbar-nav p-4" style={{ fontSize: "0.95rem", listStyle: "none", margin: 0 }}>
               {navItems.map((item) => {
-                const isActive = pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href))
+                const isActive = pathname && (pathname === item.href || (item.href !== "/" && pathname.startsWith(item.href)))
                 return (
                   <li className="mb-2" key={item.href}>
                     <Link
