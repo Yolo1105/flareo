@@ -1,5 +1,5 @@
 import { Suspense } from "react"
-import CommunityHomePage from "@/src/pages/CommunityHomePage"
+import CommunityHomePage from "@/app/community/page"
 
 interface TagPageProps {
   params: {
