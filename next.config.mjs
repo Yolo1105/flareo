@@ -7,7 +7,10 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
   images: {
-    unoptimized: true,
+    domains: [
+      "images.unsplash.com",
+      "randomuser.me"
+    ],
   },
 }
 
