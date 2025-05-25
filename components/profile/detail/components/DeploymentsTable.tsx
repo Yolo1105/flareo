@@ -1,6 +1,7 @@
 "use client"
 import useSWR from "swr"
 import { Server, AlertCircle, CheckCircle, XCircle } from "lucide-react"
+import Link from "next/link"
 
 const fetcher = (url: string) => fetch(url).then((res) => res.json())
 
@@ -65,9 +66,11 @@ export default function DeploymentsTable() {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold text-gray-900">部署管理</h3>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-          新建部署
-        </button>
+        <Link href="/plugin/deploy">
+          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+            新建部署
+          </button>
+        </Link>
       </div>
 
       {deployments.length > 0 ? (
@@ -150,9 +153,11 @@ export default function DeploymentsTable() {
           <Server className="w-12 h-12 mx-auto mb-4 text-gray-300" />
           <h3 className="text-lg font-medium text-gray-900 mb-2">暂无部署</h3>
           <p className="text-gray-600 mb-4">部署你的第一个插件实例！</p>
-          <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
-            浏览插件市场
-          </button>
+          <Link href="/plugin/deploy">
+            <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200">
+              新建部署
+            </button>
+          </Link>
         </div>
       )}
     </div>
