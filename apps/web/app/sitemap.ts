@@ -1,6 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/db/prisma";
-import { appBaseUrl } from "@/lib/config/env";
+import { appBaseUrl, hasDatabaseUrl } from "@/lib/config/env";
 
 /**
  * /sitemap.xml — listing all publicly crawlable URLs.
@@ -44,21 +44,23 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Every public module gets its detail page in the sitemap with its
   // real lastRebuiltAt so search engines know when it actually changed.
   let modulePages: MetadataRoute.Sitemap = [];
-  try {
-    const modules = (await prisma.module.findMany({
-      where: { visibility: "public" },
-      select: { slug: true, lastRebuiltAt: true },
-    })) as Array<{ slug: string; lastRebuiltAt: Date | null }>;
+  if (hasDatabaseUrl()) {
+    try {
+      const modules = (await prisma.module.findMany({
+        where: { visibility: "public" },
+        select: { slug: true, lastRebuiltAt: true },
+      })) as Array<{ slug: string; lastRebuiltAt: Date | null }>;
 
-    modulePages = modules.map((m) => ({
-      url: `${base}/modules/${m.slug}`,
-      lastModified: m.lastRebuiltAt ?? now,
-      priority: 0.8,
-      changeFrequency: "daily" as const,
-    }));
-  } catch {
-    // If the DB is unreachable, return a partial sitemap rather than
-    // erroring out. Better to list static pages than to 500 the crawler.
+      modulePages = modules.map((m) => ({
+        url: `${base}/modules/${m.slug}`,
+        lastModified: m.lastRebuiltAt ?? now,
+        priority: 0.8,
+        changeFrequency: "daily" as const,
+      }));
+    } catch {
+      // If the DB is unreachable, return a partial sitemap rather than
+      // erroring out. Better to list static pages than to 500 the crawler.
+    }
   }
 
   return [...staticPages, ...modulePages];

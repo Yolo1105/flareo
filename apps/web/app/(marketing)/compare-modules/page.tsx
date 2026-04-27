@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import { shapeToModule, type ModuleShape } from "@/lib/db/queries";
 import { getAggregatesForSlugs, type ReviewAggregate } from "@/lib/db/reviews";
@@ -97,6 +98,7 @@ export default async function CompareModulesPage({
 // ─── data helpers ─────────────────────────────────────────────────
 
 async function safeListAllModules(): Promise<Module[]> {
+  if (!hasDatabaseUrl()) return [];
   try {
     const rows = (await prisma.module.findMany({
       where: { visibility: "public" } as never,

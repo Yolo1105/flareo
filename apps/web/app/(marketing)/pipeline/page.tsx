@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth/config";
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import { shapeToModule, type ModuleShape } from "@/lib/db/queries";
 import type { Module } from "@/lib/types";
@@ -158,6 +159,7 @@ export default async function PipelinePage({
 }
 
 async function safeListModules(): Promise<Module[]> {
+  if (!hasDatabaseUrl()) return [];
   try {
     const rows = (await prisma.module.findMany({
       where: { visibility: "public" } as never,

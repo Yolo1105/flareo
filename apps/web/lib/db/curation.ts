@@ -13,14 +13,11 @@
  * touching callers.
  */
 
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import type { Module } from "@/lib/types";
 import { shapeToModule, moduleExistsBySlug } from "./queries";
 import type { ModuleShape } from "./queries";
-
-function hasDatabaseUrl(): boolean {
-  return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.length > 0);
-}
 
 // ─── Featured ────────────────────────────────────────────────────
 

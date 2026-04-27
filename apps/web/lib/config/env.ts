@@ -1,4 +1,16 @@
 /**
+ * True when `DATABASE_URL` is set so Prisma can open a connection.
+ *
+ * During Vercel builds the database secret is often absent; callers must
+ * skip Prisma entirely rather than try/catch — Prisma still logs errors
+ * to stderr before throwing.
+ */
+export function hasDatabaseUrl(): boolean {
+  const u = process.env.DATABASE_URL;
+  return Boolean(u && String(u).trim().length > 0);
+}
+
+/**
  * Environment-derived configuration with fail-fast semantics.
  *
  * Keeps env access in one place so a typo in a var name surfaces as

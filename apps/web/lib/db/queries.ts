@@ -9,6 +9,7 @@
  */
 
 import crypto from "node:crypto";
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "./prisma";
 import type {
   ApiKey,
@@ -317,6 +318,7 @@ export async function listMyModules(userId: string): Promise<Module[]> {
 }
 
 export async function getModuleBySlug(slug: string): Promise<Module | null> {
+  if (!hasDatabaseUrl()) return null;
   const row = (await prisma.module.findUnique({
     where: { slug },
     include: {
@@ -343,6 +345,7 @@ export async function getModuleBySlug(slug: string): Promise<Module | null> {
 export async function moduleExistsBySlug(
   slug: string,
 ): Promise<{ slug: string; visibility: string } | null> {
+  if (!hasDatabaseUrl()) return null;
   const row = (await prisma.module.findUnique({
     where: { slug } as never,
     select: { slug: true, visibility: true } as never,

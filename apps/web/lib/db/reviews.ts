@@ -12,11 +12,8 @@
  *     hiddenById + hiddenAt when flipping to "hidden".
  */
 
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
-
-function hasDatabaseUrl(): boolean {
-  return Boolean(process.env.DATABASE_URL && process.env.DATABASE_URL.length > 0);
-}
 
 export type ModerationState = "visible" | "flagged" | "hidden";
 
@@ -40,6 +37,10 @@ export interface ReviewAggregate {
   average: number | null; // null when count === 0
   /** Counts per star bucket, visible reviews only. 1..5 array. */
   histogram: [number, number, number, number, number];
+}
+
+function emptyReviewAggregate(): ReviewAggregate {
+  return { count: 0, average: null, histogram: [0, 0, 0, 0, 0] };
 }
 
 interface DbRow {
@@ -85,6 +86,7 @@ export async function listReviewsForModule(
   slug: string,
   opts: { includeHidden?: boolean; limit?: number } = {},
 ): Promise<ReviewRow[]> {
+  if (!hasDatabaseUrl()) return [];
   const where = opts.includeHidden
     ? { moduleSlug: slug }
     : { moduleSlug: slug, moderation: { not: "hidden" } };
@@ -108,6 +110,7 @@ export async function listReviewsForModule(
 export async function getReviewAggregate(
   slug: string,
 ): Promise<ReviewAggregate> {
+  if (!hasDatabaseUrl()) return emptyReviewAggregate();
   const rows = (await prisma.moduleReview.findMany({
     where: {
       moduleSlug: slug,
@@ -117,7 +120,7 @@ export async function getReviewAggregate(
   })) as Array<{ rating: number }>;
 
   if (rows.length === 0) {
-    return { count: 0, average: null, histogram: [0, 0, 0, 0, 0] };
+    return emptyReviewAggregate();
   }
 
   const hist: [number, number, number, number, number] = [0, 0, 0, 0, 0];
@@ -142,6 +145,9 @@ export async function getAggregatesForSlugs(
   slugs: string[],
 ): Promise<Map<string, ReviewAggregate>> {
   if (slugs.length === 0) return new Map();
+  if (!hasDatabaseUrl()) {
+    return new Map(slugs.map((s) => [s, emptyReviewAggregate()]));
+  }
   const rows = (await prisma.moduleReview.findMany({
     where: {
       moduleSlug: { in: slugs },
@@ -161,7 +167,7 @@ export async function getAggregatesForSlugs(
   for (const slug of slugs) {
     const ratings = groups.get(slug) ?? [];
     if (ratings.length === 0) {
-      result.set(slug, { count: 0, average: null, histogram: [0, 0, 0, 0, 0] });
+      result.set(slug, emptyReviewAggregate());
       continue;
     }
     const hist: [number, number, number, number, number] = [0, 0, 0, 0, 0];
@@ -350,6 +356,7 @@ export async function getMyReview(
   slug: string,
   userId: string,
 ): Promise<ReviewRow | null> {
+  if (!hasDatabaseUrl()) return null;
   const row = (await prisma.moduleReview.findUnique({
     where: {
       moduleSlug_authorId: {

@@ -16,6 +16,7 @@
  * Postgres → SQLite swap in the test harness stays painless.
  */
 
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 
 export type RebuildOutcome =
@@ -66,6 +67,7 @@ export async function listRecentRebuildsForModule(
   slug: string,
   limit: number = 10,
 ): Promise<RebuildAttempt[]> {
+  if (!hasDatabaseUrl()) return [];
   const rows = (await prisma.moduleRebuild.findMany({
     where: { moduleSlug: slug } as never,
     orderBy: { attemptedAt: "desc" } as never,

@@ -5,6 +5,7 @@ import type {
   TrendingStripItem,
 } from "@/components/sections/catalog/CatalogExplorer";
 import type { Metadata } from "next";
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import { shapeToModule } from "@/lib/db/queries";
 import type { ModuleShape } from "@/lib/db/queries";
@@ -36,24 +37,26 @@ export default async function CatalogPage() {
   let featured: FeaturedStripItem[] = [];
   let trending: TrendingStripItem[] = [];
 
-  try {
-    // Main grid: ALL public modules, any verification status. The
-    // client-side filter bar narrows by category/query/sort.
-    const rows = (await prisma.module.findMany({
-      where: { visibility: "public" } as never,
-      include: {
-        publisher: { select: { username: true } },
-      } as never,
-    })) as Array<
-      ModuleShape & { publisher?: { username: string | null } | null }
-    >;
-    modules = rows.map((r) => ({
-      ...shapeToModule(r),
-      publisherUsername: r.publisher?.username ?? null,
-    }));
-  } catch {
-    // DB unreachable → CatalogExplorer falls back to the MODULES
-    // fixture so the page still renders something useful.
+  if (hasDatabaseUrl()) {
+    try {
+      // Main grid: ALL public modules, any verification status. The
+      // client-side filter bar narrows by category/query/sort.
+      const rows = (await prisma.module.findMany({
+        where: { visibility: "public" } as never,
+        include: {
+          publisher: { select: { username: true } },
+        } as never,
+      })) as Array<
+        ModuleShape & { publisher?: { username: string | null } | null }
+      >;
+      modules = rows.map((r) => ({
+        ...shapeToModule(r),
+        publisherUsername: r.publisher?.username ?? null,
+      }));
+    } catch {
+      // DB unreachable → CatalogExplorer falls back to the MODULES
+      // fixture so the page still renders something useful.
+    }
   }
 
   try {

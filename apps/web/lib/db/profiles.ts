@@ -6,6 +6,7 @@
  * tombstone.
  */
 
+import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import type { Module } from "@/lib/types";
 import { shapeToModule } from "./queries";
@@ -43,6 +44,7 @@ interface ProfileRow {
 export async function getPublicProfile(
   usernameRaw: string,
 ): Promise<{ profile: PublicProfile; userId: string } | null> {
+  if (!hasDatabaseUrl()) return null;
   const username = usernameRaw.trim().toLowerCase();
   if (!username) return null;
 
@@ -108,6 +110,7 @@ export async function getPublicProfile(
 export async function getPublicModulesForUser(
   userId: string,
 ): Promise<Module[]> {
+  if (!hasDatabaseUrl()) return [];
   const rows = (await prisma.module.findMany({
     where: {
       publisherId: userId,
@@ -136,6 +139,7 @@ export async function getReviewsByUser(
   userId: string,
   limit = 20,
 ): Promise<ProfileReview[]> {
+  if (!hasDatabaseUrl()) return [];
   const rows = (await prisma.moduleReview.findMany({
     where: {
       authorId: userId,
