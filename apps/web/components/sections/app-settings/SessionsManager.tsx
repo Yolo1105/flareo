@@ -103,13 +103,12 @@ export function SessionsManager() {
 
   if (rows.length === 0) {
     return (
-      <div className="border border-hairline bg-canvas-deep p-5 font-body text-[13px] text-ink-softer">
-        No active sessions. That shouldn&apos;t be possible — you&apos;re
-        reading this — so it&apos;s probably a bug. Email{" "}
-        <a href="mailto:hello@flareo.dev" className="text-accent underline">
-          hello@flareo.dev
-        </a>
-        .
+      <div className="border border-hairline bg-canvas-deep p-5 font-body text-[13px] leading-[1.55] text-ink-softer">
+        Per-device sessions aren&apos;t listed for this account (auth uses a
+        signed browser session). To end access on this device, use{" "}
+        <strong className="text-ink">Sign out</strong> from the app menu. To
+        rotate credentials after a suspected compromise, change your GitHub or
+        email provider password and sign out here.
       </div>
     );
   }

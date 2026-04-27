@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth/config";
+import NextAuth from "next-auth";
+import { authConfig } from "@/lib/auth/auth.config";
+import { authSecret } from "@/lib/config/env";
+
+/**
+ * Edge-only auth: must not import `@/lib/auth/config` (Prisma adapter +
+ * Prisma client exceed Vercel Hobby’s 1 MB Edge middleware limit).
+ */
+const { auth } = NextAuth({
+  ...authConfig,
+  secret: authSecret(),
+});
 
 /**
  * Middleware guard for /app/*.
