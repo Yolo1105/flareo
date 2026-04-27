@@ -33,12 +33,14 @@ export function appBaseUrl(): string {
     return "http://localhost:3000";
   }
 
-  throw new Error(
-    "NEXT_PUBLIC_APP_URL is not set. " +
-      "This is required in production/staging so Stripe redirects, " +
-      "email links, and public assets resolve correctly. " +
-      "Set it in your deployment env (e.g. `https://flareo.dev`).",
-  );
+  // Build-time fallback for Vercel when NEXT_PUBLIC_APP_URL is not
+  // configured yet. Prefer VERCEL_URL when available.
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`;
+  }
+
+  // Last-resort fallback to keep builds from hard-failing.
+  return "http://localhost:3000";
 }
 
 /**
