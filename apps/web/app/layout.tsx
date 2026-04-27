@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo_Black, Space_Grotesk, JetBrains_Mono } from "next/font/google";
+import { appBaseUrl } from "@/lib/config/env";
 import { auth } from "@/lib/auth/config";
 import { SessionRoot } from "@/components/providers/SessionRoot";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
@@ -32,6 +33,7 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(appBaseUrl()),
   title: {
     default: "Flareo · Container supply chain",
     template: "%s · Flareo",

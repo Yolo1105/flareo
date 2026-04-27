@@ -55,6 +55,25 @@ const securityHeaders = [
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  webpack: (webpackConfig) => {
+    // Sentry pulls @opentelemetry/instrumentation, which uses dynamic
+    // `require()` — webpack flags "Critical dependency" even though it
+    // runs fine on Node. Prisma's wasm edge chunk triggers an Edge
+    // static-analysis note when auth is reachable from middleware; the
+    // deployed middleware works today. Suppress only these known-safe
+    // warnings so Vercel logs stay signal-heavy.
+    webpackConfig.ignoreWarnings = [
+      ...(Array.isArray(webpackConfig.ignoreWarnings)
+        ? webpackConfig.ignoreWarnings
+        : []),
+      { message: /the request of a dependency is an expression/ },
+      {
+        message:
+          /A Node\.js API is used .* which is not supported in the Edge Runtime/,
+      },
+    ];
+    return webpackConfig;
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
