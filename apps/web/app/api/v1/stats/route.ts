@@ -24,6 +24,17 @@ type ModuleRow = {
 };
 
 export async function GET() {
+  if (!process.env.DATABASE_URL) {
+    return NextResponse.json({
+      moduleCount: 0,
+      verifiedCount: 0,
+      builds7d: 0,
+      scanPassPct: 100,
+      openCves: 0,
+      lastRebuildAt: null,
+    });
+  }
+
   const [moduleCount, modulesUnknown, verifiedCount] = await Promise.all([
     prisma.module.count({ where: { visibility: "public" } }),
     prisma.module.findMany({

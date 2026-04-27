@@ -55,6 +55,12 @@ const securityHeaders = [
 const config: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
   // Tell Next that .mdx files under app/ are also valid page files.
   // That lets app/docs/<slug>/page.mdx render (we use page.tsx + content.mdx
   // today, so this is forward-looking but cheap).

@@ -6,7 +6,7 @@ import {
   REPORT_CATEGORIES,
   REPORT_CATEGORY_LABELS,
   type ReportCategory,
-} from "@/lib/db/reports";
+} from "@/lib/reports/constants";
 
 interface Props {
   module: Module;
