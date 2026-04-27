@@ -34,7 +34,7 @@ The output is a regular OCI image — same signing, scanning, SBOM, and SLSA pip
 CNB constraints worth knowing:
 
 - **Buildpack builds run with network enabled** (this is the only worker path that does, and it's gated to the buildpack's curated dep-resolution traffic only). Your dependencies pull through the buildpack's package-mirror, not arbitrary URLs.
-- **Slower than a Dockerfile** — typical CNB build is 2-5 minutes; a tight Dockerfile is often <1 minute.
+- **Slower than a Dockerfile** — typical CNB build is 2-5 minutes; a tight Dockerfile is often under one minute.
 - **Less control** — you can't pre-compile binaries, customize entry points beyond what the buildpack supports, or add system packages. For those cases, write a Dockerfile.
 
 Mixing CNB and Dockerfile in one submission isn't supported. If both are present, the Dockerfile wins.
