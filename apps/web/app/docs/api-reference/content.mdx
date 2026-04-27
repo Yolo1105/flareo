@@ -1,0 +1,253 @@
+# API reference
+
+The Flareo v1 API is REST-ish, accepts and returns JSON, and requires no authentication for read endpoints. The CLI consumes the same API documented here. Full OpenAPI 3.1 spec lives at [flareo.dev/openapi.json](https://flareo.dev/openapi.json).
+
+## Base URL
+
+```
+https://flareo.dev
+```
+
+All endpoints are under `/api/v1/`.
+
+## Authentication
+
+Two accepted forms:
+
+- **Session cookie** from the web app (`NextAuth` session). Used by the in-browser tools.
+- **API key** as a Bearer token: `Authorization: Bearer fla_<hex>`. Used by the CLI and scripts.
+
+Obtain an API key by running `flareo login` (see [CLI reference](/docs/cli-reference)) or via the in-app settings page at `/app/settings/api-keys`.
+
+Unauthenticated requests are allowed on all read endpoints with stricter rate limits.
+
+## Rate limits
+
+Every response includes `X-RateLimit-Limit` and `X-RateLimit-Remaining`. Buckets:
+
+| Endpoint              | Unauthenticated      | Authenticated         |
+|-----------------------|----------------------|-----------------------|
+| `/api/v1/verify`      | 60/hour/IP           | 600/hour/user         |
+| `/api/v1/modules`     | 300/hour (either)    | 300/hour (either)     |
+| `/api/v1/whoami`      | 120/hour/IP          | 120/hour/user         |
+
+Exceeded limits return 429 with `Retry-After` in seconds.
+
+## Endpoints
+
+### POST /api/v1/verify
+
+Resolves an image reference to a digest and checks for a Sigstore signature. See [verify](/docs/verify) for the semantics.
+
+**Request:**
+```json
+{ "imageRef": "public.ecr.aws/flareo/vaultwarden:latest" }
+```
+
+**Response (200):**
+```json
+{
+  "status": "verified",
+  "imageRef": "public.ecr.aws/flareo/vaultwarden:latest",
+  "resolvedDigest": "sha256:abc...",
+  "signerIdentity": "https://github.com/flareo/flareo-canary/...",
+  "signerIssuer": "https://token.actions.githubusercontent.com",
+  "rekorLogIndex": "12345678",
+  "rekorUrl": "https://search.sigstore.dev/?logIndex=12345678",
+  "integratedAt": "2026-04-23T00:14:00Z",
+  "flareoModule": {
+    "slug": "vaultwarden",
+    "name": "Vaultwarden",
+    "version": "1.30.3",
+    "trust": 94,
+    "cves": { "critical": 0, "high": 0, "medium": 2, "low": 5 },
+    "sbomUrl": "https://...",
+    "scanUrl": "https://..."
+  },
+  "errorMessage": null
+}
+```
+
+`status` is one of `verified`, `signed`, `unsigned`, `invalid`, `error`.
+
+### GET /api/v1/modules
+
+List modules. Pagination is cursor-based.
+
+**Query parameters:**
+- `q` (optional) — text search across slug, name, description, tags
+- `category` (optional) — filter by category
+- `limit` (optional, default 50, max 100)
+- `cursor` (optional) — slug of the last item from prior page
+
+**Response (200):**
+```json
+{
+  "modules": [ { "slug": "vaultwarden", ... } ],
+  "nextCursor": "uptime-kuma"
+}
+```
+
+### GET /api/v1/modules/`{slug}`
+
+Full detail for one module.
+
+**Response (200):** module with full fields including `trustBreakdown`, `sbomUrl`, `scanUrl`, `rekorIndex`, `signerIdentity`.
+
+**404** if slug not found or visibility is private.
+
+### GET /api/v1/modules/by-digest/`{digest}`
+
+Reverse lookup. Used by the CLI to enrich Sigstore output when the digest is a Flareo module.
+
+**Path parameter:** `digest` in `sha256:<hex>` form (URL-encode the colon as `%3A` or pass the raw colon; both work).
+
+**Response (200):** module summary.
+
+**404** if the digest isn't in the catalog.
+
+### GET /api/v1/modules/`{slug}`/vex
+
+OpenVEX 0.2.0 document for the module. Lists per-CVE annotations made by the reviewer team — `not_affected`, `affected`, `fixed`, `under_investigation` — with public impact statements.
+
+Trivy, Grype, and Snyk all consume this format directly. Pointing your scanner at this URL while scanning a Flareo module will suppress findings the reviewer team has marked non-exploitable, leaving you with the residual real risk.
+
+**Response (200):** OpenVEX 0.2.0 JSON. `Cache-Control: public, max-age=300`. ETag invalidates when statements change.
+
+**403** for private modules; **404** for unknown slugs.
+
+### GET /api/v1/modules/`{slug}`/policy
+
+Catalog admission-policy verdict for the module. The active policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, SLSA level, composite trust score) is evaluated against the module; this endpoint returns the cached verdict plus the per-rule breakdown plus the input snapshot the evaluator saw.
+
+If no cached verdict exists yet (newly-published module), the endpoint evaluates inline and persists before returning.
+
+**Response (200):**
+```json
+{
+  "moduleSlug": "vaultwarden",
+  "verdict": "pass",
+  "policyRevision": 7,
+  "evaluatedAt": "2026-04-25T14:32:00Z",
+  "summary": "Pass. 9 rules evaluated; all clear.",
+  "results": [
+    {
+      "rule": { "kind": "threshold", "signal": "cve_critical_after_vex", "op": "<=", "value": 0, "severity": "fail", "rationale": "..." },
+      "status": "pass"
+    }
+    // ...
+  ],
+  "input": {
+    "cve_critical": 0,
+    "cve_high": 1,
+    "cve_critical_after_vex": 0,
+    "cve_high_after_vex": 1,
+    "slsa_level": 2,
+    "trust_score": 88,
+    "signature": true,
+    "sbom": true,
+    "rekor_entry": true,
+    "slsa_attestation": true
+  }
+}
+```
+
+`Cache-Control: public, max-age=300`. ETag invalidates on policy revision change or verdict re-evaluation. Consumers can chain this into Kyverno admission via the `apiCall` context — see [admission policies](/docs/admission#querying-flareos-own-admission-verdict).
+
+**403** for private modules; **404** for unknown slugs.
+
+### GET /api/v1/modules/`{slug}`/takeaway
+
+Single canonical pointer for "everything you need to verify and run this module." Returns the pinned-by-digest image ref, the verify command (`flareo verify ...` and `cosign verify ...`), the pull command, the SBOM URL, the Rekor entry, the policy verdict URL, and a one-line decision summary.
+
+Designed for CLI consumption — `flareo pull` uses it to resolve "give me everything for X" in one round trip, and copy-paste blocks on the website are generated from it.
+
+**Response (200):** takeaway JSON. **404** for unknown slugs.
+
+### POST /api/v1/submissions
+
+Submit a module for review. Accepts a JSON manifest (matching the shape in `flareo.json`) and optionally a Dockerfile body. Auth required.
+
+**Request body:**
+```json
+{
+  "slug": "my-module",
+  "name": "My Module",
+  "version": "1.2.3",
+  "category": "productivity",
+  "license": "MIT",
+  "upstreamUrl": "https://github.com/me/my-module",
+  "contactEmail": "me@example.com",
+  "description": "Short blurb",
+  "dockerfile": "FROM alpine:3.19\n..."
+}
+```
+
+If `dockerfile` is omitted and the request comes via `flareo publish`, the worker will detect language signals and attempt a Cloud Native Buildpacks build.
+
+**Response (202):**
+```json
+{ "submissionId": "sub_abc...", "status": "pending", "queuePositionEstimate": 4 }
+```
+
+**429** if the user has hit their submission quota (`Retry-After` header included). The CLI's retry helper handles this transparently.
+
+### GET /api/v1/whoami
+
+Authenticated user info. Accepts either session cookie or Bearer token.
+
+**Response (200):**
+```json
+{
+  "id": "usr_abc...",
+  "name": "Octocat",
+  "email": "oct@example.com",
+  "role": "user",
+  "authSource": "apikey",
+  "apiKeyLabel": "cli / my-laptop"
+}
+```
+
+**401** if unauthenticated.
+
+### GET /api/v1/stats
+
+Aggregate catalog stats used by the landing page.
+
+**Response (200):**
+```json
+{
+  "moduleCount": 12,
+  "verifiedCount": 11,
+  "builds7d": 84,
+  "scanPassPct": 92,
+  "openCves": 23,
+  "lastRebuildAt": "2026-04-23T00:14:00Z"
+}
+```
+
+Cached at the edge for 60 seconds.
+
+### GET /api/v1/health
+
+Liveness check. Returns 200 when the app and database are reachable, 503 otherwise. Used by Instatus for uptime monitoring.
+
+## Error envelope
+
+Every 4xx/5xx response has this shape:
+
+```json
+{
+  "error": {
+    "code": "rate_limited",
+    "message": "too many verify requests, try again shortly"
+  }
+}
+```
+
+`code` is stable; `message` is a human-readable string and may change.
+
+## Next steps
+
+- [CLI reference](/docs/cli-reference) for the command-line wrapper
+- Full OpenAPI spec: [flareo.dev/openapi.json](https://flareo.dev/openapi.json)

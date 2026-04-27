@@ -1,0 +1,212 @@
+# CLI reference
+
+Every `flareo` subcommand, with examples and exit codes.
+
+## Global flags
+
+```
+  --api-url <URL>     Override the Flareo API base URL (default: https://flareo.dev)
+                      env: FLAREO_API_URL
+  -v, --verbose       Verbose logging to stderr
+  -V, --version       Print version and exit
+  -h, --help          Print help
+```
+
+## flareo login
+
+```sh
+flareo login
+```
+
+Sign in via GitHub device code flow. Prints a one-time code, opens your browser to github.com/login/device, polls until you authorize, then exchanges the GitHub token for a Flareo API key stored in `~/.flareo/config.toml`.
+
+Exit codes: 0 success · 4 auth failure or denial · 3 network error.
+
+## flareo whoami
+
+```sh
+flareo whoami
+```
+
+Prints the currently signed-in user's identity, role, and auth source. Requires prior `flareo login`.
+
+Exit codes: 0 success · 4 not signed in · 5 API error.
+
+## flareo logout
+
+```sh
+flareo logout
+```
+
+Removes the stored token from `~/.flareo/config.toml`. Safe to run when not signed in (no-op).
+
+Exit codes: 0 always.
+
+## flareo search
+
+```sh
+flareo search <query>
+flareo search <query> --limit 50
+```
+
+Search the Flareo catalog. Works unauthenticated but higher rate limits apply to signed-in users. Output is a color-coded table of slug, version, category, trust score, CVE summary, deploy count.
+
+| Flag            | Effect                         | Default |
+|-----------------|--------------------------------|---------|
+| `-n, --limit`   | Max results (1-100)            | 20      |
+
+Exit codes: 0 success · 3 network error · 5 API error.
+
+## flareo verify
+
+```sh
+flareo verify <image-ref>
+```
+
+Runs the full Sigstore verification chain against the given image reference. For Flareo images, cross-references with the catalog and prints trust score, CVE count, signer identity, and Rekor log index. For non-Flareo Sigstore-signed images, prints signer identity and issuer only.
+
+Exit codes: 0 signed or verified · 1 unsigned · 2 invalid · 5 error.
+
+Shipped in v0.2.0.
+
+## flareo pull
+
+```sh
+flareo pull <slug>
+flareo pull <slug> --no-verify
+```
+
+Resolves the module's current pinned digest, verifies its Sigstore signature, and invokes `docker pull` (or `podman pull` if docker isn't on PATH). Refuses to pull when verification fails unless `--no-verify` is set.
+
+| Flag           | Effect                                                  |
+|----------------|---------------------------------------------------------|
+| `--no-verify`  | Skip signature verification (prints a loud warning)     |
+
+Exit codes: 0 success · 3 network · 5 API error · other non-zero on docker failure.
+
+Shipped in v0.2.1.
+
+## flareo run *(v0.3.0)*
+
+```sh
+flareo run <slug>
+flareo run <slug> --ttl-minutes 30 --port 8081
+flareo run <slug> --no-verify
+```
+
+Pulls a verified module and runs it locally on your machine with an isolated docker volume, a host port (random or specified), and a TTL after which the container is auto-stopped and the volume removed. Designed for "test this with my own data, throw the state away when done" evaluation.
+
+The container runs until any of three things happen:
+
+- **Ctrl-C** — clean teardown, volume removed, exit 0
+- **TTL fires** — same teardown path, exit 0
+- **The container exits on its own** (crash, OOM, etc.) — teardown still runs, exit 0
+
+Each run uses a fresh volume named `flareo-ephemeral-vol-<slug>-<nonce>`. Nothing persists across runs. If you want persistent state across launches, use `flareo pull` and run the module non-ephemerally with your own `docker run`.
+
+| Flag                | Effect                                                                  |
+|---------------------|-------------------------------------------------------------------------|
+| `--ttl-minutes <n>` | Auto-stop after n minutes. Default 60. 0 disables. Cap 480 (8 hours).   |
+| `--port <p>`        | Host port to bind. Random ephemeral-range port if unset.                |
+| `--no-verify`       | Skip signature verification (prints a loud warning).                    |
+| `--quiet`           | Suppress the post-launch help block — useful when scripting.            |
+
+Exit codes: 0 on clean teardown · 3 network · 5 API error · 1 on internal teardown failures. Note that container-side errors (the module crashing inside the container) result in an exit-0 — `flareo run` is a launcher; the module's own logs to stderr are passed through during the pull phase.
+
+This is the local-substrate alternative to per-user hosted previews. The user's machine runs the module; data never leaves your laptop. Tradeoff: requires Docker (or Podman) installed locally, and requires the laptop to be capable of running the image.
+
+## flareo update *(v0.3.1)*
+
+```sh
+flareo update <slug>
+flareo update <slug> --current sha256:abc...
+```
+
+Compares your local image's pinned digest against the catalog's current pinned digest. If they differ, prints the catalog's current version, CVE counts, and rebuild date plus the upgrade command. Doesn't auto-pull — informed upgrade is the whole point.
+
+The local digest is auto-detected from `docker images` output for any ref ending with `/<slug>`. If you've pinned a digest in a compose file rather than relying on docker's image cache, pass it explicitly with `--current`.
+
+| Flag | Effect |
+|---|---|
+| `--current <digest>` | Override auto-detected current digest. Format `sha256:abc...` |
+
+Exit codes: 0 for "up to date" or "update available" — both are non-error states. 3 for network · 5 for API · `--current` validation errors are 1.
+
+## flareo compose
+
+```sh
+flareo compose <slug> > docker-compose.yaml
+flareo compose <slug> --port 8080 --domain vw.example.com
+flareo compose <slug> --output docker-compose.yaml --with-caddy
+```
+
+Emits a `docker-compose.yaml` pinned to the module's current verified digest. Sensible port bindings, volumes, and environment variables per module. Writes to stdout by default; use `--output` to write a file.
+
+| Flag            | Effect                                                          |
+|-----------------|-----------------------------------------------------------------|
+| `--port`        | Override the default host port                                  |
+| `--domain`      | Public domain (filled into env vars like NEXTAUTH_URL)          |
+| `-o, --output`  | Write to a file instead of stdout                               |
+| `--with-caddy`  | Also emit a Caddy reverse-proxy service and suggest a Caddyfile |
+
+Shipped in v0.2.1.
+
+## flareo publish *(v0.3.0)*
+
+```sh
+flareo publish
+```
+
+Submits the current directory as a module for Flareo review. Requires a `flareo.json` manifest in the working directory (run `flareo init` first if you don't have one).
+
+The CLI reads the manifest, posts to `/api/v1/submissions` with your authenticated session, and prints the submission ID and review queue position. The submission lands as `status=pending` in the reviewer queue — typical first review touch within 5 business days, faster on Pro tier.
+
+If a Dockerfile is present in the working directory, it's included with the submission so the build worker has everything it needs once your submission is approved. CNB-detection: if the directory has no Dockerfile but contains language signals (`package.json`, `pyproject.toml`, etc.), the submission is flagged for buildpack-based building rather than rejected.
+
+## flareo init *(v0.3.0)*
+
+```sh
+flareo init
+```
+
+Interactively scaffolds a `flareo.json` manifest in the current directory. Walks through the required fields (slug, name, version, category, license, upstream URL, contact email, short description) with validation matching the API's submission schema, then writes the result.
+
+Safe to re-run; if `flareo.json` exists, prompts before overwriting.
+
+## Rate limiting
+
+The Flareo API enforces per-user rate limits. When the CLI hits a 429, it doesn't fail immediately — it reads the `Retry-After` header, waits, and retries up to 3 times with cumulative wait capped at 5 minutes. While waiting it prints to stderr:
+
+```
+rate-limited; waiting 30s before retry (1 of 3)
+```
+
+If you exhaust the retries the original 429 surfaces as a non-zero exit (code 5). `flareo login`'s OAuth device-flow polling has its own bespoke retry loop and isn't affected by this.
+
+## Configuration file
+
+Location: `~/.flareo/config.toml` (Linux), `~/Library/Application Support/flareo/config.toml` (macOS), `%APPDATA%\flareo\config.toml` (Windows). File mode `0600`.
+
+Shape:
+
+```toml
+[auth]
+token = "fla_..."
+api_url = "https://flareo.dev"
+user_handle = "octocat"
+signed_in_at = "2026-04-23T14:32:00Z"
+```
+
+Edit by hand at your own risk. `flareo login` / `flareo logout` are the supported paths.
+
+## Environment variables
+
+| Variable                     | Effect                                                      |
+|------------------------------|-------------------------------------------------------------|
+| `FLAREO_API_URL`             | Override the API base URL (equivalent to `--api-url`)       |
+| `RUST_LOG`                   | Standard tracing filter. `RUST_LOG=flareo=debug` for details|
+
+## Next steps
+
+- [API reference](/docs/api-reference) for the underlying HTTP endpoints
+- [Install the CLI](/docs/install) if you haven't yet

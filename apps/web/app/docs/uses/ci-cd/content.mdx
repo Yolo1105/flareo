@@ -1,0 +1,169 @@
+# Verify images in CI/CD
+
+Taking Flareo's verification out of "thing I run manually on my laptop" and into "thing the CI/CD pipeline enforces on every deploy" is one line of shell and one small YAML change. This page shows the wiring for GitHub Actions, GitLab CI, and Argo CD. The pattern generalizes.
+
+The point: if a deploy fails because an image isn't Flareo-signed or its signature has been revoked, the deploy fails *before* anything changes in production. No manual gate, no post-deploy scramble, no "let's check this next time" technical debt.
+
+## What "verify" means here
+
+The `flareo verify` CLI checks three things against any image reference:
+
+- **Signature presence and validity** — the image was signed by a workflow identity we trust (pinned by default to Flareo's signer workflows, overridable)
+- **Transparency log entry** — the signature is in Rekor (Sigstore's public append-only log)
+- **Scan status** — the current CVE status from Flareo's latest scan
+
+A passing `flareo verify` is a claim that the image hasn't been tampered with, was built by the expected pipeline, and has been checked for known vulnerabilities recently. It's a fast check — typically under 2 seconds — because the verification is done locally against publicly-cached signing data.
+
+Exit code 0 on success, non-zero on any failure. That's the seam CI/CD hooks into.
+
+## Pattern 1: GitHub Actions
+
+A two-step addition to any deploy workflow. First, install the CLI; second, verify each image you're about to deploy.
+
+```yaml
+- name: Install Flareo CLI
+  run: |
+    curl -fsSL https://flareo.dev/install | sh
+    echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+- name: Verify image signature
+  run: |
+    flareo verify public.ecr.aws/flareo/vaultwarden@sha256:${{ env.VAULTWARDEN_DIGEST }}
+```
+
+If verify exits non-zero, the job fails and the deploy step downstream never runs. You get the failure in the GitHub Actions UI with a precise reason.
+
+For a matrix of images, pull them into a step input:
+
+```yaml
+- name: Verify all images
+  env:
+    IMAGES: |
+      public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+      public.ecr.aws/flareo/gitea@sha256:a3b1...
+      public.ecr.aws/flareo/uptime-kuma@sha256:d8e2...
+  run: |
+    set -e
+    while read -r img; do
+      [ -z "$img" ] && continue
+      echo "Verifying $img"
+      flareo verify "$img"
+    done <<< "$IMAGES"
+```
+
+The set -e plus the non-zero exit from `flareo verify` means the first failure aborts the whole batch.
+
+### Pinning the signer identity
+
+By default `flareo verify` accepts any image signed by Flareo's signer workflows. If you want to pin tighter — e.g. only accept images signed by a specific workflow tag — pass `--signer`:
+
+```sh
+flareo verify \
+  --signer "https://github.com/flareo/flareo-signer-workflows/.github/workflows/sign.yml@refs/tags/v1" \
+  public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+```
+
+This is stricter — a Flareo signing-workflow update (v1 → v2) would stop satisfying your pin until you review and update the pin yourself. Appropriate for production. Slightly overkill for a homelab.
+
+## Pattern 2: GitLab CI
+
+Same pattern, slightly different shell syntax:
+
+```yaml
+verify_images:
+  stage: verify
+  image: alpine:3.19
+  before_script:
+    - apk add --no-cache curl bash
+    - curl -fsSL https://flareo.dev/install | bash
+    - export PATH="$HOME/.local/bin:$PATH"
+  script:
+    - flareo verify "$VAULTWARDEN_IMAGE"
+
+deploy:
+  stage: deploy
+  needs: [verify_images]
+  # ... actual deploy steps
+```
+
+The `needs:` directive ensures deploy only runs if `verify_images` passes. Failing the verify job blocks the deploy.
+
+## Pattern 3: Argo CD — pre-sync hook
+
+For Kubernetes deploys via Argo CD, the cleanest place to verify is a pre-sync Job that runs before the real workload rollout:
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify-images
+  annotations:
+    argocd.argoproj.io/hook: PreSync
+    argocd.argoproj.io/hook-delete-policy: HookSucceeded
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: ghcr.io/flareo/flareo-cli:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              set -e
+              flareo verify public.ecr.aws/flareo/vaultwarden@sha256:$DIGEST
+          env:
+            - name: DIGEST
+              valueFrom:
+                configMapKeyRef:
+                  name: deploy-digests
+                  key: vaultwarden
+```
+
+Argo CD runs this Job before sync, waits for it to complete, and aborts the sync if the Job fails. The actual deployment manifests only apply after verification passes.
+
+For cluster-wide enforcement rather than per-app, use an admission controller — see [Admission policies](/docs/admission).
+
+## Pattern 4: pre-commit hook for compose files
+
+Less "CI/CD" more "keep CI/CD from ever needing to reject", but worth mentioning. Drop a pre-commit hook in `.git/hooks/pre-commit`:
+
+```sh
+#!/usr/bin/env sh
+set -e
+# Find all flareo-hosted image refs in docker-compose files and verify each
+grep -hoE 'public\.ecr\.aws/flareo/[a-z0-9-]+@sha256:[a-f0-9]+' docker-compose*.yaml | sort -u | while read -r img; do
+  echo "Verifying $img"
+  flareo verify "$img"
+done
+```
+
+Now a compose-file change that pins to an unverified digest fails at commit time, before the CI pipeline ever runs.
+
+## Failure modes worth knowing
+
+Three things can make `flareo verify` fail:
+
+- **Signature missing or invalid** — the image either wasn't signed by our pipeline, or the signature on Sigstore is gone (e.g. the image was tampered with after publication). Never deploy. Investigate.
+- **Scan outdated or failing** — the image's CVE scan is stale (Flareo re-scans daily; "stale" means >48h old) or the most recent scan flagged critical/high CVEs. Decide based on risk tolerance; the CLI surfaces the CVE list so you can look at them.
+- **Network error** — `flareo verify` couldn't reach Sigstore or the Flareo API. Retry once; if it happens twice, something's wrong with your CI's outbound connectivity.
+
+We intentionally don't let "image not recognized" fail silently or pass. An unknown image reference exits non-zero with an explanatory error.
+
+## Why this matters
+
+A CI/CD pipeline that doesn't verify is trusting:
+
+- That the image registry wasn't compromised between your last pull and this deploy
+- That no one swapped the image behind a mutable tag
+- That the image you tested in staging is byte-identical to what prod pulls
+- That the scanner you ran three weeks ago still reflects current CVE knowledge
+
+Digest pinning addresses the first three. Flareo signatures plus scan freshness address the fourth. Wiring `flareo verify` into the deploy is roughly 10 lines of YAML in exchange for eliminating a whole class of silent-tampering risk.
+
+## Next steps
+
+- [Admission policies](/docs/admission) — cluster-wide enforcement via OPA or Kyverno
+- [Verify from the CLI](/docs/verify-cli) — what `flareo verify` actually checks, in detail
+- [Replacing Docker Hub in a homelab](/docs/uses/replacing-docker-hub) — the non-CI version of this story

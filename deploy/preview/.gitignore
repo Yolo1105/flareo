@@ -1,0 +1,9 @@
+# Built Caddy binary (built on the host; not committed)
+caddy/caddy
+
+# Local env files (never commit)
+.env
+.env.local
+
+# OS cruft
+.DS_Store

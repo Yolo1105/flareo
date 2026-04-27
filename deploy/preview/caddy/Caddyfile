@@ -1,0 +1,221 @@
+# /etc/caddy/Caddyfile
+#
+# Runs on the Hetzner box as `caddy.service` (systemd unit). Terminates
+# TLS for s-*.preview.flareo.dev and reverse-proxies each subdomain to
+# a specific localhost port where the matching docker compose service
+# is listening.
+#
+# TLS strategy: wildcard certificate for *.preview.flareo.dev obtained
+# via DNS-01 ACME against Cloudflare. This requires:
+#   - the caddy-dns/cloudflare module compiled into the binary
+#     (see scripts/build-caddy.sh for the xcaddy build)
+#   - a Cloudflare API token with Zone:DNS:Edit scope in /etc/caddy/env
+#
+# Analytics (Phase F0):
+#   - Each preview block applies the (inject_analytics) snippet which
+#     uses the `replace-response` Caddy plugin to inject a tiny script
+#     tag before </head> on HTML responses.
+#   - The script fires a Plausible pageview directly via the JSON
+#     events API (no loader script, no third-party cookies, no domain
+#     pinning) tagged with the module slug.
+#   - The Plausible site identifier `preview.flareo.dev` is hard-coded
+#     in the snippet; configure that site in your Plausible account
+#     before deploying. See README "Phase F0 analytics" section.
+#
+# ┌──────────────────────────────────────────────────────────────────┐
+# │                                                                  │
+# │  HOW A PREVIEW REQUEST FLOWS                                     │
+# │                                                                  │
+# │  browser ──https──▶ Hetzner:443 ──▶ Caddy ──http──▶ 127.0.0.1:8001│
+# │                                      │                           │
+# │                                      ▼                           │
+# │                              Docker container                    │
+# │                              (Vaultwarden, etc.)                 │
+# │                                                                  │
+# └──────────────────────────────────────────────────────────────────┘
+
+{
+	# Admin API bound to localhost only.
+	admin localhost:2019
+
+	# ACME contact for urgent cert notifications.
+	email ops@flareo.dev
+
+	# Use DNS challenge for the wildcard. The {env.CLOUDFLARE_API_TOKEN}
+	# substitution reads from /etc/caddy/env.
+	acme_dns cloudflare {env.CLOUDFLARE_API_TOKEN}
+
+	# Log structured JSON to stdout (systemd journal catches it).
+	log {
+		output stdout
+		format json
+		level INFO
+	}
+}
+
+# ────────────────────────────────────────────────────────────────────
+# Snippets
+#
+# (inject_analytics): rewrite HTML responses to include a small
+# analytics snippet just before </head>. The snippet posts a pageview
+# event to the Plausible events API tagged with the module slug.
+#
+# `stream` mode: don't buffer the entire response in memory before
+# rewriting. Important for SSE-heavy modules like ntfy and for
+# image/binary responses where buffering would cost ~200ms.
+#
+# `*</head>*` matches: the substitution only fires when </head> is
+# present, which is the cheap "is this HTML?" filter — we don't want
+# to inject into JSON, images, or websocket frames.
+
+(inject_analytics) {
+	replace {
+		stream
+		"</head>" `<script defer>
+(function(){try{
+var h=location.hostname,m=h.match(/^s-([a-z0-9-]+)-demo\.preview\.flareo\.dev$/);
+var slug=m?m[1]:"unknown";
+fetch("https://plausible.io/api/event",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+name:"pageview",
+url:location.href,
+domain:"preview.flareo.dev",
+props:{module:slug}
+})
+}).catch(function(){});
+}catch(e){}})();
+</script></head>`
+	}
+}
+
+# ────────────────────────────────────────────────────────────────────
+# Preview instances
+#
+# Each block below matches one subdomain pattern and proxies to the
+# matching docker compose service. Order matters: the wildcard catch-all
+# at the bottom is last so specific names win.
+
+s-vaultwarden-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8001 {
+		# Vaultwarden needs the real client IP for admin actions.
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	import inject_analytics
+	header {
+		X-Flareo-Preview "shared-demo"
+		X-Flareo-Notice "Shared demo. Data resets every 24h UTC."
+	}
+	log {
+		output stdout
+		format json
+	}
+}
+
+s-uptime-kuma-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8002 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	# Uptime Kuma uses websockets for its live dashboard.
+	@websockets {
+		header Connection *Upgrade*
+		header Upgrade websocket
+	}
+	reverse_proxy @websockets 127.0.0.1:8002
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-gitea-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8003 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	# Gitea can be large; allow bigger request bodies for git push.
+	request_body {
+		max_size 100MB
+	}
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-linkwarden-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8004 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-ntfy-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8005 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	# ntfy clients hold long SSE connections; lift the default timeout.
+	reverse_proxy 127.0.0.1:8005 {
+		flush_interval -1
+		transport http {
+			read_timeout 10m
+		}
+	}
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-adguard-home-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8006 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-paperless-ngx-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8007 {
+		header_up X-Real-IP {remote_host}
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto https
+	}
+	request_body {
+		max_size 50MB
+	}
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+s-caddy-demo.preview.flareo.dev {
+	reverse_proxy 127.0.0.1:8008
+	import inject_analytics
+	header X-Flareo-Preview "shared-demo"
+}
+
+# ────────────────────────────────────────────────────────────────────
+# Catch-all: any subdomain we don't explicitly handle returns a clear
+# "preview not yet available" JSON response rather than a 502 or a
+# confusing error page. This covers the modules we marked non-
+# previewable (home-assistant, immich, jellyfin, nextcloud) and any
+# typos.
+#
+# No analytics injection here — these are JSON responses, not HTML.
+
+s-*.preview.flareo.dev {
+	handle {
+		respond `{
+	"error": "preview_not_available",
+	"message": "This module is in the Flareo catalog but does not have a shared preview yet. Add it to your own infrastructure with the deploy instructions on flareo.dev."
+}` 404
+		header Content-Type application/json
+	}
+}

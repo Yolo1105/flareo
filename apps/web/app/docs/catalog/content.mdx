@@ -1,0 +1,62 @@
+# Browse the catalog
+
+The Flareo catalog is the curated list of modules Flareo rebuilds and signs. As of closed beta launch it holds 12 modules across five categories.
+
+## The catalog today
+
+| Slug              | Category       | Purpose                             |
+|-------------------|----------------|-------------------------------------|
+| vaultwarden       | security       | Bitwarden-compatible password vault |
+| immich            | media          | Photo and video library             |
+| jellyfin          | media          | Media server                        |
+| home-assistant    | automation     | Home automation hub                 |
+| nextcloud         | productivity   | File sync, notes, calendar          |
+| paperless-ngx     | productivity   | Document management with OCR        |
+| adguard-home      | network        | DNS-based ad blocker                |
+| gitea             | devtools       | Lightweight git hosting             |
+| linkwarden        | productivity   | Bookmark manager                    |
+| ntfy              | communication  | Push notifications                  |
+| uptime-kuma       | monitoring     | Self-hosted uptime monitor          |
+| caddy             | network        | HTTPS-first reverse proxy           |
+
+## Finding a module
+
+Three ways, all equivalent:
+
+**Web.** Go to [flareo.dev/catalog](https://flareo.dev/catalog). Filter by category and search by name.
+
+**CLI.**
+
+```sh
+flareo search vault
+flareo search --category security
+```
+
+**API.**
+
+```sh
+curl 'https://flareo.dev/api/v1/modules?q=vault&limit=5' | jq
+```
+
+All three hit the same data. The API is documented at [api-reference](/docs/api-reference).
+
+## Reading the module page
+
+Every module page has the same sections:
+
+- **Hero.** Name, version, trust score, SLSA level, CVE count, time since last rebuild.
+- **Deploy.** Pinned digest, pull command, docker-compose snippet.
+- **Receipts.** Links to the SBOM, CVE scan, Rekor entry, and signer identity.
+- **SBOM.** Inline package list from the latest build.
+
+The **trust score** is a 0-100 number we compute from four signals: CVE status (50%), SLSA level (20%), signature freshness (15%), and SBOM completeness (15%). The weights are on the [signing](/docs/signing) page. A trust score below 70 is shown in amber; below 50 in red.
+
+## What's coming
+
+We rebuild only the 12 modules above for the closed beta. Adding a module costs real work on our side — rebuilding, testing, maintaining the recipe — so we're being deliberate about what to add next. The [publishing page](/docs/publishing) describes how to propose one.
+
+## Catalog freshness
+
+Every module is rebuilt daily. The "Last rebuild" metric on each module page tells you how stale the current image is. If upstream has released a new version in the last 24 hours, our pipeline will pick it up and rebuild. If upstream is the same but we've pushed a fix to the recipe, you'll see the rebuild timestamp update with the same upstream version.
+
+Subscribe to a module for rebuild notifications from the module page (coming v0.2.0; for now, watch [github.com/flareo/flareo-canary](https://github.com/flareo/flareo-canary) for the pipeline).

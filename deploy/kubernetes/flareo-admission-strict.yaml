@@ -1,0 +1,78 @@
+# Flareo admission policy — STRICTER variant.
+#
+# Requires, on top of the base policy:
+#   1. Image must be a Flareo-signed image
+#   2. Image must NOT be in 'failing' status per the Flareo catalog
+#      (this is enforced by querying /api/v1/verify at admission time)
+#
+# The live catalog check adds latency (~200-500ms) and a dependency on
+# flareo.dev being reachable. Use only in clusters where you're willing
+# to trade freshness for availability.
+#
+# Requires Kyverno 1.11+ with image attestation verification.
+
+apiVersion: kyverno.io/v2beta1
+kind: ClusterPolicy
+metadata:
+  name: require-flareo-signature-strict
+  annotations:
+    policies.kyverno.io/title: "Require Flareo signatures (strict)"
+    policies.kyverno.io/description: >-
+      Require a valid Flareo Sigstore signature AND require the module's
+      current status in the Flareo catalog to be 'verified' (not
+      'pending' or 'failing').
+spec:
+  validationFailureAction: Audit
+  webhookTimeoutSeconds: 60
+  failurePolicy: Fail
+  rules:
+    - name: verify-flareo-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      verifyImages:
+        - imageReferences:
+            - "public.ecr.aws/flareo/*"
+          mutateDigest: true
+          required: true
+          verifyDigest: true
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/flareo/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+
+    - name: check-flareo-module-status
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+      context:
+        - name: flareoCheck
+          apiCall:
+            method: POST
+            service:
+              url: https://flareo.dev/api/v1/verify
+            data:
+              - key: imageRef
+                value: "{{request.object.spec.containers[0].image}}"
+            jmesPath: "status"
+      preconditions:
+        all:
+          - key: "{{request.object.spec.containers[0].image}}"
+            operator: AnyIn
+            value: ["public.ecr.aws/flareo/*"]
+      validate:
+        message: >-
+          Image status is '{{flareoCheck}}' per flareo.dev. Refusing to
+          admit anything other than 'verified' or 'signed'. To override,
+          pin to a specific digest that was verified at an earlier time.
+        deny:
+          conditions:
+            any:
+              - key: "{{flareoCheck}}"
+                operator: NotIn
+                value: ["verified", "signed"]

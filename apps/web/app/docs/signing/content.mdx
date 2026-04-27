@@ -1,0 +1,99 @@
+# How we sign modules
+
+The short version: we use [Sigstore's cosign](https://docs.sigstore.dev/cosign/) in keyless mode, signing with GitHub Actions' OIDC identity, writing the result to the public Rekor transparency log. This page unpacks each part.
+
+## Keyless signing
+
+Traditional code signing requires a long-lived private key, stored somewhere. That key is a compromise magnet: if it leaks, the attacker can impersonate you until you rotate. Worse, distributing your public key to verifiers is its own trust problem.
+
+Keyless signing skips the long-lived key entirely. Instead:
+
+1. At build time, our GitHub Actions workflow authenticates to [Fulcio](https://docs.sigstore.dev/fulcio/) using its OIDC identity token (the same token GitHub mints for every workflow run).
+2. Fulcio verifies the token and issues a short-lived certificate (~10 minutes) bound to that identity.
+3. cosign uses the short-lived cert to sign the image digest.
+4. The signature and cert are published to the [Rekor](https://docs.sigstore.dev/rekor/) transparency log.
+5. The cert expires. The signature remains verifiable forever because Rekor's inclusion proof timestamps it to the moment it was valid.
+
+To verify, consumers check:
+
+- The signature is valid under the cert
+- The cert was issued by Fulcio
+- The cert's identity matches what they expect (`https://github.com/flareo/...`)
+- The Rekor entry exists and its inclusion proof checks out
+
+No key material for us to lose. No keys for you to distribute.
+
+## The specific identity we sign with
+
+Every Flareo image signature claims this identity:
+
+| Field           | Value                                                   |
+|-----------------|---------------------------------------------------------|
+| OIDC issuer     | `https://token.actions.githubusercontent.com`           |
+| Identity (SAN)  | `https://github.com/flareo/flareo-canary/.github/workflows/canary-rebuild.yml@refs/heads/main` |
+
+When you verify, use a regex on the identity:
+
+```sh
+cosign verify \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  public.ecr.aws/flareo/<module>@sha256:<digest>
+```
+
+## Rekor log index
+
+Every signature we publish gets an entry in the Rekor transparency log with a monotonic index. You can look up any Flareo signature at [search.sigstore.dev](https://search.sigstore.dev) using either the image digest or the Rekor log index. The module's detail page links directly.
+
+The log is append-only and tamper-evident. If Rekor itself were compromised, the inclusion proof chain would break, and any verifier with an old trust root would notice. This is the core property that makes keyless signing work.
+
+## Trust score breakdown
+
+Every module has a 0-100 trust score computed from four signals:
+
+| Signal               | Weight | What we measure                                            |
+|----------------------|--------|------------------------------------------------------------|
+| Vulnerability status | 50%    | CVE count by severity, scaled — criticals hurt more        |
+| SLSA provenance      | 20%    | Level 0-3 based on our build provenance maturity           |
+| Signature freshness  | 15%    | Hours since the last successful rebuild-and-sign           |
+| SBOM completeness    | 15%    | Percentage of packages with complete CycloneDX metadata    |
+
+A fresh build with zero CVEs and a valid SLSA L2 attestation scores around 92-95. A module with one high CVE drops to 75-80. A module with any critical CVE flips status to `failing` regardless of the raw score.
+
+## SLSA level
+
+We are at **SLSA Level 2** today. That means:
+
+- ✔ Source is version-controlled (GitHub)
+- ✔ Build is fully scripted
+- ✔ Build service produces signed provenance
+- ✘ Build platform is not yet isolated per-job (requires L3)
+
+SLSA L3 requires builds to run in an environment where one job cannot influence another. Moving GitHub Actions to an ephemeral, hermetic runner (or switching builders to something like Chainguard's L3-certified infrastructure) is how we'd get there. We don't target L3 today; the operational cost is real and no customer has asked for it. If your admission policy needs L3, file an issue — that's the trigger.
+
+## VEX — telling your scanner what's actually exploitable
+
+Trivy is intentionally noisy. A typical mature image has 5-30 findings that don't represent real risk because the vulnerable code path isn't reachable in the way the image is configured. Flareo's reviewer team annotates these per the [OpenVEX 0.2.0](https://github.com/openvex/spec) spec.
+
+Each module's VEX document is at `/api/v1/modules/<slug>/vex`. Trivy, Grype, and Snyk all consume it: point your scanner at the URL and CVEs marked `not_affected` or `fixed` get suppressed; what's left is the residual real risk.
+
+This isn't an exoneration mechanism. The reviewer team writes a public impact statement for every `not_affected` annotation explaining why. If you disagree with a justification, the module's contact email is in `flareo.json`.
+
+For the full picture — scanner config snippets, the four OpenVEX statuses, how VEX feeds the admission policy verdict — see [/docs/vex](/docs/vex).
+
+## Admission policy verdict
+
+Beyond the per-module receipts, the catalog runs an active admission policy against every module — CVE thresholds (post-VEX), signature/SBOM/Rekor presence, SLSA level, composite trust score. The verdict (`pass`, `warn`, or `fail`) plus the per-rule breakdown is at `/api/v1/modules/<slug>/policy`. If you operate Kubernetes admission for downstream teams, this gives you a higher-level signal than the raw signature: "Flareo's policy passed" means a known set of rules cleared, not just "a signature exists."
+
+The policy is OPA-shaped JSON evaluated by a pure-TypeScript evaluator. If you self-host an internal Flareo and want to swap in a Rego runtime, the input/output contract doesn't change.
+
+## What the signature does NOT prove
+
+- **Not that the upstream source code is trustworthy.** We sign what we built, not what upstream shipped.
+- **Not that the binary is free of zero-day vulnerabilities.** Trivy catches known CVEs; unknown ones are, by definition, unknown.
+- **Not that the image is appropriate for your use case.** Vaultwarden is secure but if you run it on a public IP without a password, Flareo's signature is not relevant to that failure mode.
+
+## Next steps
+
+- [Verify from the CLI](/docs/verify-cli) — the commands to run
+- [Threat model](/docs/threat-model) — what this all adds up to

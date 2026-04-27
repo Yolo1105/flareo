@@ -1,0 +1,92 @@
+name: E2E
+
+# Runs the Playwright suite against a temporary Next.js build.
+# Catches the link-class bug the W1-8 retro flagged.
+#
+# Slower than `ci.yml` (~5-7 min) so it runs in parallel rather than
+# blocking the type-check on small PRs.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: e2e-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  playwright:
+    name: Playwright
+    runs-on: ubuntu-22.04
+    timeout-minutes: 15
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: flareo
+          POSTGRES_PASSWORD: flareo
+          POSTGRES_DB: flareo_test
+        ports:
+          - 5432:5432
+        # Wait for postgres to be ready before any step that uses it.
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Use Node 20
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser
+        # `--with-deps` pulls system libs Chromium needs on Ubuntu.
+        # Cache hit when the @playwright/test version doesn't change.
+        run: npx playwright install --with-deps chromium
+
+      - name: Generate Prisma client
+        env:
+          DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
+        run: npx prisma generate
+
+      - name: Apply migrations
+        env:
+          DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
+        run: npx prisma migrate deploy
+
+      - name: Seed demo data
+        env:
+          DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
+          SEED: "1"
+        # The seed script is guarded by SEED=1; we set it here so the
+        # script populates the test DB. The e2e tests reference modules
+        # by slug (vaultwarden, etc.) which the seed populates.
+        run: npm run db:seed
+
+      - name: Run Playwright tests
+        env:
+          DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
+          NEXTAUTH_SECRET: e2e-test-secret-not-real
+          NEXTAUTH_URL: http://localhost:3000
+        run: npm run test:e2e
+
+      - name: Upload trace + report on failure
+        if: failure()
+        uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with:
+          name: playwright-report-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          retention-days: 7

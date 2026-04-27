@@ -1,0 +1,94 @@
+# Pull and run
+
+Once you have a verified digest, running the container is no different from running any other image. This page shows two patterns — `docker run` for quick tests, `docker compose` for anything you want to keep around.
+
+## Pull by digest
+
+Always pull by digest, not by tag. A digest is the content hash; it can't be replaced without you noticing.
+
+```sh
+docker pull public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+If you want the current pinned digest for a module, it's on the module page at [flareo.dev/modules/vaultwarden](https://flareo.dev/modules/vaultwarden), or via API:
+
+```sh
+curl -s https://flareo.dev/api/v1/modules/vaultwarden | jq -r .digest
+```
+
+## Run a one-off
+
+For a quick test, `docker run` is enough. Bind the service port to localhost (not `0.0.0.0`) unless you actually want it on the network, and keep a named volume for persistent data:
+
+```sh
+docker run --name vw -d \
+  -v vw-data:/data \
+  -p 127.0.0.1:8080:80 \
+  --restart unless-stopped \
+  public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+This is fine for a smoke test. It is **not** fine for anything you care about keeping. The moment you want to back up, upgrade, or change config, you want compose.
+
+## Use docker-compose
+
+A minimal `docker-compose.yaml`:
+
+```yaml
+services:
+  vaultwarden:
+    image: public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8080:80"
+    environment:
+      DOMAIN: https://vw.your-domain.example
+      SIGNUPS_ALLOWED: "false"
+    volumes:
+      - vw-data:/data
+
+volumes:
+  vw-data:
+```
+
+Bring it up:
+
+```sh
+docker compose up -d
+```
+
+The Flareo CLI can generate this for you — see [Generate compose files](/docs/compose).
+
+## Upgrading
+
+Flareo rebuilds daily, so the pinned digest on the module page moves. Upgrading looks like:
+
+1. Check the current digest on the module page.
+2. Verify it still meets your trust requirements (CVE status, SLSA level).
+3. Update your compose file's `image:` line.
+4. `docker compose up -d` — Docker pulls the new digest and recreates the container.
+
+We don't recommend using `:latest` in production. Pinned digests are the whole point of a content-addressable registry; tags undo that guarantee.
+
+## Data migration
+
+When a module ships a major version bump upstream (Vaultwarden 1.30 → 1.31, Paperless-ngx 2.5 → 2.6, etc), upstream publishes migration notes. Flareo rebuilds don't add migration logic on top. Read the upstream notes before upgrading in production, not after.
+
+## Common patterns
+
+**Backup before upgrade.** Most modules use a single `/data` volume. Back it up with `docker run --rm -v <volume>:/data -v $(pwd):/backup alpine tar czf /backup/data.tar.gz /data`.
+
+**Health checks.** The Flareo base image sets a sensible `HEALTHCHECK` for each module. Compose's `depends_on: { condition: service_healthy }` works out of the box.
+
+**Reverse proxy.** The [Caddy module](https://flareo.dev/modules/caddy) is designed to sit in front of everything else. A minimal Caddyfile for Vaultwarden:
+
+```
+vw.your-domain.example {
+    reverse_proxy vaultwarden:80
+}
+```
+
+## Next steps
+
+- [Generate compose files](/docs/compose) to avoid writing them by hand
+- [Admission policies](/docs/admission) to enforce Flareo signatures cluster-wide

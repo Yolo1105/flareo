@@ -1,0 +1,71 @@
+[package]
+name = "flareo"
+version = "0.3.0"
+edition = "2021"
+rust-version = "1.80"
+authors = ["Flareo maintainers"]
+description = "CLI for the Flareo container supply chain platform. Verify any signed container image against Sigstore and browse the Flareo catalog from your terminal."
+license = "AGPL-3.0-or-later"
+repository = "https://github.com/flareo/flareo-cli"
+homepage = "https://flareo.dev"
+readme = "README.md"
+keywords = ["container", "supply-chain", "sigstore", "cosign", "homelab"]
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "flareo"
+path = "src/main.rs"
+
+[dependencies]
+# CLI parsing
+clap = { version = "4.5", features = ["derive", "env", "wrap_help"] }
+
+# Async runtime
+tokio = { version = "1.40", features = ["rt-multi-thread", "macros", "fs", "io-util", "net", "time", "signal", "process"] }
+
+# HTTP client (rustls so we don't need OpenSSL)
+reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip", "stream"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Paths / config directory
+directories = "5"
+
+# Errors
+anyhow = "1"
+thiserror = "1"
+
+# Logging (off by default; enabled with RUST_LOG env var)
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+# UX (reserved for v0.2 — verify/pull commands use progress bars)
+# indicatif = "0.17"
+comfy-table = "7"
+
+# Colored terminal output
+owo-colors = "4"
+
+# Cryptographic primitives — pinned to avoid the sha2 0.11 MSRV bump.
+# Will be used by `flareo verify` in v0.2.0.
+# sha2 = "=0.10.8"
+
+[dev-dependencies]
+tempfile = "3"
+
+[profile.release]
+opt-level = "z"          # optimize for size
+lto = "fat"              # whole-program optimization
+codegen-units = 1        # single unit lets LTO work harder
+panic = "abort"          # smaller binary; we don't unwind
+strip = "symbols"        # strip symbols
+debug = false
+incremental = false
+
+[profile.release-with-debug]
+inherits = "release"
+debug = true
+strip = "none"

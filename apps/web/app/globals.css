@@ -1,0 +1,237 @@
+@import "./docs-prose.css";
+@import "tailwindcss";
+
+/*
+ * Flareo design tokens
+ * Every color, font, and spacing decision from the mockups lives here.
+ * Change here once, changes propagate everywhere.
+ */
+@theme {
+  /* Warm charcoal canvas */
+  --color-canvas: #1A1614;
+  --color-canvas-panel: #1E1A17;
+  --color-canvas-deep: #0F0B09;
+  --color-canvas-meta: #0F0B09;
+
+  /* Hairlines */
+  --color-hairline: #2E2621;
+  --color-hairline-soft: #3A302A;
+
+  /* Text */
+  --color-ink: #EAE4DA;
+  --color-ink-mute: #BCB4A8;
+  --color-ink-softer: #9A9389;
+  /* Bumped from #7A7268 / #544A43 (a11y audit Apr 2026).
+     Old values failed WCAG AA contrast (#544A43 → 2.09 on canvas;
+     #7A7268 → 3.79). Both are used heavily for 9.5–13px mono labels
+     where the "large text" 3.0 threshold doesn't apply. New values
+     keep the warm undertone but pass AA: #A89682 → 6.29, #90806C → 4.70. */
+  --color-ink-faint: #A89682;
+  --color-ink-ghost: #90806C;
+  --color-ink-cream: #C5BEB3;
+
+  /* Accent (red-orange) — load-bearing */
+  --color-accent: #EA442A;
+  --color-accent-hot: #F05A3E;
+  --color-accent-dim: #7A2612;
+
+  /* Pass/working */
+  --color-good: #5FBF7F;
+
+  /* Honest caution (threat-model OUT, LIMITS) */
+  --color-warn: #C29A5E;
+
+  /* Failure */
+  --color-bad: #E04040;
+
+  /* Execution plane (architecture page) */
+  --color-blue: #8CB4E0;
+
+  /* Fonts — PP Neue Machina listed first as preferred; swap the @font-face
+     block at the bottom of this file once you buy the license */
+  --font-display: 'PP Neue Machina', 'Archivo Black', system-ui, sans-serif;
+  --font-body: 'Space Grotesk', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* Letter spacing */
+  --tracking-display: -0.035em;
+  --tracking-h2: -0.03em;
+  --tracking-h3: -0.025em;
+  --tracking-h4: -0.02em;
+  --tracking-mono: 0.02em;
+  --tracking-label: 0.14em;
+  --tracking-cap: 0.12em;
+
+  /* Animation */
+  --ease-default: cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+/*
+ * Base element styles
+ */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+  background-color: var(--color-accent);
+  color: var(--color-canvas);
+}
+
+/*
+ * Grain texture overlay — used via the .fl-grain utility
+ */
+.fl-grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.05;
+  background-image: radial-gradient(#fff 0.5px, transparent 0.5px);
+  background-size: 3px 3px;
+  z-index: 1;
+}
+
+/*
+ * Meta-strip pulse — used on pipeline-active dot
+ */
+@keyframes metapulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.35;
+  }
+}
+.meta-pulse {
+  animation: metapulse 1.4s ease-in-out infinite;
+}
+
+/*
+ * Ping — for the big status indicator
+ */
+@keyframes ping {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.4);
+    opacity: 0;
+  }
+}
+.status-ping {
+  animation: ping 2s ease-out infinite;
+}
+
+/*
+ * Terminal slide-in
+ */
+@keyframes termin {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.termin {
+  animation: termin 0.4s var(--ease-default);
+}
+
+/*
+ * Activity-stream line slide-in
+ */
+@keyframes slidein {
+  from {
+    opacity: 0;
+    transform: translateX(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.slidein {
+  animation: slidein 0.4s ease-out;
+}
+
+/*
+ * ============================================================================
+ * PP Neue Machina — uncomment after buying the personal-use trial from
+ * pangrampangram.com/products/neue-machina and dropping the woff2 files in
+ * /public/fonts/. Font-stack above already lists PP Neue Machina first, so
+ * this is a one-block swap to activate the real display font sitewide.
+ * ============================================================================
+ */
+/*
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('/fonts/PPNeueMachina-Ultrabold.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'PP Neue Machina';
+  src: url('/fonts/PPNeueMachina-InktrapUltrabold.woff2') format('woff2');
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+*/
+
+/*
+ * ============================================================================
+ * Full-bleed helper — escape the bordered max-w-[1440px] container so a
+ * section can span the full inner-canvas width. Use sparingly (marquees,
+ * full-width images, dividers); most sections should respect the bordered
+ * column. Negative margins use the half-difference between viewport and
+ * 1440px container; on viewports under 1440px these reduce to zero.
+ *
+ * Usage:
+ *   <section className="full-bleed">...</section>
+ *
+ * The negative margin can't go beyond the outer border (since the outer
+ * div has overflow-hidden), so this is safe at any viewport size.
+ * ============================================================================
+ */
+.full-bleed {
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+  max-width: 100vw;
+}
+
+/*
+ * ============================================================================
+ * Chamfered button corner — single bottom-right corner cut diagonally,
+ * matching the BrandMark logo's silhouette. Apply this class to any
+ * solid-fill CTA element to get the brand-consistent shape.
+ *
+ * Why a CSS utility instead of just using <Button>: lots of CTAs are
+ * hand-rolled <a> or <Link> elements with their own styles. Forcing
+ * them all through <Button> would mean rewriting their classes; this
+ * is a one-class addition that achieves the same visual result.
+ *
+ * For OUTLINED (no fill) variants, this class still works but the
+ * corner border line will stop where the chamfer begins. If you need
+ * an outlined chamfer with a continuous border, use the <Button>
+ * component's "ghost" variant which paints an SVG outline.
+ *
+ * The 12px chamfer matches the constant in components/ui/Button.tsx.
+ * If you change one, change both.
+ * ============================================================================
+ */
+.btn-chamfer {
+  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+}

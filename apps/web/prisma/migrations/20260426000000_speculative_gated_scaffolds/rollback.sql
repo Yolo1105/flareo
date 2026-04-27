@@ -1,0 +1,52 @@
+-- ROLLBACK for 20260426000000_speculative_gated_scaffolds.
+--
+-- Run this if a gate decision says "don't build this" — for instance,
+-- if F0 says <5% conversion and we're killing F1, run the relevant
+-- portion of this rollback to drop the unused PreviewInstance table.
+--
+-- Each section is independent. Run only the ones you're rolling back.
+-- Order: drop FK-dependent tables first (children before parents).
+--
+-- WARNING: this is destructive. Verify no real data exists in any
+-- of these tables before running. The original migration was additive
+-- so production data should only land here if these features were
+-- actually used.
+--
+-- Verify before rollback:
+--   SELECT count(*) FROM "PreviewInstance";
+--   SELECT count(*) FROM "Org";
+--   SELECT count(*) FROM "OrgMember";
+--   SELECT count(*) FROM "AdmissionPolicyOrg";
+--   SELECT count(*) FROM "ModuleProvenance";
+-- Any non-zero count means the feature was used; rolling back drops
+-- the data. Make a backup first.
+
+-- ─── G-1 rollback (PreviewInstance) ────────────────────────────────
+-- Run only if F0 said <5% and F1 is killed.
+-- DROP TABLE "PreviewInstance";
+
+-- ─── G-2 rollback (per-org policy) ─────────────────────────────────
+-- Run only if no org demand materialized and per-org is killed.
+-- Order matters: drop AdmissionPolicyOrg before Org (FK).
+-- DROP TABLE "AdmissionPolicyOrg";
+-- DROP TABLE "OrgMember";
+-- DROP TABLE "Org";
+
+-- ─── G-3/G-4 rollback (provenance) ─────────────────────────────────
+-- Run only if both SLSA L3 and reproducible builds are killed.
+-- DROP TABLE "ModuleProvenance";
+
+-- ─── Schema cleanup ────────────────────────────────────────────────
+-- After running the SQL above for whichever sections you're rolling
+-- back, also remove the matching models from prisma/schema.prisma:
+--   - PreviewInstance + User.previewInstances + Module.previewInstances
+--   - Org + OrgMember + AdmissionPolicyOrg + User.orgMemberships +
+--     User.orgAdmissionPolicies
+--   - ModuleProvenance + Module.provenance
+--
+-- Then run:
+--   npx prisma migrate resolve --rolled-back 20260426000000_speculative_gated_scaffolds
+--   npx prisma generate
+--
+-- This tells Prisma the speculative migration is reverted; future
+-- migrations build off the clean baseline.

@@ -1,0 +1,936 @@
+// Flareo database schema.
+//
+// Models fall into three groups:
+//   1. NextAuth tables (User, Account, Session, VerificationToken)
+//   2. Domain tables (Module, Build, Submission, Job, etc.)
+//   3. Join / state tables (ApiKey, Notification, RecentActivity)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ────────────────────────────────────────────────────────────────
+// NextAuth tables
+// ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  // Custom column for gating /app/admin
+  role          String    @default("user") // "user" | "admin"
+  createdAt     DateTime  @default(now())
+
+  // Public handle for /@<username> profile page. Format enforced at
+  // the API level: [a-z0-9][a-z0-9-]{2,29}, case-insensitive unique.
+  // Null during a brief migration window for accounts created before
+  // the username column landed; the migration auto-generates values
+  // from email local-part with numeric de-dup suffix.
+  //
+  // Reserved words (api, app, admin, docs, catalog, verify, etc.)
+  // are rejected at the API level, not via check constraint, so the
+  // list can evolve without a migration.
+  username      String?   @unique
+  // Free-text bio for the public profile page. Markdown NOT supported
+  // (same reasoning as review bodies — renders plain text with
+  // whitespace-pre-wrap; XSS surface stays zero).
+  bio           String?   @db.Text
+  // Optional URL the user wants displayed on their profile. Validated
+  // as a URL at write time; displayed as a link without affiliate
+  // tagging or redirect.
+  websiteUrl    String?
+
+  // Billing. The "plan" field is the source of truth for feature
+  // gating and quota enforcement — see lib/billing/quota.ts. When
+  // Stripe is wired, the checkout webhook writes plan="pro" and
+  // populates the Stripe IDs below; until then every user is free.
+  //
+  // plan lives on User (not a separate Subscription table) because
+  // at this scale there's one subscription per user, no team plans,
+  // and the simplest thing that could work is one string column.
+  // If team plans ever ship, this migrates cleanly to a new model.
+  plan                 String    @default("free") // "free" | "pro"
+  stripeCustomerId     String?   @unique
+  stripeSubscriptionId String?   @unique
+  // When the plan field last changed. Used by the /app/billing page
+  // to render "Upgraded on ..." and for audit if a customer disputes
+  // a charge.
+  planUpdatedAt        DateTime?
+
+  // Account lifecycle. When `deletedAt` is set, the account is in its
+  // 30-day soft-delete grace window. A nightly job hard-deletes rows
+  // past `deletedAt + 30d`. During the grace window the user can email
+  // privacy@flareo.dev to restore the account.
+  deletedAt     DateTime?
+  // When the user last changed their display name / email, for audit
+  // and rate-limit purposes. NULL means "never changed since signup."
+  profileUpdatedAt DateTime?
+
+  // Email preferences. All notifications default to on; the user can
+  // opt out. Marketing emails default to OFF — we only send them if
+  // the user explicitly opts in (GDPR friendly default).
+  notifySecurity   Boolean @default(true)  // security advisories for modules you subscribe to
+  notifySubmission Boolean @default(true)  // decisions on your module submissions
+  notifyProduct    Boolean @default(true)  // changelog digest, once a month max
+  notifyMarketing  Boolean @default(false) // launch announcements, milestones
+
+  accounts      Account[]
+  sessions      Session[]
+
+  submissions   Submission[] @relation("submitter")
+  decidedSubmissions Submission[] @relation("decider")
+  apiKeys       ApiKey[]
+  notifications Notification[]
+  publishedModules Module[]
+  jobs          Job[]
+  submissionAudits SubmissionAudit[]
+  dockerfileUploads DockerfileUpload[]
+  moduleReviews  ModuleReview[]
+  featuredModules ModuleFeatured[] @relation("moduleFeaturedCurator")
+  filedReports   ModuleReport[]   @relation("moduleReportReporter")
+  triagedReports ModuleReport[]   @relation("moduleReportTriagedBy")
+  vexStatements  VexStatement[]
+  admissionPolicies AdmissionPolicy[]
+
+  // Speculative — see DECISIONS.md G-1, G-2, G-5
+  previewInstances        PreviewInstance[]
+  orgMemberships          OrgMember[]
+  orgAdmissionPolicies    AdmissionPolicyOrg[] @relation("AdmissionPolicyOrgAuthor")
+
+  @@index([deletedAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ────────────────────────────────────────────────────────────────
+// Domain tables
+// ────────────────────────────────────────────────────────────────
+
+model Module {
+  id             String   @id                 // e.g. "FLA-2026-0001"
+  slug           String   @unique
+  name           String
+  version        String
+  author         String
+  description    String
+  tags           String[]
+  category       String
+  status         String                       // "verified" | "pending" | "failing"
+  slsa           String                       // "L1" | "L2" | "L3" | "L4"
+  trust          Int
+  trustVulns     Int
+  trustSlsa      Int
+  trustSignature Int
+  trustSbom      Int
+  cveCritical    Int
+  cveHigh        Int
+  cveMedium      Int
+  cveLow         Int
+  deploys        Int
+  updatedHours   Int
+  size           String
+  digest         String
+  previewable    Boolean  @default(false)
+  visibility     String   @default("public")  // "public" | "private"
+  pulls30d       Int      @default(0)
+  building       Boolean  @default(false)
+
+  // Canary pipeline artifacts. Populated by scripts/canary/rebuild-canary.sh.
+  // Null until the module has been rebuilt end to end; "status" reflects
+  // whether those artifacts exist yet.
+  imageRef         String?  // e.g. "public.ecr.aws/flareo/vaultwarden"
+  upstreamRef      String?  // what we rebuilt from, for transparency
+  upstreamDigest   String?
+  sbomUrl          String?  // R2 public URL
+  sbomPackages     Int?
+  trivyUrl         String?
+  rekorIndex       String?
+  signerIdentity   String?
+  signerIssuer     String?
+  lastRebuiltAt    DateTime?
+
+  publisherId    String?
+  publisher      User?    @relation(fields: [publisherId], references: [id], onDelete: SetNull)
+
+  builds         Build[]
+  rebuilds       ModuleRebuild[]
+  reviews        ModuleReview[]
+  featured       ModuleFeatured?
+  reports        ModuleReport[]
+  vexStatements  VexStatement[]
+  policyVerdict  ModulePolicyVerdict?
+  // Speculative — see DECISIONS.md G-1, G-3, G-4
+  previewInstances PreviewInstance[]
+  provenance     ModuleProvenance?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([publisherId])
+}
+
+model Build {
+  id            String   @id   // e.g. "#0847"
+  moduleSlug    String
+  module        Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  startedAt     DateTime
+  sourceCommit  String
+  stagesJson    String   @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([moduleSlug])
+}
+
+/// One row per canary-rebuild attempt. Populated by the rebuild-canary
+/// script after each attempt against each module. Separate from Build
+/// because Builds are initial/reviewer-triggered builds while
+/// ModuleRebuild is the ongoing daily re-verification chain.
+///
+/// outcome: "success" | "upstream_unchanged" | "scan_failed" | "build_failed"
+///   - success            — the rebuild produced a fresh signed image
+///   - upstream_unchanged — upstream commit hasn't moved, skipped re-sign
+///   - scan_failed        — build succeeded, Trivy found critical CVEs;
+///                          module status flipped to "failing"
+///   - build_failed       — build errored; previous artifacts remain live
+///                          but this rebuild didn't produce new ones
+model ModuleRebuild {
+  id              String   @id @default(cuid())
+  moduleSlug      String
+  module          Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  attemptedAt     DateTime @default(now())
+  durationMs      Int?     // null if the rebuild crashed before completing
+  outcome         String   // see doc comment
+  // Digest produced on success; null otherwise. Useful in the log so
+  // operators can tell whether a "success" outcome actually changed the
+  // deployed image (vs. just re-signed the same bytes).
+  resultDigest    String?
+  // Short operator-facing message. For failures, the first line of the
+  // error; for upstream_unchanged, the current upstream digest.
+  notes           String?  @db.Text
+
+  @@index([moduleSlug, attemptedAt])
+  @@index([attemptedAt])     // admin log queries order by this desc
+  @@index([outcome])          // filter "show only failures"
+}
+
+model Submission {
+  id           String   @id
+  moduleName   String
+  version      String
+  author       String
+  submittedAt  DateTime
+  // Status lifecycle:
+  //   pending      → waiting on reviewer
+  //   approved     → reviewer accepted, worker will pick up
+  //   building     → worker is currently building
+  //   built        → success, module published to catalog
+  //   failed       → build failed (user's fault: bad Dockerfile, etc.)
+  //   scan_rejected → build succeeded but Trivy found critical CVEs
+  //   rejected     → reviewer rejected
+  //   changes_requested → reviewer asked for edits, submitter still owns it
+  status       String   @default("pending")
+  queueAgeSec  Int
+  flagsJson    String   @db.Text
+  autoCosign   Boolean
+  autoTrivy    Boolean
+  autoSlsa     Boolean
+  decidedAt    DateTime?
+  decidedById  String?
+  decidedBy    User?    @relation("decider", fields: [decidedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  // Submitter link. Nullable because the pre-migration rows were
+  // stashing the userId in flagsJson; the migration backfills this
+  // from flagsJson where possible.
+  submitterId  String?
+  submitter    User?    @relation("submitter", fields: [submitterId], references: [id], onDelete: SetNull)
+
+  // Dockerfile storage. The Dockerfile itself lives in R2 to avoid
+  // stuffing multi-KB build files into Postgres. We keep a sha256
+  // here for integrity verification at build time.
+  dockerfileUrl      String?
+  dockerfileSha256   String?
+  // Opt-in network access during build. Default off; reviewer flips
+  // this on if the submission explicitly requires it. When true, the
+  // worker uses the constrained-network namespace (HTTPS to a
+  // whitelist of package registries only).
+  requiresNetwork    Boolean  @default(false)
+
+  /// Build mode for this submission. Two paths:
+  ///   "dockerfile" — submitter provided a Dockerfile (inline or R2)
+  ///   "cnb"        — submitter chose Cloud Native Buildpacks
+  ///                  auto-detect; the worker selects a Paketo
+  ///                  builder based on what it finds in the source
+  ///                  archive (package.json → Node, requirements.txt
+  ///                  → Python, go.mod → Go, Cargo.toml → Rust, Gemfile → Ruby).
+  /// String column rather than enum so we can add new build modes
+  /// (Nix, ko, etc.) without a schema migration.
+  buildType          String   @default("dockerfile") @db.VarChar(16)
+
+  /// For buildType="cnb": the language Flareo detected. Recorded at
+  /// submission time so the reviewer sees what we'll build, and so
+  /// failures can be diagnosed against the original detection. NULL
+  /// for buildType="dockerfile" submissions.
+  cnbDetectedLanguage String?  @db.VarChar(32)
+
+  /// For buildType="cnb": the canonical Paketo builder image we'd use.
+  /// Stored so the reviewer can pin a specific builder version per
+  /// submission rather than relying on a moving "latest" tag.
+  cnbBuilder         String?  @db.VarChar(128)
+
+  // Build lifecycle timestamps. NULL until the worker claims the row.
+  buildStartedAt     DateTime?
+  buildCompletedAt   DateTime?
+  // Retry accounting for kind="system" failures. The worker's polling
+  // loop increments attemptCount and sets availableAfter=NOW+backoff
+  // before flipping status back to "approved" for re-pickup. After
+  // three system-error attempts, the row is dead-lettered to the
+  // "worker_failures" status for human review.
+  attemptCount       Int       @default(0)
+  availableAfter     DateTime?
+  // Error classification when status=failed or status=scan_rejected.
+  //   "user"   — Dockerfile or submission was wrong (user's fault)
+  //   "system" — worker/infra failed (our fault — possibly retryable)
+  //   "scan"   — build succeeded, Trivy found CVEs
+  buildErrorKind     String?
+  // Error text safe to email the submitter. Does not include stack
+  // traces or host paths; internal details go to Sentry.
+  buildErrorMessage  String?  @db.Text
+  // Full build log, in R2. Accessible to submitter via a signed URL
+  // in their decision email.
+  buildLogUrl        String?
+
+  // Result artifacts on success.
+  resultImageRef     String?  // e.g. "public.ecr.aws/flareo/my-app"
+  resultDigest       String?  // "sha256:..." that we signed
+  resultSbomUrl      String?  // R2 URL to CycloneDX SBOM
+  resultRekorIndex   String?  // cosign transparency-log index
+
+  // Visibility of the module this submission will publish as.
+  // "public" shows up in the shared catalog; "private" is visible
+  // only to the submitter and admins. Enforced by plan at submission
+  // time (free users get public-only; pro users can pick either).
+  // Propagated to Module.visibility when the worker publishes.
+  visibility   String   @default("public")
+
+  auditEntries SubmissionAudit[]
+  buildLogLines BuildLogLine[]
+
+  @@index([status])
+  @@index([decidedById])
+  @@index([submitterId])
+  // Compound index — the build worker polls with this combination
+  // ("approved" + oldest first). Having the index means the poll is
+  // a single index scan, not a table scan.
+  @@index([status, submittedAt])
+}
+
+/// Audit trail for reviewer actions on submissions. One row per/// approve/reject/request-changes/retry action. Not shown in the
+/// admin UI v1 — kept for legal defensibility if a submitter disputes
+/// a decision, and for reviewer pattern-recognition later ("this
+/// reviewer rejects 80% of submissions — too strict?").
+model SubmissionAudit {
+  id           String   @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  // "approved" | "rejected" | "requested_changes" | "retried" | "cancelled"
+  action       String
+  // The reviewer's note. For rejections this is the email body sent
+  // to the submitter; for approvals it's an internal note.
+  notes        String?    @db.Text
+  // Whether the reviewer set requiresNetwork=true when approving.
+  // Tracked separately so we can audit "how often does the network
+  // escape hatch get used?"
+  grantedNetwork Boolean  @default(false)
+  createdAt    DateTime   @default(now())
+
+  @@index([submissionId])
+  @@index([reviewerId])
+  @@index([createdAt])
+}
+
+/// Incremental build-log chunks written by the worker as a Docker
+/// build progresses. Enables the submission detail page to stream
+/// live output while status = "building".
+///
+/// One row per chunk. `seq` is a monotonic sequence within a
+/// submission; the client polls with `?after=<lastSeq>` to fetch
+/// only new lines. `text` carries the raw chunk (stdout + stderr
+/// interleaved in emission order).
+///
+/// Rows are cleaned up by a periodic job once the submission reaches
+/// a terminal state and its buildLogUrl in R2 is written — the
+/// incremental table is for the live stream only, not archival.
+model BuildLogLine {
+  id            String     @id @default(cuid())
+  submissionId  String
+  submission    Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  seq           Int
+  text          String     @db.Text
+  /// "stdout" | "stderr" | "system" (worker-emitted markers like "--- build started ---")
+  stream        String     @default("stdout")
+  emittedAt     DateTime   @default(now())
+
+  // Compound unique so the worker can safely use upsert on (submission, seq)
+  // if a retry re-emits the same chunk. Also the primary access path:
+  // "all lines for this submission after seq N".
+  @@unique([submissionId, seq])
+  @@index([submissionId, emittedAt])
+}
+
+/// Ownership record for staged Dockerfile uploads. Persisted by the
+/// /api/v1/submissions/dockerfile-upload endpoint at staging time,
+/// read by /api/v1/submissions at commit time to verify that the
+/// requester who claims this upload is actually the user who staged
+/// it.
+///
+/// Without this table, ownership was implicit via the unguessability
+/// of the `sub_<16 hex>` id. Unguessability is fine today but doesn't
+/// protect against a logged or shared URL — if the id ever leaks,
+/// anyone with it could commit a submission using someone else's
+/// staged Dockerfile.
+///
+/// The row is insert-only (no updates). The sha256 is captured so the
+/// commit endpoint can cross-check the body's declared sha matches
+/// what was actually uploaded.
+model DockerfileUpload {
+  id            String   @id @default(cuid())
+  submissionId  String   @unique   // Matches the R2 key's sub_* component
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sha256        String
+  sizeBytes     Int
+  uploadedAt    DateTime @default(now())
+
+  @@index([userId, uploadedAt])
+}
+
+/// User-written review for a module. One review per (user, module)
+/// enforced by unique constraint — users can edit but not stack
+/// multiple reviews.
+///
+/// Moderation lifecycle:
+///   visible     → default state, shown in public listings
+///   flagged     → at least one reader flagged it; still visible, but
+///                 surfaced to admin for triage
+///   hidden      → admin decided it violates policy; not shown in
+///                 public listings but the row is preserved so the
+///                 author sees "your review was removed" rather than
+///                 silent disappearance
+///
+/// Rating is 1-5 integers. No half-stars. Rationale: sparse rating
+/// scales correlate with thoughtful reviews; a 0-100 slider invites
+/// review-as-number-pick.
+model ModuleReview {
+  id          String   @id @default(cuid())
+  moduleSlug  String
+  module      Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  rating      Int      // 1-5 inclusive (not enforced at DB level; API validates)
+  title       String
+  body        String   @db.Text
+  /// "visible" | "flagged" | "hidden"
+  moderation  String   @default("visible")
+  /// Free-text flag reason, populated when moderation="flagged".
+  flagReason  String?  @db.Text
+  /// Admin who set moderation="hidden". Null while visible/flagged.
+  hiddenById  String?
+  hiddenAt    DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // One review per user per module. Updates overwrite the same row.
+  @@unique([moduleSlug, authorId])
+  @@index([moduleSlug, createdAt])  // per-module list newest-first
+  @@index([moderation, createdAt])   // admin "review queue" by state
+  @@index([authorId])                 // user's own review list
+}
+
+/// Editorially-featured modules. Admins explicitly pick modules to
+/// surface in the catalog's Featured strip. Up to six at a time by
+/// convention (not enforced at the DB level); the UI takes the first
+/// six by `position` ascending, treating gaps or duplicates as
+/// harmless — admin resolves those in the editor.
+///
+/// Expiration is soft: a feature with `expiresAt` in the past is
+/// hidden from public listings automatically but the row stays in the
+/// DB as history. Admins see expired features in the editor so they
+/// can re-promote or clean up.
+///
+/// `blurb` is an optional editorial line displayed below the module
+/// name in the Featured strip. Keep it short — a single sentence.
+model ModuleFeatured {
+  id          String   @id @default(cuid())
+  moduleSlug  String   @unique
+  module      Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  /// 1..6 for display order. Lower shows first.
+  position    Int
+  /// Short editorial copy shown with the featured card. Optional —
+  /// many features are just "here's a great module" without commentary.
+  blurb       String?
+  featuredAt  DateTime @default(now())
+  /// Nullable = no expiration. Past value = hidden from public view
+  /// but visible to admins.
+  expiresAt   DateTime?
+  curatorId   String
+  curator     User     @relation("moduleFeaturedCurator", fields: [curatorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([position])
+  @@index([featuredAt])
+}
+
+/// Per-module "report a problem" submissions. Users file reports
+/// from the module detail page; admins triage them from
+/// /app/admin/reports.
+///
+/// Distinct from ModuleReview flags (#1) — those flag abusive
+/// reviews, these flag the module itself (broken, malicious,
+/// metadata wrong, legal issue, etc).
+///
+/// Lifecycle states are linear:
+///   open           — default, awaiting admin triage
+///   investigating  — admin acknowledged; work in progress
+///   resolved       — action taken (publisher notified, metadata
+///                    fixed, module hidden, etc.)
+///   dismissed      — no action warranted (not reproducible, spam,
+///                    wrong channel)
+///
+/// A report cannot be reopened. Admin files a fresh one if the issue
+/// recurs. That keeps the audit trail linear and queryable.
+///
+/// Rate limiting: (moduleSlug, reporterId) is NOT a unique
+/// constraint — a user MAY have multiple historical reports on the
+/// same module over time. The API enforces "one open-or-investigating
+/// report per (user, module) at a time" and "one new report per
+/// (user, module) per 7 days" separately, so the DB schema is
+/// flexible enough to hold history without letting the table grow
+/// via spam.
+model ModuleReport {
+  id           String   @id @default(cuid())
+  moduleSlug   String
+  module       Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  reporterId   String
+  reporter     User     @relation("moduleReportReporter", fields: [reporterId], references: [id], onDelete: Cascade)
+  /// "broken" | "malicious" | "metadata" | "legal" | "other"
+  category     String
+  /// User-provided detail. 20-4000 chars at API.
+  body         String   @db.Text
+  /// "open" | "investigating" | "resolved" | "dismissed"
+  state        String   @default("open")
+  /// Admin-only internal note — what action was taken, why.
+  resolutionNote String? @db.Text
+  /// Admin who moved the report out of "open". Null while open.
+  triagedById  String?
+  triagedBy    User?    @relation("moduleReportTriagedBy", fields: [triagedById], references: [id], onDelete: SetNull)
+  triagedAt    DateTime?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([state, createdAt])       // admin queue: open first, newest
+  @@index([moduleSlug, createdAt])  // per-module history
+  @@index([reporterId, createdAt])  // user's own reports + rate-limit lookup
+}
+
+model ApiKey {
+  id         String    @id
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String
+  tokenHash  String                          // sha256 hex of the raw token
+  tokenMask  String                          // display only, e.g. "fla_••••••••abc1"
+  scopesJson String    @db.Text
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revoked    Boolean   @default(false)
+
+  @@index([userId])
+  @@index([revoked])
+}
+
+model Notification {
+  id      String   @id @default(cuid())
+  userId  String?
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind    String
+  title   String
+  body    String
+  at      String
+  read    Boolean  @default(false)
+  href    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model Job {
+  id           String   @id                   // short numeric string, e.g. "0853"
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  moduleSlug   String
+  moduleName   String
+  version      String
+  status       String                         // "queued" | "running" | "success" | "failed" | "cancelled"
+  startedAt    DateTime
+  currentStage Int
+  percent      Int
+  stagesJson   String   @db.Text
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Incident {
+  id          String   @id
+  title       String
+  detectedAt  DateTime
+  durationSec Int
+  status      String
+  body        String   @db.Text
+  timelineJson String  @db.Text
+}
+
+model WaitlistEntry {
+  // Email-keyed signup list for closed-beta early access. Collected via
+  // /signup or the nav CTA. Drained manually in batches as capacity opens.
+  id         String   @id @default(cuid())
+  email      String   @unique
+  // How the person heard about Flareo — free-text, optional, capped to 280
+  referrer   String?  @db.VarChar(280)
+  // UTM-style source tag, e.g. "hn-launch" or "reddit-selfhosted"
+  source     String?  @db.VarChar(64)
+  // The raw X-Forwarded-For chain at signup time (first value only),
+  // stored for basic abuse triage. Truncated to 64 chars.
+  ipSnapshot String?  @db.VarChar(64)
+  // UA string for the same reason. Truncated to 200.
+  userAgent  String?  @db.VarChar(200)
+  createdAt  DateTime @default(now())
+  // Set when we've actually invited them and they've signed up.
+  invitedAt  DateTime?
+  invitedBy  String?  // admin user id who sent the invite
+
+  @@index([createdAt])
+  @@index([invitedAt])
+}
+
+/**
+ * OpenVEX 0.2.0 statement attached to a module's Trivy findings.
+ *
+ * For every CVE Trivy reports, an authorized reviewer (admin or the
+ * module's publisher) can record a VEX statement describing whether
+ * the vulnerability is actually exploitable in this module's context.
+ *
+ * The statements roll up into the OpenVEX document emitted at
+ * `/api/v1/modules/<slug>/vex`. Consumers can include that document
+ * in their own scanning pipelines to suppress findings that are
+ * not_affected, surface ones still under investigation, etc.
+ *
+ * Why this lives in its own table rather than alongside ModuleReview
+ * or in a JSON column on Module: the audit trail matters. Every
+ * statement records who wrote it and when, supports edits with
+ * createdAt/updatedAt, and can be queried independently for
+ * compliance reporting.
+ */
+model VexStatement {
+  id          String   @id @default(cuid())
+  moduleSlug  String
+  module      Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+
+  /// CVE identifier this statement applies to (e.g. "CVE-2024-12345").
+  /// One statement per (module, cve) pair — see unique index.
+  cve         String   @db.VarChar(32)
+
+  /// CVE severity bucket — "critical" | "high" | "medium" | "low" |
+  /// "unknown". Sourced from the Trivy report when the reviewer
+  /// creates the statement; lets the admission-policy evaluator
+  /// compute exact post-VEX counts per severity bucket rather than
+  /// the pessimistic "subtract from criticals first" heuristic.
+  ///
+  /// Nullable for backward compat — statements created before this
+  /// column existed have NULL severity; the evaluator falls back to
+  /// the heuristic for those rows. New statements always populate it.
+  cveSeverity String?  @db.VarChar(16)
+
+  /// OpenVEX status: "not_affected" | "affected" | "fixed" | "under_investigation"
+  /// We store as string for forward-compat with future OpenVEX statuses
+  /// rather than as an enum that's painful to extend.
+  status      String   @db.VarChar(32)
+
+  /// Required for status="not_affected": one of the OpenVEX
+  /// justifications. Examples:
+  ///   "vulnerable_code_not_present"
+  ///   "vulnerable_code_not_in_execute_path"
+  ///   "vulnerable_code_cannot_be_controlled_by_adversary"
+  ///   "inline_mitigations_already_exist"
+  justification String? @db.VarChar(64)
+
+  /// Free-text impact statement explaining the reasoning. Surfaced
+  /// to consumers reading the OpenVEX document. Required for
+  /// not_affected, optional otherwise.
+  impactStatement String? @db.Text
+
+  /// Author of the statement. We track this for audit even though the
+  /// emitted OpenVEX uses the canonical "Flareo Reviewer Team" author
+  /// regardless — internal review trail vs external attribution.
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // One VEX statement per CVE per module. Updates overwrite the same row.
+  @@unique([moduleSlug, cve])
+  @@index([moduleSlug, status])
+  @@index([authorId])
+}
+
+/**
+ * Active admission policy — singleton row that holds the JSON
+ * policy document evaluated against every module/submission.
+ *
+ * Why a database row instead of a checked-in JSON file:
+ *
+ *   - Admins can edit the policy through the UI without a deploy.
+ *   - Every change is captured as a new revision (append-only),
+ *     so we have a full audit trail of what rules were active on
+ *     any given date.
+ *   - When a policy change retroactively flips a module's verdict,
+ *     we can pinpoint the change that caused it.
+ *
+ * The policy column is stringified JSON. Schema validation lives
+ * at the application layer (lib/policy/schema.ts) so the policy
+ * shape can evolve without DB migrations.
+ *
+ * Singleton-ish: in v1 there's only one active policy. Future
+ * per-org policy override would add an orgId column and a partial
+ * unique index. Out of scope for this iteration.
+ */
+model AdmissionPolicy {
+  id          String   @id @default(cuid())
+  /// Monotonic revision number. The "active" policy is the one
+  /// with the highest revision; older revisions are kept for the
+  /// audit trail.
+  revision    Int      @unique
+  /// Stringified JSON of the policy document. Validated at write
+  /// time via the Zod schema in lib/policy/schema.ts.
+  policyJson  String   @db.Text
+  /// Free-text changelog entry — what changed in this revision and
+  /// why. Required for audit; UI prompts for it on save.
+  notes       String   @db.Text
+  /// Admin who authored this revision.
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+/**
+ * Cached policy verdict for a module. Computed when the worker
+ * publishes a module (or on policy change), stored here so the
+ * public API and module detail page can return it without
+ * re-evaluating on every read.
+ *
+ * One row per module. The verdict is invalidated and regenerated
+ * when:
+ *   - A new policy revision lands (cron sweep regenerates all)
+ *   - The module rebuilds to a new digest (worker writes a fresh row)
+ *   - A VEX statement on the module changes (downstream effect on
+ *     effective CVE counts)
+ *
+ * verdictJson contains the full per-rule breakdown for the admin UI.
+ * The top-level verdict ("pass" | "warn" | "fail") is denormalized
+ * to its own column for cheap filtering.
+ */
+model ModulePolicyVerdict {
+  id            String   @id @default(cuid())
+  moduleSlug    String   @unique
+  module        Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  /// "pass" | "warn" | "fail" — denormalized for index-friendly queries.
+  verdict       String   @db.VarChar(8)
+  /// Revision of the policy that produced this verdict.
+  policyRevision Int
+  /// Stringified JSON containing the per-rule results, the inputs
+  /// the evaluator saw, and a human-readable summary.
+  verdictJson   String   @db.Text
+  evaluatedAt   DateTime @default(now())
+
+  @@index([verdict])
+  @@index([policyRevision])
+}
+
+// ─── SPECULATIVE: gated-item scaffolds (G-1 through G-5) ──────────
+//
+// These models are added speculatively, before their respective trigger
+// criteria fired in DECISIONS.md. The goal is to have the schema in
+// place so future feature work doesn't block on a migration.
+//
+// When a real customer arrives with specific requirements, expect to
+// modify or replace these — speculative shape rarely matches real ask.
+
+/// G-1: per-user preview instances. Each row represents one ephemeral
+/// VM (Firecracker, Fly, or whatever substrate we pick) that a user
+/// has launched for a specific module.
+///
+/// Allocator contract: see lib/preview/allocator.ts. The stub allocator
+/// returns mock instance refs; F2 swaps the real allocator in.
+model PreviewInstance {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleSlug   String
+  module       Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  /// "allocating" | "ready" | "expired" | "failed"
+  status       String   @db.VarChar(16)
+  /// Provider's instance ID (Fly machine ID, Firecracker socket, etc.)
+  /// NULL while still allocating or after teardown.
+  hostId       String?  @db.VarChar(128)
+  /// Public URL the user accesses. NULL until ready.
+  subdomain    String?  @db.VarChar(128)
+  allocatedAt  DateTime @default(now())
+  /// When the instance auto-expires. Default 1 hour.
+  expiresAt    DateTime
+  /// Last interaction timestamp — keep-alive support.
+  lastActiveAt DateTime @default(now())
+  /// Failure detail if status="failed".
+  errorMessage String?  @db.Text
+
+  // One ready instance per (user, module) at a time.
+  @@unique([userId, moduleSlug, status])
+  @@index([userId, status])
+  @@index([expiresAt])
+}
+
+/// G-2 / G-5: organization concept. Required for per-org policy
+/// override AND for self-host enterprise bundle accounting.
+model Org {
+  id               String   @id @default(cuid())
+  name             String   @db.VarChar(80)
+  slug             String   @unique @db.VarChar(64)
+  /// Stripe customer ID for invoicing. NULL during trial.
+  stripeCustomerId String?  @db.VarChar(64)
+  /// "team" | "enterprise" — drives feature gates.
+  tier             String   @default("team") @db.VarChar(16)
+  /// Whether this org has a self-host bundle deployed (G-5).
+  /// Used for license-validity reporting and support routing.
+  selfHostedAt     DateTime?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  members          OrgMember[]
+  policies         AdmissionPolicyOrg[]
+
+  @@index([tier])
+}
+
+/// User membership in an Org. Roles drive admin-page visibility and
+/// the ability to edit per-org admission policies.
+model OrgMember {
+  id        String   @id @default(cuid())
+  orgId     String
+  org       Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// "owner" | "admin" | "member"
+  role      String   @default("member") @db.VarChar(16)
+  createdAt DateTime @default(now())
+
+  @@unique([orgId, userId])
+  @@index([userId])
+}
+
+/// G-2: per-org admission policy override. Separate model from
+/// AdmissionPolicy (which is catalog-wide) rather than adding orgId
+/// nullable to that — keeping them separate avoids breaking the
+/// existing single-row-per-revision invariant on AdmissionPolicy.
+///
+/// Resolution semantics: when a request comes in with org context,
+/// look here first; fall through to AdmissionPolicy if no row.
+model AdmissionPolicyOrg {
+  id          String   @id @default(cuid())
+  orgId       String
+  org         Org      @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  /// Monotonic per-org revision. Each save creates a new row.
+  revision    Int
+  policyJson  String   @db.Text
+  notes       String   @db.Text
+  authorId    String
+  author      User     @relation("AdmissionPolicyOrgAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+
+  @@unique([orgId, revision])
+  @@index([authorId])
+  @@index([createdAt])
+}
+
+/// G-3 / G-4: SLSA-L3 + reproducible-build readiness marker per
+/// module. Tracks whether the module's last build was hermetic and
+/// whether a Diffoscope verification has succeeded against an
+/// independent rebuild. Both default false; when L3 work happens,
+/// the worker sets these on each canary rebuild.
+model ModuleProvenance {
+  id              String   @id @default(cuid())
+  moduleSlug      String   @unique
+  module          Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  /// SLSA level achieved on the most recent build. 2 today; 3 once
+  /// hermetic builders are in place.
+  slsaLevel       Int      @default(2)
+  /// Whether last build was reproducible per Diffoscope (G-4).
+  reproducible    Boolean  @default(false)
+  /// When the last L3-attested build completed. NULL means never.
+  l3AttestedAt    DateTime?
+  /// When Diffoscope last verified bit-identical reproduction. NULL
+  /// means never.
+  reproducedAt    DateTime?
+  /// Path/URL to the diff if reproducible=false but a comparison
+  /// was attempted. NULL otherwise.
+  diffArtifactUrl String?  @db.Text
+  updatedAt       DateTime @updatedAt
+}

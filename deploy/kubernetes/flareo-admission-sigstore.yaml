@@ -1,0 +1,22 @@
+# Sigstore policy-controller variant of the Flareo admission policy.
+#
+# For clusters using sigstore/policy-controller instead of Kyverno.
+# https://github.com/sigstore/policy-controller
+#
+# Apply with:
+#   kubectl apply -f flareo-admission-sigstore.yaml
+
+apiVersion: policy.sigstore.dev/v1beta1
+kind: ClusterImagePolicy
+metadata:
+  name: require-flareo-signature
+spec:
+  images:
+    - glob: "public.ecr.aws/flareo/**"
+  authorities:
+    - keyless:
+        url: https://fulcio.sigstore.dev
+        identities:
+          - issuer: https://token.actions.githubusercontent.com
+            subjectRegExp: "https://github.com/flareo/.+"
+  mode: enforce

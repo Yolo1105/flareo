@@ -1,0 +1,151 @@
+.fl-prose {
+  color: var(--color-ink-mute);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  line-height: 1.65;
+  max-width: 78ch;
+}
+
+.fl-prose h1 {
+  font-family: var(--font-display);
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: -0.035em;
+  color: var(--color-ink);
+  margin: 0 0 12px 0;
+  line-height: 1.05;
+}
+
+.fl-prose h2 {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 900;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+  margin: 40px 0 14px 0;
+  line-height: 1.15;
+  padding-top: 28px;
+  border-top: 1px solid var(--color-hairline);
+}
+
+.fl-prose h2:first-child { padding-top: 0; border-top: 0; }
+.fl-prose h3 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--color-ink);
+  margin: 28px 0 10px 0;
+}
+
+.fl-prose h4 {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-ink);
+  margin: 22px 0 8px 0;
+}
+
+.fl-prose p { margin: 0 0 16px 0; }
+.fl-prose a {
+  color: var(--color-accent);
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--color-accent) 35%, transparent);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease;
+}
+
+.fl-prose a:hover {
+  text-decoration-color: var(--color-accent);
+}
+
+.fl-prose ul, .fl-prose ol {
+  margin: 0 0 16px 0;
+  padding-left: 24px;
+}
+
+.fl-prose ul { list-style: disc; }
+.fl-prose ol { list-style: decimal; }
+.fl-prose li { margin-bottom: 6px; }
+.fl-prose li::marker { color: var(--color-ink-ghost); }
+
+/* Inline code */
+.fl-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background-color: var(--color-canvas-panel);
+  border: 1px solid var(--color-hairline);
+  padding: 1.5px 6px;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.fl-prose pre {
+  background-color: var(--color-canvas-deep);
+  border: 1px solid var(--color-hairline);
+  padding: 18px 20px;
+  margin: 0 0 20px 0;
+  overflow-x: auto;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.fl-prose pre code {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font-size: inherit;
+  color: var(--color-ink);
+  white-space: pre;
+}
+
+.fl-prose blockquote {
+  border-left: 2px solid var(--color-accent);
+  background-color: color-mix(in srgb, var(--color-accent) 5%, transparent);
+  padding: 14px 20px;
+  margin: 0 0 20px 0;
+  color: var(--color-ink-softer);
+  font-style: normal;
+}
+
+.fl-prose blockquote p:last-child { margin-bottom: 0; }
+
+/* Tables */
+.fl-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 0 0 24px 0;
+  font-size: 14px;
+}
+
+.fl-prose th, .fl-prose td {
+  padding: 10px 14px;
+  border: 1px solid var(--color-hairline);
+  text-align: left;
+  vertical-align: top;
+}
+
+.fl-prose th {
+  background-color: var(--color-canvas-panel);
+  color: var(--color-ink);
+  font-weight: 600;
+  font-size: 12.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.fl-prose hr {
+  border: 0;
+  border-top: 1px solid var(--color-hairline);
+  margin: 32px 0;
+}
+
+.fl-prose .anchor {
+  color: inherit;
+  text-decoration: none;
+}
+
+.fl-prose .anchor:hover {
+  color: var(--color-accent);
+}
+

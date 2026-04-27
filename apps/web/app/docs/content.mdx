@@ -1,0 +1,53 @@
+# What is Flareo?
+
+Flareo is a container supply chain platform for self-hosters. We take popular open-source applications — password managers, photo libraries, media servers, home automation — rebuild them from source in a hardened pipeline, sign them with Sigstore, and publish the results to a public registry anyone can verify.
+
+The pitch is simple: **don't trust us, verify yourself**. Every image in the Flareo catalog comes with a cryptographic signature, a software bill of materials, and a vulnerability scan report. Anyone can run the same checks we run, offline, with `cosign` and `trivy`.
+
+## What Flareo is good for
+
+You run services on your own hardware — a homelab, a small business server, a single-node Kubernetes cluster. You care about being able to answer the question "is this binary safe to run?" without relying on the good faith of the person who pushed it.
+
+Flareo gives you:
+
+- A curated **catalog** of modules, each rebuilt from source on our CI
+- A **verification tool** that runs the same Sigstore checks in the browser or the CLI
+- Signed images available from a public registry (ECR Public)
+- Structured metadata — SBOM, CVE scan, SLSA provenance — for every build
+
+## What Flareo isn't
+
+- **Not a Docker Hub replacement.** We rebuild and sign a specific set of popular modules, not arbitrary images.
+- **Not an enterprise platform (yet).** Closed beta today. Admission controllers, air-gapped mirrors, and SOC 2 are on the roadmap but not shipped.
+- **Not a substitute for your own review.** Signatures prove an image was built by the pipeline we claim. They don't prove the upstream project is bug-free or malicious-free.
+
+## How to read these docs
+
+If you've never used Flareo:
+
+1. Start with [Install the CLI](/docs/install).
+2. Then [Verify your first module](/docs/first-verify).
+3. Then browse [Using Flareo](/docs/catalog) for day-to-day workflows.
+
+If you're considering submitting your own module:
+
+1. Read [Threat model](/docs/threat-model) to understand what we sign for.
+2. Read [Writing a good module](/docs/good-module).
+3. Submit via the web UI (CLI `flareo publish` lands in v0.3.0).
+
+If you want the full security story:
+
+1. [Threat model](/docs/threat-model)
+2. [How we sign modules](/docs/signing)
+3. [Verify from the CLI](/docs/verify-cli)
+
+## Status
+
+Flareo is in **closed beta**. That means:
+
+- The 12 modules in the catalog are real and really rebuilt daily.
+- The verification pipeline really works end-to-end.
+- The economics, SLAs, and enterprise features are being built.
+- Expect things to change. Breaking changes will be announced on [status.flareo.dev](https://status.flareo.dev) and the mailing list.
+
+If something is wrong or missing from these docs, [open an issue](https://github.com/flareo/flareo/issues) — we read every one.

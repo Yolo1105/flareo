@@ -1,0 +1,22 @@
+# /etc/systemd/system/flareo-preview-reset.service
+#
+# One-shot unit that wipes every demo instance's state. Paired with
+# flareo-preview-reset.timer which fires it daily at 00:00 UTC.
+#
+# Install:
+#   sudo cp flareo-preview-reset.{service,timer} /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl enable --now flareo-preview-reset.timer
+
+[Unit]
+Description=Wipe all Flareo preview demo state
+Documentation=https://flareo.dev
+After=docker.service
+Requires=docker.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/flareo-preview
+ExecStart=/opt/flareo-preview/reset/reset-all.sh
+StandardOutput=journal
+StandardError=journal

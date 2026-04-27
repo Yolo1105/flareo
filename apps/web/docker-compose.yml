@@ -1,0 +1,32 @@
+# Local development Postgres.
+#
+# Run:
+#   docker compose up -d
+#
+# Then set DATABASE_URL in .env to:
+#   postgresql://flareo:flareo@localhost:5432/flareo
+#
+# Stop and wipe the volume:
+#   docker compose down -v
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flareo-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: flareo
+      POSTGRES_PASSWORD: flareo
+      POSTGRES_DB: flareo
+    ports:
+      - "5432:5432"
+    volumes:
+      - flareo_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U flareo -d flareo"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  flareo_pgdata:

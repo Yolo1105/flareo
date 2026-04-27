@@ -1,0 +1,106 @@
+# VEX — Vulnerability Exploitability eXchange
+
+VEX is a way for the people who *built* a piece of software to tell scanner users which CVEs are actually exploitable in the way that software is configured. It exists because vulnerability scanners are noisy.
+
+A typical mature container image flags 5-30 findings, of which most are some flavor of "the vulnerable function is in a library that's bundled but never called from this image's entry points." A scanner can't know that. The publisher can. VEX is the format that publishes the "we looked, here's what's real" information in a way machines and humans can both consume.
+
+The full spec is at [github.com/openvex/spec](https://github.com/openvex/spec). This page covers what Flareo does with it.
+
+## The four statuses
+
+OpenVEX 0.2.0 defines four statuses for a CVE relative to a specific product:
+
+| Status | Meaning |
+|---|---|
+| `not_affected` | The CVE exists in a dependency but isn't reachable in this product's configuration. Requires a public impact statement explaining why. |
+| `affected` | The CVE applies. Treat as a real risk. |
+| `fixed` | A patch has been applied to the version in this image. Different from upstream-fixed; this is "fixed in our build." |
+| `under_investigation` | We see the finding but haven't completed the analysis yet. Don't suppress; treat as `affected` until resolved. |
+
+The reviewer team writes statements as the catalog evolves. Most modules have most of their findings annotated within a week of publication; new CVEs disclosed against existing modules are triaged on a rolling basis and re-published.
+
+## Where to find a module's VEX document
+
+```
+GET https://flareo.dev/api/v1/modules/<slug>/vex
+```
+
+The response is OpenVEX 0.2.0 JSON. `Cache-Control: public, max-age=300`. ETag invalidates when the document changes — typically when a reviewer adds, edits, or re-statuses a CVE.
+
+A minimal example response:
+
+```json
+{
+  "@context": "https://openvex.dev/ns/v0.2.0",
+  "@id": "https://flareo.dev/api/v1/modules/vaultwarden/vex",
+  "author": "Flareo Reviewer Team",
+  "timestamp": "2026-04-25T14:32:00Z",
+  "version": 7,
+  "statements": [
+    {
+      "vulnerability": { "name": "CVE-2024-12345" },
+      "products": [
+        { "@id": "pkg:oci/vaultwarden@sha256:abc...?repository_url=public.ecr.aws%2Fflareo" }
+      ],
+      "status": "not_affected",
+      "justification": "vulnerable_code_not_in_execute_path",
+      "impact_statement": "The vulnerable JSON parser in ldap-rs is bundled with this image but Vaultwarden does not invoke any LDAP code paths in its current default configuration. The crate is present because of a transitive dep through tracing-subscriber. Verified by symbol-table inspection of the release binary at digest sha256:abc..."
+    }
+  ]
+}
+```
+
+## Using VEX in your scanner
+
+The major scanners all consume OpenVEX directly:
+
+**Trivy:**
+```sh
+trivy image --vex https://flareo.dev/api/v1/modules/vaultwarden/vex \
+  public.ecr.aws/flareo/vaultwarden@sha256:...
+```
+
+**Grype:**
+```sh
+grype --vex https://flareo.dev/api/v1/modules/vaultwarden/vex \
+  public.ecr.aws/flareo/vaultwarden@sha256:...
+```
+
+**Snyk:** point Snyk's Open Source SAST at the VEX URL via the `--vex-from-url` flag (Snyk CLI ≥ 1.1280).
+
+What happens: CVEs marked `not_affected` or `fixed` get suppressed from the scanner's output. CVEs marked `affected` or `under_investigation` are shown as before. The result is the residual real risk — the findings the reviewer team agrees are exploitable, and the ones they haven't finished analyzing.
+
+If your scanner doesn't consume VEX, you'll see the raw Trivy output. That's the conservative outcome — you may chase findings that don't apply, but you won't miss anything.
+
+## What VEX is not
+
+**Not an exoneration mechanism.** Every `not_affected` annotation has a public impact statement. If you read one and disagree, the module's contact email is in `flareo.json` and you can also file an issue against the module. Suppression is not silent.
+
+**Not infallible.** The reviewer team makes judgment calls. A VEX statement is "this is our analysis, including the reasoning, dated and signed by the catalog." Treat it as a credible second opinion, not as gospel. If you're operating in a regulated environment where a finding must be remediated regardless of exploitability, you can ignore the VEX document and keep the raw scanner output.
+
+**Not a substitute for patching.** A `not_affected` annotation explains why a finding doesn't apply *today*; it doesn't promise the finding will never apply. If upstream's behavior changes (a previously-unreachable code path becomes reachable in a new release), the annotation gets revised. Keep your modules current.
+
+## How VEX integrates with the admission policy
+
+The catalog's [admission policy](/docs/admission#querying-flareos-own-admission-verdict) evaluates CVE thresholds against post-VEX counts. The default policy says "no critical CVEs after VEX" and "at most three high CVEs after VEX" — meaning a module with one critical CVE that VEX has annotated `not_affected` still passes that rule, while a module with one critical CVE that's annotated `affected` (or unannotated) fails it.
+
+This is deliberate: it gives reviewers a single lever — VEX annotations — to express "this finding is real, this one isn't" without needing to edit the policy itself for every new CVE disclosure.
+
+If you're consuming the policy verdict at `/api/v1/modules/<slug>/policy`, the input snapshot in the response includes both raw and post-VEX counts so you can audit how much of the verdict depends on VEX-suppression.
+
+## Trust we ask you to extend
+
+To use Flareo's VEX documents you're trusting the reviewer team's judgment about which findings are exploitable. The ways we mitigate that:
+
+- **Public impact statements.** Every `not_affected` annotation explains the reasoning publicly. Anyone can read it and disagree.
+- **Audit trail.** The reviewer-side admin surface tracks every annotation by author and timestamp; the issued OpenVEX document carries the canonical "Flareo Reviewer Team" author for external attribution but the internal trail is complete.
+- **No silent suppression.** A scanner that doesn't consume VEX sees the raw findings. Suppression requires explicit opt-in by pointing your scanner at the VEX URL.
+- **Versioned and timestamped.** Every issued VEX document carries a version and timestamp; ETag invalidation lets you tell when the analysis changes.
+
+If the reviewer team makes a wrong call — annotates something `not_affected` that turns out to be exploitable — the response is to revise the annotation, publish the new document, and notify consumers via the catalog's RSS / Atom feed of module updates. That's the same recovery path as for any other supply-chain misjudgment; VEX doesn't add a special case.
+
+## Next steps
+
+- [Threat model](/docs/threat-model) — where VEX sits in Flareo's overall trust posture
+- [Admission policies](/docs/admission) — how VEX-suppressed counts feed the catalog's policy verdict
+- [API reference: GET /api/v1/modules/`{slug}`/vex](/docs/api-reference) — the endpoint contract

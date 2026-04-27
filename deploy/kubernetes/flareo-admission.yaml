@@ -1,0 +1,68 @@
+# Flareo admission policy — require a valid Sigstore signature on any
+# image pulled from the Flareo registry.
+#
+# Requires Kyverno 1.10+ (https://kyverno.io/docs/installation/).
+#
+# Apply with:
+#   kubectl apply -f flareo-admission.yaml
+#
+# Test with a signed image (should admit):
+#   kubectl run vw --image=public.ecr.aws/flareo/vaultwarden:latest
+#
+# Test with an unsigned image from the same registry (should reject):
+#   kubectl run bad --image=public.ecr.aws/flareo/does-not-exist:v999
+#
+# Policy behavior:
+#   - `validationFailureAction: Audit` by default, so you can observe
+#     what WOULD be rejected without breaking production.
+#   - Flip to `Enforce` once you've confirmed every production image
+#     is actually signed.
+#   - Only applies to images matching `public.ecr.aws/flareo/*`. Other
+#     images (your own company registry, Docker Hub, etc) are not
+#     affected.
+#
+# Related docs:
+#   - https://docs.flareo.dev/docs/admission
+#   - https://docs.flareo.dev/docs/signing
+
+apiVersion: kyverno.io/v2beta1
+kind: ClusterPolicy
+metadata:
+  name: require-flareo-signature
+  annotations:
+    policies.kyverno.io/title: "Require Flareo signatures"
+    policies.kyverno.io/category: Sigstore, Supply Chain
+    policies.kyverno.io/severity: high
+    policies.kyverno.io/subject: "Pod, Deployment"
+    policies.kyverno.io/description: >-
+      Every image pulled from public.ecr.aws/flareo/* must have a valid
+      Sigstore signature issued to an identity matching
+      https://github.com/flareo/.+
+      This ensures nobody can silently push an unsigned image to the
+      Flareo registry namespace and have it scheduled in your cluster.
+spec:
+  validationFailureAction: Audit
+  webhookTimeoutSeconds: 30
+  failurePolicy: Fail
+  rules:
+    - name: verify-flareo-registry-signatures
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      # Only apply this rule when the pod references an image in the
+      # Flareo registry namespace. Other images are out of scope.
+      verifyImages:
+        - imageReferences:
+            - "public.ecr.aws/flareo/*"
+          mutateDigest: true
+          required: true
+          verifyDigest: true
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/flareo/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"

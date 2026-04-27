@@ -1,0 +1,76 @@
+# Install the CLI
+
+The Flareo CLI runs on Linux and macOS, on both x86_64 and arm64. Windows works under WSL2; we don't yet ship a native Windows binary.
+
+## Recommended: curl-pipe install
+
+```sh
+curl -fsSL https://flareo.dev/install | sh
+```
+
+This downloads the latest release archive from GitHub Releases for your platform, verifies its sha256 checksum, and (if `cosign` is installed) verifies the cryptographic signature. The binary lands in `~/.local/bin/flareo`.
+
+If `~/.local/bin` isn't already on your PATH, add this to your shell rc:
+
+```sh
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Check it worked:
+
+```sh
+flareo --version
+```
+
+## Alternative: manual download
+
+If you'd rather skip the install script, grab an archive directly from [github.com/flareo/flareo-cli/releases](https://github.com/flareo/flareo-cli/releases). Each release ships four archives:
+
+| Archive                                            | Platform                |
+|----------------------------------------------------|-------------------------|
+| `flareo-<tag>-x86_64-apple-darwin.tar.gz`          | macOS Intel             |
+| `flareo-<tag>-aarch64-apple-darwin.tar.gz`         | macOS Apple Silicon     |
+| `flareo-<tag>-x86_64-unknown-linux-musl.tar.gz`    | Linux x86_64 (static)   |
+| `flareo-<tag>-aarch64-unknown-linux-musl.tar.gz`   | Linux arm64 (static)    |
+
+Each archive is accompanied by a `.sha256` checksum and a `.cosign.bundle` Sigstore signature. Pick the one for your platform, extract, and move the `flareo` binary somewhere on your PATH:
+
+```sh
+tar -xzf flareo-v0.1.0-aarch64-apple-darwin.tar.gz
+install -m 0755 flareo ~/.local/bin/flareo
+```
+
+## Verifying the binary
+
+If you have `cosign` installed:
+
+```sh
+cosign verify-blob \
+  --bundle flareo-v0.1.0-aarch64-apple-darwin.tar.gz.cosign.bundle \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  flareo-v0.1.0-aarch64-apple-darwin.tar.gz
+```
+
+You should see `Verified OK`. If you don't have cosign, the sha256 checksum alongside each archive gives you at least tamper evidence against a MITM download:
+
+```sh
+sha256sum -c flareo-v0.1.0-aarch64-apple-darwin.tar.gz.sha256
+```
+
+## Build from source
+
+Requires Rust 1.80 or newer:
+
+```sh
+git clone https://github.com/flareo/flareo-cli
+cd flareo-cli
+FLAREO_GITHUB_CLIENT_ID=<your-oauth-app-id> cargo build --release
+./target/release/flareo --version
+```
+
+The `FLAREO_GITHUB_CLIENT_ID` is the public client ID of any GitHub OAuth App you own that has the Device Flow enabled. We embed it at build time so `flareo login` works against your GitHub account. The public ID Flareo ships is not a secret.
+
+## Next steps
+
+Now that the CLI is installed, [verify your first module](/docs/first-verify) in under five minutes.

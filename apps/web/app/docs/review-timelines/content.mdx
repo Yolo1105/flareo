@@ -1,0 +1,46 @@
+# Review timelines
+
+What happens between "proposal submitted" and "module public."
+
+## Closed beta reality
+
+Our closed-beta headcount is small. That's the main constraint. Here's the honest version:
+
+| Stage                            | Typical time    |
+|----------------------------------|-----------------|
+| Proposal opened → first response | 2-5 business days |
+| Accepted → first recipe drafted  | 1-2 weeks       |
+| First recipe → first green build | 1-3 days        |
+| First green build → public       | 24-48 hours     |
+| **End-to-end, new module**       | **2-3 weeks**   |
+
+This is slow by SaaS standards and deliberate. Every module we publish is a promise we've made to keep rebuilding, scanning, and signing it. We take that seriously and we'd rather ship one good module than ten half-maintained ones.
+
+If you need speed, the shared demo infrastructure is not your answer. You can always rebuild from source yourself and run unsigned — we're just not doing the signed-and-curated operation on your behalf in that case.
+
+## Post-launch cadence
+
+Once a module is live:
+
+- **Daily.** Canary rebuild runs. If upstream shipped a new release, we pick it up. If a transitive dependency has a new CVE, our Trivy scan catches it and flips the module status.
+- **Weekly.** We review any modules that flipped to `failing` and push recipe fixes where possible. Usually this means bumping a base image or adding a patch for an open upstream PR.
+- **Quarterly.** We audit the catalog. Anything abandoned upstream for 6+ months gets a "will be removed" notice. Removal 90 days later.
+
+## What "removed" means
+
+Removed modules get an endpoint that returns `status: archived` with the last known digest. The image itself stays on ECR Public — we can't delete it, and people may still have it pinned. The catalog page shows a clear "no longer maintained" banner. Verification still works against Sigstore; it just isn't a Flareo-supported module anymore.
+
+## What "failing" means
+
+Every module you see has one of three top-level statuses:
+
+- **verified.** Current image has a valid signature and passes our trust threshold (no criticals, ≤ 3 highs). Ship it.
+- **pending.** New module that hasn't completed its first full canary cycle. Treat with caution.
+- **failing.** Something is wrong. Either there's an open critical CVE, or the last rebuild errored, or we manually flipped it for another reason. Details on the module page.
+
+Failing doesn't mean the image is compromised. It means we don't recommend running this exact digest in production. Pin an older digest if you need to run something in the meantime.
+
+## Next steps
+
+- [Publishing](/docs/publishing) — the 30-second version
+- [Writing a good module](/docs/good-module) — what passes review

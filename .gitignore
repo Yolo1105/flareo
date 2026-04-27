@@ -1,32 +1,35 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+# OS/editor
+.DS_Store
+.idea/
+.vscode/
 
-# dependencies
-/node_modules
+# Dependencies
+node_modules/
 
-# next.js
-/.next/
-/out/
-
-# production
-/build
-
-# debug
+# Logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-.pnpm-debug.log*
+pnpm-debug.log*
 
-# env files
-.env*
+# Environment files
+.env
+.env.*
+!.env.example
 
-# vercel
-.vercel
+# Build artifacts
+dist/
+build/
+coverage/
+.next/
+out/
 
-# typescript
+# Tool caches
+.turbo/
+.cache/
+
+# TypeScript
 *.tsbuildinfo
-next-env.d.ts
 
-# macOS
-.DS_Store
-**/.DS_Store
-.vscode
+# Vercel
+.vercel/

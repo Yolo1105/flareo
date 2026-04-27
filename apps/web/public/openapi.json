@@ -1,0 +1,320 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Flareo v1 API",
+    "version": "0.2.0",
+    "description": "Public API for the Flareo container supply chain platform. Covers image verification against Sigstore, module catalog reads, health checks, and identity lookups. The CLI consumes the same endpoints described here.\n\nAuthentication is optional for read endpoints and `/verify`, and either a NextAuth session cookie or an `Authorization: Bearer fla_<token>` header is accepted where required.\n\nRate limits: 60/hour/IP for anonymous verify calls, 600/hour/user for authenticated, 300/hour/key on catalog reads. Exceeded limits return 429 with `Retry-After` set."
+  },
+  "servers": [
+    { "url": "https://flareo.dev", "description": "Production" },
+    { "url": "http://localhost:3000", "description": "Local development" }
+  ],
+  "paths": {
+    "/api/v1/verify": {
+      "post": {
+        "summary": "Verify an image against Sigstore",
+        "description": "Resolves the given image reference to a digest, checks whether a Sigstore signature exists for that digest, and enriches the result with Flareo catalog metadata if the digest is known to Flareo.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/VerifyRequest" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Verification completed (outcome is in the body)",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/VerifyResult" }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          },
+          "429": {
+            "description": "Rate limit exceeded",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/modules": {
+      "get": {
+        "summary": "List modules",
+        "description": "Returns a paginated list of public modules. Supports text search and category filtering.",
+        "parameters": [
+          { "name": "q", "in": "query", "schema": { "type": "string", "maxLength": 200 }, "description": "Text search across slug, name, description, tags" },
+          { "name": "category", "in": "query", "schema": { "type": "string", "enum": ["security", "media", "automation", "productivity", "network", "devtools", "monitoring", "communication"] } },
+          { "name": "limit", "in": "query", "schema": { "type": "integer", "minimum": 1, "maximum": 100, "default": 50 } },
+          { "name": "cursor", "in": "query", "schema": { "type": "string" }, "description": "Slug of last item from prior page" }
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated modules",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["modules", "nextCursor"],
+                  "properties": {
+                    "modules": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/ModuleSummary" }
+                    },
+                    "nextCursor": { "type": ["string", "null"] }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/modules/{slug}": {
+      "get": {
+        "summary": "Get module by slug",
+        "parameters": [
+          { "name": "slug", "in": "path", "required": true, "schema": { "type": "string" } }
+        ],
+        "responses": {
+          "200": {
+            "description": "Module detail",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ModuleDetail" }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/ApiError" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/modules/by-digest/{digest}": {
+      "get": {
+        "summary": "Get module by digest",
+        "description": "Reverse lookup. Used by the CLI's `verify` command to enrich Sigstore output with Flareo catalog metadata when the digest belongs to a Flareo module.",
+        "parameters": [
+          { "name": "digest", "in": "path", "required": true, "schema": { "type": "string", "pattern": "^sha256:[a-f0-9]{64}$" } }
+        ],
+        "responses": {
+          "200": { "description": "Module found", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ModuleByDigest" } } } },
+          "404": { "description": "Digest not in catalog", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } }
+        }
+      }
+    },
+    "/api/v1/whoami": {
+      "get": {
+        "summary": "Get authenticated user",
+        "description": "Accepts either a NextAuth session cookie or an `Authorization: Bearer fla_<token>` header.",
+        "responses": {
+          "200": { "description": "Authenticated", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/WhoamiResult" } } } },
+          "401": { "description": "No valid credentials", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/ApiError" } } } }
+        }
+      }
+    },
+    "/api/v1/stats": {
+      "get": {
+        "summary": "Public catalog statistics",
+        "responses": {
+          "200": {
+            "description": "Stats",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "moduleCount": { "type": "integer" },
+                    "verifiedCount": { "type": "integer" },
+                    "builds7d": { "type": "integer" },
+                    "scanPassPct": { "type": "integer" },
+                    "openCves": { "type": "integer" },
+                    "lastRebuildAt": { "type": ["string", "null"], "format": "date-time" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/health": {
+      "get": {
+        "summary": "Health check",
+        "description": "Returns 200 when the app and database are reachable, 503 otherwise. Used by Instatus uptime monitoring.",
+        "responses": {
+          "200": { "description": "Healthy" },
+          "503": { "description": "Degraded" }
+        }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "fla_<token>"
+      }
+    },
+    "schemas": {
+      "VerifyRequest": {
+        "type": "object",
+        "required": ["imageRef"],
+        "properties": {
+          "imageRef": { "type": "string", "example": "public.ecr.aws/flareo/vaultwarden@sha256:abc..." }
+        }
+      },
+      "VerifyResult": {
+        "type": "object",
+        "required": ["status", "imageRef", "resolvedDigest", "signerIdentity", "signerIssuer", "rekorLogIndex", "rekorUrl", "integratedAt", "flareoModule", "errorMessage"],
+        "properties": {
+          "status": { "type": "string", "enum": ["verified", "signed", "unsigned", "invalid", "error"] },
+          "imageRef": { "type": "string" },
+          "resolvedDigest": { "type": ["string", "null"] },
+          "signerIdentity": { "type": ["string", "null"] },
+          "signerIssuer": { "type": ["string", "null"] },
+          "rekorLogIndex": { "type": ["string", "null"] },
+          "rekorUrl": { "type": ["string", "null"] },
+          "integratedAt": { "type": ["string", "null"], "format": "date-time" },
+          "flareoModule": { "oneOf": [{ "$ref": "#/components/schemas/FlareoModuleRef" }, { "type": "null" }] },
+          "errorMessage": { "type": ["string", "null"] }
+        }
+      },
+      "FlareoModuleRef": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "trust": { "type": "integer" },
+          "cves": { "$ref": "#/components/schemas/CveCounts" },
+          "sbomUrl": { "type": ["string", "null"] },
+          "scanUrl": { "type": ["string", "null"] }
+        }
+      },
+      "ModuleSummary": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "author": { "type": "string" },
+          "description": { "type": "string" },
+          "category": { "type": "string" },
+          "status": { "type": "string", "enum": ["verified", "pending", "failing"] },
+          "slsa": { "type": "string" },
+          "trust": { "type": "integer" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "cves": { "$ref": "#/components/schemas/CveCounts" },
+          "deploys": { "type": "integer" },
+          "digest": { "type": "string" },
+          "previewable": { "type": "boolean" },
+          "lastRebuiltAt": { "type": ["string", "null"], "format": "date-time" }
+        }
+      },
+      "ModuleDetail": {
+        "allOf": [
+          { "$ref": "#/components/schemas/ModuleSummary" },
+          {
+            "type": "object",
+            "properties": {
+              "trustBreakdown": {
+                "type": "object",
+                "properties": {
+                  "vulns": { "type": "integer" },
+                  "slsa": { "type": "integer" },
+                  "signature": { "type": "integer" },
+                  "sbom": { "type": "integer" }
+                }
+              },
+              "size": { "type": "string" },
+              "imageRef": { "type": ["string", "null"] },
+              "upstreamRef": { "type": ["string", "null"] },
+              "upstreamDigest": { "type": ["string", "null"] },
+              "sbomUrl": { "type": ["string", "null"] },
+              "scanUrl": { "type": ["string", "null"] },
+              "rekorIndex": { "type": ["string", "null"] },
+              "rekorUrl": { "type": ["string", "null"] },
+              "signerIdentity": { "type": ["string", "null"] },
+              "signerIssuer": { "type": ["string", "null"] }
+            }
+          }
+        ]
+      },
+      "ModuleByDigest": {
+        "type": "object",
+        "properties": {
+          "slug": { "type": "string" },
+          "name": { "type": "string" },
+          "version": { "type": "string" },
+          "author": { "type": "string" },
+          "digest": { "type": "string" },
+          "imageRef": { "type": ["string", "null"] },
+          "trust": { "type": "integer" },
+          "cves": { "$ref": "#/components/schemas/CveCounts" },
+          "rekorIndex": { "type": ["string", "null"] },
+          "signerIdentity": { "type": ["string", "null"] },
+          "signerIssuer": { "type": ["string", "null"] },
+          "sbomUrl": { "type": ["string", "null"] },
+          "scanUrl": { "type": ["string", "null"] }
+        }
+      },
+      "WhoamiResult": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": ["string", "null"] },
+          "email": { "type": ["string", "null"] },
+          "image": { "type": ["string", "null"] },
+          "role": { "type": "string", "enum": ["user", "admin"] },
+          "authSource": { "type": "string", "enum": ["session", "apikey"] },
+          "apiKeyLabel": { "type": "string" }
+        }
+      },
+      "CveCounts": {
+        "type": "object",
+        "required": ["critical", "high", "medium", "low"],
+        "properties": {
+          "critical": { "type": "integer" },
+          "high": { "type": "integer" },
+          "medium": { "type": "integer" },
+          "low": { "type": "integer" }
+        }
+      },
+      "ApiError": {
+        "type": "object",
+        "required": ["error"],
+        "properties": {
+          "error": {
+            "type": "object",
+            "required": ["code", "message"],
+            "properties": {
+              "code": { "type": "string" },
+              "message": { "type": "string" },
+              "details": {}
+            }
+          }
+        }
+      }
+    }
+  }
+}

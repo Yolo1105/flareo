@@ -1,0 +1,83 @@
+name: CI
+
+# Catches the regression class my brace-balance check can't:
+# unused imports, type errors hidden by `as never`, ESLint
+# violations, and Next.js build failures from invalid React tree.
+#
+# Runs on every PR plus pushes to main. Fast — typically <2 min on
+# a warm cache.
+#
+# Prerequisite: package-lock.json must be committed to the repo.
+# `npm ci` requires it. If you've been working with the workspace
+# zip (which excludes the lockfile), run `npm install` once locally
+# and commit the resulting lockfile before pushing.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+# Allow concurrent runs on different PRs but cancel older runs on
+# the same PR if a new commit lands.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  typecheck:
+    name: TypeScript + ESLint
+    runs-on: ubuntu-22.04
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Use Node 20
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Generate Prisma client
+        # Required before tsc because lib/db/* references generated types.
+        run: npx prisma generate
+
+      - name: Type check
+        run: npm run typecheck
+
+      - name: Lint
+        run: npm run lint
+
+  build:
+    name: Next.js build
+    runs-on: ubuntu-22.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Use Node 20
+        uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install
+        run: npm ci
+
+      - name: Generate Prisma client
+        run: npx prisma generate
+
+      - name: Build
+        # Use a placeholder DATABASE_URL — Next build only needs it
+        # for static page generation that hits the DB. We build with
+        # `output: 'standalone'` and dynamic rendering for DB-bound
+        # routes, so this typically doesn't matter, but the env var
+        # being set prevents Prisma client init from throwing.
+        env:
+          DATABASE_URL: postgresql://placeholder@localhost:5432/placeholder
+          NEXTAUTH_SECRET: build-time-placeholder-not-secret
+          NEXTAUTH_URL: http://localhost:3000
+        run: npm run build

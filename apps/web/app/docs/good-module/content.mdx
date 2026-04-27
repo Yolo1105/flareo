@@ -1,0 +1,70 @@
+# Writing a good module
+
+This page is for maintainers who want to understand what Flareo's pipeline does to a module and how to propose one that passes easily.
+
+## The recipe
+
+A Flareo module is defined by a small config file in the canary pipeline:
+
+```yaml
+slug: example
+name: Example
+author: Example Project
+category: productivity
+license: MIT
+upstream:
+  source: https://github.com/example/example
+  ref_pattern: "v*.*.*"         # tags that trigger a rebuild
+  entry: ./Dockerfile           # how to build (relative to source root)
+runtime:
+  ports: [3000]
+  volumes: ["/data"]
+  default_env: {}
+  healthcheck: "wget -q --spider http://localhost:3000/health"
+```
+
+This tells the pipeline:
+
+- Watch upstream for new tags matching `v*.*.*`
+- When a new tag appears, clone, build from `Dockerfile`, tag as `public.ecr.aws/flareo/example:<tag>`
+- Scan with Trivy, sign with cosign, publish to Rekor
+- Advertise ports, volumes, healthcheck on the module page
+
+## What makes a module easy to accept
+
+**A single `Dockerfile` that produces a runnable image.** No scripts that download prebuilt binaries from the upstream release page, no `FROM upstream/prebuilt-image` where "upstream/prebuilt-image" is whoever's Docker Hub account. We rebuild from source.
+
+**Pinned build dependencies.** Apt packages pinned by version, language dependencies from a lockfile (`package-lock.json`, `go.sum`, `Cargo.lock`, `requirements.txt` with hashes). If your build is non-reproducible, reproducibility is the first thing we ask you to fix.
+
+**A healthcheck that doesn't lie.** Healthchecks that return 200 before the app is actually ready cause hard-to-debug issues for everyone downstream. Prefer an endpoint that actually exercises the code path users hit.
+
+**Small final image.** Multi-stage builds are strongly encouraged. A 2 GB image where 1.8 GB is build-time node_modules is a red flag.
+
+**Declare your volumes.** Anything stateful the app writes — database files, uploaded content, generated keys — needs to be in a named volume so backups work. An app that scatters state across `/opt`, `/var`, `/etc` is painful.
+
+## What makes review slow
+
+- **Secrets baked into the image.** We reject and require a rebuild.
+- **Build-time network access to arbitrary hosts.** We whitelist registry and package-manager domains; everything else requires justification.
+- **Licenses other than the upstream's.** If your recipe is MIT but upstream is AGPL, the final image is AGPL, and we'll adjust the metadata accordingly.
+- **Binaries the build step can't trace.** If there's a `curl | sh` in your Dockerfile, we need the URL to be one we can pin and hash.
+
+## What we do on top of your recipe
+
+The Flareo build pipeline adds several things your base recipe doesn't have to care about:
+
+- **Trivy scan** on every build layer, results published to R2
+- **CycloneDX SBOM** generation, also published to R2
+- **VEX annotation** by the reviewer team — Trivy findings that aren't actually exploitable in the way the module is configured get marked `not_affected` or `fixed` per the OpenVEX 0.2.0 spec, surfaced at `/api/v1/modules/<slug>/vex`
+- **Cosign keyless signing** via our GitHub Actions OIDC identity
+- **Rekor transparency log** entry, so the signature is public and immutable
+- **SLSA provenance attestation** at level 2. We don't currently target L3 — the gap is "build platform isolated per-job," which our shared GitHub Actions runner doesn't satisfy. Whether L3 is worth the operational cost is open; we'll revisit if a customer asks for it
+- **Admission policy verdict** — the catalog's active policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, SLSA level) is evaluated against your module's signals, with the result at `/api/v1/modules/<slug>/policy`
+- **Daily rebuild** against the same upstream tag, in case dependencies have patched CVEs since the last build
+
+None of that is your job. Write a clean Dockerfile; we do the rest.
+
+## Next steps
+
+- [Review timelines](/docs/review-timelines) — what the week after submission looks like
+- [Signing](/docs/signing) — the cryptography of what happens after your recipe builds

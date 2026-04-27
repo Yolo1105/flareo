@@ -1,0 +1,258 @@
+# Flareo shared preview demo — Week 4 deliverable.
+#
+# Runs one instance of each Flareo canary module behind a Caddy reverse
+# proxy, with each module exposed at s-<slug>-demo.preview.flareo.dev.
+#
+# IMPORTANT SECURITY NOTE: every instance here is SHARED. Any visitor
+# can see any other visitor's test data. The daily reset at 00:00 UTC
+# (see reset/ and systemd/) wipes all named volumes to minimise how long
+# accidentally-entered real data lives on the box.
+#
+# Services marked `profiles: [heavy]` are not started by default because
+# they need too much RAM for a CX41 (16 GB). Enable by running:
+#   docker compose --profile heavy up -d
+# on a larger box. For the MVP we ship the light services only.
+
+services:
+
+  # ── Vaultwarden (Bitwarden-compatible password manager) ────────────
+  vaultwarden:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/vaultwarden:latest"
+    container_name: flareo-preview-vaultwarden
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8001:80"
+    environment:
+      DOMAIN: "https://s-vaultwarden-demo.preview.flareo.dev"
+      SIGNUPS_ALLOWED: "true"   # shared demo — anyone can sign up
+      WEBSOCKET_ENABLED: "true"
+      LOG_LEVEL: "warn"
+      DATA_FOLDER: "/data"
+    volumes:
+      - vaultwarden_data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/alive"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    mem_limit: 512m
+    cpus: 1.0
+
+  # ── Uptime Kuma (self-hosted uptime monitoring) ────────────────────
+  uptime-kuma:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/uptime-kuma:latest"
+    container_name: flareo-preview-uptime-kuma
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8002:3001"
+    volumes:
+      - uptime_kuma_data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "extra/healthcheck.js"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    mem_limit: 512m
+    cpus: 1.0
+
+  # ── Gitea (lightweight git hosting) ────────────────────────────────
+  gitea:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/gitea:latest"
+    container_name: flareo-preview-gitea
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8003:3000"
+    environment:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      GITEA__server__ROOT_URL: "https://s-gitea-demo.preview.flareo.dev/"
+      GITEA__server__DOMAIN: "s-gitea-demo.preview.flareo.dev"
+      GITEA__server__SSH_DOMAIN: "s-gitea-demo.preview.flareo.dev"
+      GITEA__service__DISABLE_REGISTRATION: "false"
+    volumes:
+      - gitea_data:/data
+    mem_limit: 1g
+    cpus: 1.0
+
+  # ── Linkwarden (bookmark manager) ──────────────────────────────────
+  linkwarden-db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: flareo-preview-linkwarden-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: linkwarden
+      POSTGRES_PASSWORD: linkwarden-shared-demo-do-not-use
+      POSTGRES_DB: linkwarden
+    volumes:
+      - linkwarden_db:/var/lib/postgresql/data
+    mem_limit: 256m
+    cpus: 0.5
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "linkwarden"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  linkwarden:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/linkwarden:latest"
+    container_name: flareo-preview-linkwarden
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8004:3000"
+    depends_on:
+      linkwarden-db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: "postgresql://linkwarden:linkwarden-shared-demo-do-not-use@linkwarden-db:5432/linkwarden"
+      NEXTAUTH_URL: "https://s-linkwarden-demo.preview.flareo.dev/api/v1/auth"
+      NEXTAUTH_SECRET: "${LINKWARDEN_SECRET:-shared-demo-secret-do-not-use}"
+    volumes:
+      - linkwarden_data:/data/data
+    mem_limit: 768m
+    cpus: 1.0
+
+  # ── ntfy (push-notification service) ───────────────────────────────
+  ntfy:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/ntfy:latest"
+    container_name: flareo-preview-ntfy
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8005:80"
+    command: ["serve"]
+    environment:
+      NTFY_BASE_URL: "https://s-ntfy-demo.preview.flareo.dev"
+      NTFY_LISTEN_HTTP: ":80"
+      NTFY_BEHIND_PROXY: "true"
+      NTFY_CACHE_FILE: "/var/cache/ntfy/cache.db"
+      NTFY_AUTH_FILE: "/var/lib/ntfy/user.db"
+      NTFY_AUTH_DEFAULT_ACCESS: "read-write"
+    volumes:
+      - ntfy_cache:/var/cache/ntfy
+      - ntfy_data:/var/lib/ntfy
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ── AdGuard Home (DNS-based ad blocker) ────────────────────────────
+  #
+  # Note: we don't expose the DNS ports (53/tcp, 53/udp) externally; the
+  # DNS service is only reachable from inside the container. The admin
+  # UI on :3000 is what we proxy publicly. Demo visitors can click
+  # around the filter-list settings but cannot actually use it as DNS.
+  adguard-home:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/adguard-home:latest"
+    container_name: flareo-preview-adguard-home
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8006:3000"
+    volumes:
+      - adguard_work:/opt/adguardhome/work
+      - adguard_conf:/opt/adguardhome/conf
+    mem_limit: 256m
+    cpus: 0.5
+
+  # ── Paperless-ngx (document management with OCR) ───────────────────
+  #
+  # Paperless needs Redis and Postgres. Kept but marked `heavy` because
+  # the OCR consumer is memory-hungry; skip on CX41.
+  paperless-redis:
+    image: docker.io/library/redis:7-alpine
+    container_name: flareo-preview-paperless-redis
+    restart: unless-stopped
+    volumes:
+      - paperless_redis:/data
+    profiles: [heavy]
+    mem_limit: 128m
+    cpus: 0.25
+
+  paperless-db:
+    image: docker.io/library/postgres:16-alpine
+    container_name: flareo-preview-paperless-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: paperless
+      POSTGRES_USER: paperless
+      POSTGRES_PASSWORD: paperless-shared-demo-do-not-use
+    volumes:
+      - paperless_db:/var/lib/postgresql/data
+    profiles: [heavy]
+    mem_limit: 256m
+    cpus: 0.5
+
+  paperless-ngx:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/paperless-ngx:latest"
+    container_name: flareo-preview-paperless-ngx
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8007:8000"
+    depends_on:
+      - paperless-redis
+      - paperless-db
+    environment:
+      PAPERLESS_REDIS: "redis://paperless-redis:6379"
+      PAPERLESS_DBHOST: "paperless-db"
+      PAPERLESS_DBUSER: "paperless"
+      PAPERLESS_DBPASS: "paperless-shared-demo-do-not-use"
+      PAPERLESS_SECRET_KEY: "${PAPERLESS_SECRET:-shared-demo-secret-do-not-use}"
+      PAPERLESS_URL: "https://s-paperless-ngx-demo.preview.flareo.dev"
+      PAPERLESS_ADMIN_USER: "demo"
+      PAPERLESS_ADMIN_PASSWORD: "demo"
+      PAPERLESS_TIME_ZONE: "UTC"
+    volumes:
+      - paperless_data:/usr/src/paperless/data
+      - paperless_media:/usr/src/paperless/media
+      - paperless_export:/usr/src/paperless/export
+      - paperless_consume:/usr/src/paperless/consume
+    profiles: [heavy]
+    mem_limit: 2g
+    cpus: 2.0
+
+  # ── Caddy (reverse proxy) ──────────────────────────────────────────
+  #
+  # Same Caddy binary that terminates TLS; see preview-only stanza.
+  # This is the "caddy demo" module — it is the proxy AND a previewable
+  # module itself. We point the preview subdomain at Caddy's admin UI.
+  caddy-demo:
+    image: "${FLAREO_REGISTRY:-public.ecr.aws/flareo}/caddy:latest"
+    container_name: flareo-preview-caddy-demo
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8008:80"
+    volumes:
+      - caddy_demo_data:/data
+      - caddy_demo_config:/config
+    command: ["caddy", "file-server", "--browse", "--root", "/srv/demo"]
+    mem_limit: 128m
+    cpus: 0.25
+
+# ── Services NOT in the shared demo (documented here for transparency) ─
+#
+# - home-assistant  → needs USB/bluetooth passthrough to be meaningful,
+#                     and its setup flow locks to one instance
+# - immich          → requires 4+ containers and a GPU to demo well
+# - jellyfin        → streams video; network saturation on shared box
+# - nextcloud       → 2+ GB of dependencies, slow first boot
+#
+# These show "Preview coming soon" on their module pages.
+
+volumes:
+  vaultwarden_data:
+  uptime_kuma_data:
+  gitea_data:
+  linkwarden_db:
+  linkwarden_data:
+  ntfy_cache:
+  ntfy_data:
+  adguard_work:
+  adguard_conf:
+  paperless_redis:
+  paperless_db:
+  paperless_data:
+  paperless_media:
+  paperless_export:
+  paperless_consume:
+  caddy_demo_data:
+  caddy_demo_config:
+
+networks:
+  default:
+    name: flareo-preview

@@ -1,0 +1,84 @@
+# Verify your first module
+
+Goal: from a fresh laptop, get a cryptographic proof that a specific Vaultwarden image was built by Flareo's pipeline, signed into the public Sigstore transparency log. About five minutes.
+
+## What you need
+
+- `docker` or `podman` installed (we'll pull one image)
+- `cosign` installed (optional but nice — `brew install cosign` on macOS, apt/yum elsewhere)
+- The Flareo CLI from the [install guide](/docs/install)
+
+## Step 1: look up the Flareo-signed Vaultwarden
+
+Open the Vaultwarden module page at [flareo.dev/modules/vaultwarden](https://flareo.dev/modules/vaultwarden). Scroll to the deploy panel. Copy the pinned digest — it looks like:
+
+```
+public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+The digest is what we're going to verify. A digest is content-addressable: you can't swap out the image behind it. Tags like `:latest` can be moved; digests cannot.
+
+## Step 2: verify via the web
+
+Paste that reference into the box at [flareo.dev/verify](https://flareo.dev/verify) and hit Verify. You should see three green checks:
+
+- **Signature**: the image was signed by Flareo's GitHub Actions build identity
+- **Vulnerabilities**: the current CVE status from our latest scan
+- **Provenance**: the SLSA attestation is present
+
+This is the same verification Flareo does internally. It runs against public Sigstore infrastructure; no Flareo server sits in the verification path. You can close your browser and do it offline yourself, which is the point.
+
+## Step 3: verify from your own terminal
+
+```sh
+cosign verify \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+Expected output:
+
+```
+Verification for public.ecr.aws/flareo/vaultwarden@sha256:abc...
+The following checks were performed:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The code-signing certificate was verified using trusted certificate authority certificates
+```
+
+If you got `Verified OK` on the web AND from your terminal, and the outputs agree, you have an end-to-end cryptographic proof chain: Sigstore → Fulcio → GitHub Actions OIDC → Flareo's repository. Nobody can fake this chain without either compromising GitHub Actions, Fulcio, or Flareo's repository access.
+
+## Step 4: pull and run
+
+```sh
+docker pull public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+docker run --name vw -d \
+  -v vw-data:/data \
+  -p 127.0.0.1:8080:80 \
+  public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+Open `http://localhost:8080` — Vaultwarden is up. The image you're running is provably the one you verified.
+
+## What you've just done
+
+You chose to trust:
+
+- The Sigstore public-good infrastructure (trust root)
+- GitHub Actions as an OIDC issuer
+- The `flareo` organization's control of its repositories
+
+You did NOT have to trust:
+
+- Any HTTPS connection from the Flareo website to your browser
+- Any Flareo API or server being uncompromised
+- Any image mirror or registry being honest
+
+That's the design. Flareo can go offline tomorrow and every image you've already pinned by digest remains verifiable as long as Sigstore keeps operating.
+
+## Next steps
+
+- Read the [threat model](/docs/threat-model) to understand what this does and doesn't prove
+- Browse the [full catalog](/docs/catalog) of 12 modules
+- Try [shared preview demos](/docs/previews) without installing anything at all

@@ -1,0 +1,2 @@
+# Prisma migration tracking. Do not edit.
+provider = "postgresql"

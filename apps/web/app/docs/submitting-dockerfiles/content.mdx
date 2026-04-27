@@ -1,0 +1,394 @@
+# Submitting a Dockerfile
+
+This page walks you through writing a Dockerfile that the Flareo build worker can actually build. If you've written a Dockerfile before, most of the constraints here will feel familiar — the unusual one is the no-network-during-build rule, which we explain below.
+
+## The quick version
+
+A Flareo-compatible Dockerfile:
+
+1. Uses a well-known, digest-pinned base image
+2. Does not call out to the network during `RUN` (no `apt-get install`, no `npm install`, no `pip install`, no `curl https://...`)
+3. Has a clear `ENTRYPOINT` or `CMD` that runs the service
+4. Finishes building in under 10 minutes with under 4 GB RAM and 20 GB of layers
+5. Passes a Trivy CVE scan (no critical or high CVEs in the final image)
+
+If you want a working example before reading the rules, skip to [Example: a minimal Node service](#example-a-minimal-node-service).
+
+## Don't have a Dockerfile? Cloud Native Buildpacks
+
+If your project has standard language signals — `package.json`, `requirements.txt`, `pyproject.toml`, `go.mod`, `Cargo.toml`, `Gemfile`, `pom.xml`, `package.swift` — and **no Dockerfile**, the build worker can use Cloud Native Buildpacks (CNB) to produce an image instead. You don't write any of the Dockerfile rules below; the buildpack produces an OCI-compliant image from your source.
+
+This is detected automatically when you submit. The submission UI on `/app/publish` and `flareo publish` both run the same detection logic:
+
+| Signal in your repo                      | Buildpack used         |
+|------------------------------------------|------------------------|
+| `package.json`                           | `paketobuildpacks/nodejs` |
+| `requirements.txt` or `pyproject.toml`   | `paketobuildpacks/python` |
+| `go.mod`                                 | `paketobuildpacks/go`     |
+| `Cargo.toml`                             | `paketobuildpacks/rust`   |
+| `Gemfile`                                | `paketobuildpacks/ruby`   |
+| `pom.xml` or `build.gradle`              | `paketobuildpacks/java`   |
+
+The output is a regular OCI image — same signing, scanning, SBOM, and SLSA pipeline as a Dockerfile-built image. The end-result module is indistinguishable from a hand-built one in the catalog.
+
+CNB constraints worth knowing:
+
+- **Buildpack builds run with network enabled** (this is the only worker path that does, and it's gated to the buildpack's curated dep-resolution traffic only). Your dependencies pull through the buildpack's package-mirror, not arbitrary URLs.
+- **Slower than a Dockerfile** — typical CNB build is 2-5 minutes; a tight Dockerfile is often <1 minute.
+- **Less control** — you can't pre-compile binaries, customize entry points beyond what the buildpack supports, or add system packages. For those cases, write a Dockerfile.
+
+Mixing CNB and Dockerfile in one submission isn't supported. If both are present, the Dockerfile wins.
+
+## Why we build this way
+
+Flareo rebuilds every module in a locked-down environment. Your Dockerfile runs with:
+
+- **No outbound network.** The container can't reach the internet during build.
+- **4 GB of RAM and 2 CPUs.** Enough for 95% of builds. Ridiculously large builds will fail.
+- **10-minute build timeout.** Goes from `docker build` start to final `success`.
+- **Scanned afterwards** by Trivy. If the finished image has a critical or high CVE, the submission is rejected.
+
+The strictest of these is the no-network rule. That needs explanation, because most Dockerfiles you've seen include `RUN apt-get update && apt-get install -y ...` right at the top.
+
+We block network during build because it's the single biggest source of supply-chain risk. When `apt-get install curl` runs during your build, you're trusting:
+
+- That the Debian mirror wasn't compromised
+- That the curl package hasn't been swapped for a malicious version
+- That DNS resolved to the right mirror in the first place
+- That TLS wasn't MITM'd somewhere in between
+
+Every real-world supply-chain compromise has involved at least one of those steps. Blocking them isn't paranoid — it's what "reproducible" means. Two Flareo builds of the same Dockerfile produce byte-for-byte identical images because nothing external changed between builds.
+
+## How to write a network-free Dockerfile
+
+The trick is **multi-stage builds with pre-vetted base images**. Instead of fetching dependencies inside your build, you start from a base image that already has them.
+
+### Recommended base images
+
+These are base images we've pre-cached on the build host. Use these and the no-network rule rarely bites:
+
+| Base image                           | Has                                    | Good for                        |
+|--------------------------------------|----------------------------------------|---------------------------------|
+| `node:20-slim`, `node:22-slim`       | Node + npm                             | Node.js apps                    |
+| `python:3.12-slim`, `python:3.11-slim` | Python + pip                         | Python apps                     |
+| `golang:1.22`, `golang:1.23`         | Go toolchain                           | Go build stages                 |
+| `rust:1.80`, `rust:1.81`             | Rust toolchain                         | Rust build stages               |
+| `alpine:3.19`                        | Minimal Linux                          | Final-stage runtime images      |
+| `debian:12-slim`                     | Minimal Debian                         | Final-stage runtime images      |
+| `nginx:1.27-alpine`                  | Nginx                                  | Static sites + reverse proxies  |
+| `caddy:2.8-alpine`                   | Caddy                                  | Reverse proxies with auto-TLS   |
+| `postgres:16-alpine`                 | Postgres                               | Not for your app image — sidecar pattern |
+| `redis:7-alpine`                     | Redis                                  | Sidecar                         |
+
+Use these by tag and we'll pin to the latest patched version internally. If you want to pin yourself, use a digest:
+
+```dockerfile
+FROM node:20-slim@sha256:abc123...
+```
+
+### Need something outside the list?
+
+If you need a base image that isn't pre-cached, tell us in the submission notes and we can either add it to the cache or approve `requiresNetwork=true` for your specific submission.
+
+`requiresNetwork=true` allows outbound HTTPS to a small whitelist (npm registry, pypi, debian mirrors, a few others). It's opt-in, reviewer-approved, and logged. We prefer not to use it because it reintroduces the risks above, but it exists as an escape hatch.
+
+### The multi-stage pattern
+
+The idiom you'll use most often:
+
+```dockerfile
+# Stage 1: build artifacts in an image that has the toolchain
+FROM golang:1.22 AS builder
+WORKDIR /src
+COPY go.mod go.sum ./
+COPY . .
+RUN go build -o /out/server ./cmd/server
+
+# Stage 2: final image, tiny, runtime only
+FROM alpine:3.19
+COPY --from=builder /out/server /usr/local/bin/server
+ENTRYPOINT ["/usr/local/bin/server"]
+```
+
+This works under no-network because:
+
+- Stage 1 uses `golang:1.22`, which already has the toolchain. No network fetch needed.
+- `COPY go.mod go.sum ./` copies your pre-downloaded module files from the build context. Since Go modules are in the context (your git repo), no download happens.
+- `go build` compiles from source already in the image + context.
+- Stage 2 uses `alpine:3.19` which is already cached.
+- `COPY --from=builder` moves the binary between stages, no network.
+
+The pattern is identical for Node, Python, Rust, Ruby, etc. The key phrases: **pre-cached base image**, **dependencies in the build context**, **toolchain already in the image**.
+
+### Example: a minimal Node service
+
+Say you have a Node web service with `package.json`, `package-lock.json`, and `src/index.js`.
+
+```dockerfile
+# Builder stage: install deps and bundle
+FROM node:20-slim AS builder
+WORKDIR /app
+COPY package.json package-lock.json ./
+# node_modules come from the tarball we include in the submission,
+# not from npm install. See "submitting node_modules" below.
+COPY node_modules ./node_modules
+COPY src ./src
+
+# Production stage: small runtime image
+FROM node:20-slim
+WORKDIR /app
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/src ./src
+COPY package.json ./
+USER node
+ENTRYPOINT ["node", "src/index.js"]
+```
+
+What's happening:
+
+- `node:20-slim` is on our base-image list
+- `npm install` never runs; we expect `node_modules` to be shipped in the submission context
+- `USER node` drops privileges before the service starts
+- `ENTRYPOINT` is clear: this image runs `node src/index.js` when pulled
+
+### Submitting `node_modules`
+
+If you're submitting a JavaScript app, include `node_modules` in your submission tarball. Yes, this is counter to the usual `.gitignore` advice — the reason we do it here is precisely because `npm install` won't run.
+
+Alternatives:
+
+1. **Vendor your deps** — include `node_modules` in the submission context. Simple, explicit, works under no-network.
+2. **Pre-bundle** — if you use esbuild, rollup, or webpack, bundle before submission. Your submission tarball then only needs the bundled output.
+3. **Request `requiresNetwork=true`** — we whitelist the npm registry for your build. Use only if the above don't work.
+
+The same pattern applies to Python (`pip install --target vendor`), Rust (`cargo vendor`), Go (Go modules are already vendored by default in the module cache), etc.
+
+### Example: a Python service
+
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+# Pre-vendored deps
+COPY vendor ./vendor
+COPY pyproject.toml requirements.txt ./
+COPY src ./src
+ENV PYTHONPATH=/app/vendor
+ENTRYPOINT ["python", "-m", "src.server"]
+```
+
+To produce `vendor/`: before submission, run locally:
+
+```bash
+pip install --target vendor -r requirements.txt
+```
+
+Commit the `vendor/` directory into your submission tarball. No network during build.
+
+### Example: a Go service
+
+Go's module cache is usually the cleanest:
+
+```dockerfile
+FROM golang:1.22 AS builder
+WORKDIR /src
+# Pre-populated module cache
+COPY go.mod go.sum ./
+COPY vendor ./vendor
+COPY . .
+RUN go build -mod=vendor -o /out/server ./cmd/server
+
+FROM alpine:3.19
+COPY --from=builder /out/server /usr/local/bin/server
+ENTRYPOINT ["/usr/local/bin/server"]
+```
+
+Run `go mod vendor` locally before submitting; commit `vendor/`.
+
+## Things that will fail
+
+Specific patterns the build worker rejects:
+
+### `apt-get install`, `apk add`, etc., during build
+
+```dockerfile
+FROM alpine:3.19
+RUN apk add --no-cache curl   # ← fails, no network
+```
+
+Fix: use a base image that already has what you need. `python:3.12-slim` already has curl-equivalent tools via Python; `nginx:1.27-alpine` already has nginx; etc.
+
+### Runtime `curl` or `wget` in `RUN`
+
+```dockerfile
+RUN curl -fsSL https://example.com/install.sh | sh   # ← fails, no network
+```
+
+Fix: whatever you're installing, include it in the submission context instead.
+
+### `RUN` that reaches out to package registries
+
+```dockerfile
+RUN npm install express        # ← fails, no network
+RUN pip install requests       # ← fails, no network
+RUN cargo install cargo-tree   # ← fails, no network
+```
+
+Fix: vendor dependencies locally before submitting.
+
+### Git clones during build
+
+```dockerfile
+RUN git clone https://github.com/example/repo.git   # ← fails
+```
+
+Fix: include the repo contents in your submission context.
+
+### Non-approved base images
+
+```dockerfile
+FROM some-obscure-registry.io/mystery-image:latest   # ← blocked
+```
+
+Fix: request addition of this base image during review, or use an approved one.
+
+### Privileged or capability-requesting directives
+
+Docker doesn't let you request privileges in a Dockerfile — you'd request them at `docker run` time. But for clarity: we never run builds with `--privileged`, and the built image is never run by Flareo (users run it themselves after pulling). No Dockerfile directive can grant extra privileges to the build.
+
+### Excessively long builds
+
+Anything that takes more than 10 minutes is rejected with "build exceeded timeout." Common causes:
+
+- Pulling a giant base image (cut this by using a `-slim` variant)
+- Compiling from source in the build image instead of pre-compiling (move to a multi-stage build where source compilation happens in the `builder` stage)
+- An infinite loop in `RUN` (rare; usually a mistake)
+
+If your build legitimately needs more than 10 minutes, note it in the submission and we can consider a per-submission timeout extension.
+
+### Excessive disk usage
+
+If your image grows past 20 GB in layers during build, the build fails with a storage error. Usually this means a base image is way too large (some data-science images are 10+ GB). Use a `-slim` variant.
+
+## Trivy scan — what's rejected
+
+After build, we run `trivy image --severity CRITICAL,HIGH`. If the scan finds any CRITICAL or HIGH CVE, the submission is rejected.
+
+This catches:
+
+- Outdated base images with known vulnerabilities (e.g. `node:16.0.0` has a long list of CVEs)
+- Packaged dependencies with known CVEs that haven't been patched upstream
+- Accidentally-included development tools with known vulnerabilities
+
+How to pass:
+
+- Use current base image versions
+- Don't `COPY .` blindly — use a `.dockerignore` to exclude dev tools, `.git`, secrets, etc.
+- Update your vendored dependencies before submitting
+
+If you think a CVE is a false positive (they happen), note it in your submission and we can discuss. We err on the side of rejecting; false positives are usually faster to fix than false negatives are to investigate.
+
+## Good practices
+
+Things that aren't strictly required but make your submission go faster through review:
+
+### Pin base image by digest
+
+```dockerfile
+FROM node:20-slim@sha256:abc123...
+```
+
+Tag-only pins can silently change. Digest pins cannot. If a reviewer sees all-digest pins, they approve faster because "what's being built" is unambiguous.
+
+### Use `USER` to drop privileges
+
+```dockerfile
+RUN addgroup -g 1000 app && adduser -D -u 1000 -G app app
+USER app
+ENTRYPOINT ["/app/server"]
+```
+
+Final images shouldn't run as root. Dropping to a non-root user before ENTRYPOINT is cheap and closes a lot of downstream risk.
+
+### Label with OCI metadata
+
+```dockerfile
+LABEL org.opencontainers.image.source="https://github.com/you/repo"
+LABEL org.opencontainers.image.licenses="MIT"
+LABEL org.opencontainers.image.description="Short one-liner"
+```
+
+Not required, but it's what a sophisticated user looks for when deciding to pull your image.
+
+### Keep the final image small
+
+- Start `FROM alpine:3.19` or `FROM debian:12-slim` when you only need a runtime
+- Don't include build artifacts in the final image (use multi-stage)
+- Avoid `COPY .` — use a narrow `.dockerignore`
+
+Typical Flareo-catalog images land between 20 MB and 200 MB. If yours is over 1 GB, we'll ask why.
+
+### Use `HEALTHCHECK`
+
+```dockerfile
+HEALTHCHECK --interval=30s --timeout=10s --start-period=30s --retries=3 \
+  CMD wget -q --spider http://localhost:8080/health || exit 1
+```
+
+Tells downstream orchestrators when your service is actually ready. Not required but appreciated.
+
+## Submission checklist
+
+Before clicking submit:
+
+- [ ] Base image is on the approved list (or I've noted why I need a different one)
+- [ ] No `apt-get`, `apk add`, `npm install`, `pip install` in `RUN`
+- [ ] No `curl`, `wget`, `git clone` reaching out during build
+- [ ] Dependencies are vendored in the submission context
+- [ ] Final image uses a non-root `USER`
+- [ ] `ENTRYPOINT` or `CMD` clearly runs the service
+- [ ] Build completes in under 10 minutes locally (`time docker build .`)
+- [ ] Local `trivy image` scan passes (`trivy image --severity CRITICAL,HIGH my-image:local`)
+- [ ] `.dockerignore` excludes `.git`, `node_modules/.cache`, development config
+- [ ] OCI labels set so users know where to look for source
+
+## What happens after submission
+
+1. Your submission lands in the review queue. Email confirmation.
+2. A reviewer reads the Dockerfile (not the runtime code — that's your responsibility). Typical review time: 2-5 business days.
+3. If approved, the build worker picks it up within 30 seconds. Build takes 2-10 minutes.
+4. On success: you get an email with the pinned digest and the pull URL. Your module appears in `/app/modules` and in the public catalog.
+5. On failure: you get an email with the specific error. Fix and resubmit — no penalty.
+
+Resubmissions create a new submission row; they don't edit the old one. Keep the old submission id for reference in case you need to ask us about it.
+
+## Troubleshooting specific errors
+
+**"build exceeded 10-minute time limit"**
+Your build takes too long. Most common cause: you're compiling something large inside the final image. Move it to a multi-stage builder.
+
+**"network disabled — connection refused to registry.npmjs.org"**
+Something in your Dockerfile is trying to `npm install`. Vendor `node_modules` into the submission tarball.
+
+**"Trivy found CRITICAL CVEs: CVE-2024-xxxxx in lib-foo"**
+Update the dependency, or update the base image, or both. Resubmit.
+
+**"base image not in approved list: `my-registry/my-image`"**
+Either switch to an approved base image or request `requiresNetwork=true` when submitting.
+
+**"layer size limit exceeded"**
+Your image is over 20 GB. Use a smaller base image.
+
+**"Dockerfile parse error on line N"**
+Syntax error in your Dockerfile. Test locally with `docker build .` before submitting.
+
+**"submission already pending for slug `foo`"**
+You've already submitted `foo`. Wait for that submission to be reviewed before resubmitting.
+
+## Getting help
+
+- Docs: you're reading it
+- CLI reference: [/docs/cli-reference](/docs/cli-reference)
+- Email: `hello@flareo.dev` — reply within 1 business day
+- GitHub issues: [github.com/flareo/flareo/issues](https://github.com/flareo/flareo/issues), `module-submission` label
+
+If you're stuck because of a Dockerfile constraint that seems to make your use case impossible, tell us. The constraints are deliberate but we'd rather adjust them than lose a legitimate submitter. We just want the adjustment to be deliberate, not accidental.

@@ -1,0 +1,184 @@
+# ────────────────────────────────────────────────────────────────
+# Canary rebuild workflow.
+#
+# Runs every Sunday at 02:00 UTC. One matrix job per module rebuilds
+# it end-to-end (pull upstream, re-tag, push to ECR Public, SBOM, CVE
+# scan, cosign keyless sign via GHA OIDC, upload artifacts to R2,
+# write metadata to Postgres).
+#
+# Can also be run manually with workflow_dispatch, optionally scoped
+# to a single module via the `only` input.
+#
+# Required repo secrets (set in GitHub org or repo secrets):
+#   AWS_ACCESS_KEY_ID
+#   AWS_SECRET_ACCESS_KEY
+#   ECR_PUBLIC_URL
+#   R2_ACCOUNT_ID
+#   R2_ACCESS_KEY_ID
+#   R2_SECRET_ACCESS_KEY
+#   R2_BUCKET_NAME
+#   DATABASE_URL         (Neon pooled connection)
+#
+# All external actions are pinned by full commit SHA (post-tj-actions
+# hardening best practice). When you bump an action version, update
+# both the SHA and the comment with the semver tag it corresponds to.
+# ────────────────────────────────────────────────────────────────
+
+name: canary-rebuild
+
+on:
+  schedule:
+    # 02:00 UTC every Sunday. Pick your maintenance window.
+    - cron: "0 2 * * 0"
+  workflow_dispatch:
+    inputs:
+      only:
+        description: "Rebuild only one module (slug). Leave empty to rebuild all."
+        required: false
+        type: string
+
+# Needed for cosign keyless signing via the runner's OIDC token.
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: canary-rebuild
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    name: rebuild ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        module:
+          - vaultwarden
+          - immich
+          - jellyfin
+          - homeassistant
+          - nextcloud
+          - paperlessngx
+          - adguardhome
+          - gitea
+          - linkwarden
+          - ntfy
+          - uptimekuma
+          - caddy
+
+    steps:
+      - name: skip if not selected
+        if: ${{ inputs.only != '' && inputs.only != matrix.module }}
+        run: |
+          echo "skipping ${{ matrix.module }} (only=${{ inputs.only }})"
+          exit 0
+
+      # Harden runner: block egress by default, allow only the hosts we need.
+      # Pinned to v2.11.0.
+      - name: harden runner
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf
+        with:
+          egress-policy: block
+          allowed-endpoints: >
+            api.github.com:443
+            github.com:443
+            objects.githubusercontent.com:443
+            fulcio.sigstore.dev:443
+            rekor.sigstore.dev:443
+            tuf-repo-cdn.sigstore.dev:443
+            public.ecr.aws:443
+            auth.docker.io:443
+            registry-1.docker.io:443
+            production.cloudflare.docker.com:443
+            ghcr.io:443
+            pkg-containers.githubusercontent.com:443
+            ${{ secrets.R2_ACCOUNT_ID }}.r2.cloudflarestorage.com:443
+            aws.amazon.com:443
+            api.ecr-public.aws:443
+            sts.amazonaws.com:443
+            auth.ecr-public.aws:443
+            api.us-east-1.amazonaws.com:443
+            ec2.us-east-1.amazonaws.com:443
+            ghga.anchore.io:443
+            storage.googleapis.com:443
+
+      # Pinned to v4.2.2
+      - name: checkout
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      # Pinned to v4.1.0
+      - name: setup node
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: install project deps (for prisma + tsx)
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        run: npm ci --ignore-scripts
+
+      - name: generate prisma client
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        run: npx prisma generate
+
+      # Cosign, pinned to v3.8.1 via installer v3.8.0
+      - name: install cosign
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb
+        with:
+          cosign-release: v3.0.6
+
+      - name: install trivy (pinned binary)
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        run: |
+          set -e
+          TRIVY_VERSION="0.70.0"
+          curl -fsSL -o /tmp/trivy.tgz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          sudo tar -xzf /tmp/trivy.tgz -C /usr/local/bin trivy
+          trivy --version
+
+      - name: install syft (pinned binary)
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        run: |
+          set -e
+          SYFT_VERSION="1.42.4"
+          curl -fsSL -o /tmp/syft.tgz \
+            "https://github.com/anchore/syft/releases/download/v${SYFT_VERSION}/syft_${SYFT_VERSION}_linux_amd64.tar.gz"
+          sudo tar -xzf /tmp/syft.tgz -C /usr/local/bin syft
+          syft --version
+
+      - name: configure AWS creds
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        run: |
+          echo "AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}" >> "$GITHUB_ENV"
+          echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> "$GITHUB_ENV"
+          echo "AWS_REGION=us-east-1" >> "$GITHUB_ENV"
+
+      - name: rebuild ${{ matrix.module }}
+        if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        env:
+          ECR_PUBLIC_URL: ${{ secrets.ECR_PUBLIC_URL }}
+          R2_ACCOUNT_ID: ${{ secrets.R2_ACCOUNT_ID }}
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: ./scripts/canary/rebuild-canary.sh ${{ matrix.module }}
+
+      - name: upload run artifacts
+        if: ${{ always() && (inputs.only == '' || inputs.only == matrix.module) }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: canary-${{ matrix.module }}
+          path: |
+            /tmp/flareo-canary-*/artifacts/
+          if-no-files-found: ignore
+          retention-days: 30

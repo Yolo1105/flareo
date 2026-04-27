@@ -1,0 +1,351 @@
+// Flareo database schema.
+//
+// Models fall into three groups:
+//   1. NextAuth tables (User, Account, Session, VerificationToken)
+//   2. Domain tables (Module, Build, Submission, Job, etc.)
+//   3. Join / state tables (ApiKey, Notification, RecentActivity)
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ────────────────────────────────────────────────────────────────
+// NextAuth tables
+// ────────────────────────────────────────────────────────────────
+
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  // Custom column for gating /app/admin
+  role          String    @default("user") // "user" | "admin"
+  createdAt     DateTime  @default(now())
+
+  // Account lifecycle. When `deletedAt` is set, the account is in its
+  // 30-day soft-delete grace window. A nightly job hard-deletes rows
+  // past `deletedAt + 30d`. During the grace window the user can email
+  // privacy@flareo.dev to restore the account.
+  deletedAt     DateTime?
+  // When the user last changed their display name / email, for audit
+  // and rate-limit purposes. NULL means "never changed since signup."
+  profileUpdatedAt DateTime?
+
+  // Email preferences. All notifications default to on; the user can
+  // opt out. Marketing emails default to OFF — we only send them if
+  // the user explicitly opts in (GDPR friendly default).
+  notifySecurity   Boolean @default(true)  // security advisories for modules you subscribe to
+  notifySubmission Boolean @default(true)  // decisions on your module submissions
+  notifyProduct    Boolean @default(true)  // changelog digest, once a month max
+  notifyMarketing  Boolean @default(false) // launch announcements, milestones
+
+  accounts      Account[]
+  sessions      Session[]
+
+  submissions   Submission[] @relation("submitter")
+  decidedSubmissions Submission[] @relation("decider")
+  apiKeys       ApiKey[]
+  notifications Notification[]
+  publishedModules Module[]
+  jobs          Job[]
+  submissionAudits SubmissionAudit[]
+
+  @@index([deletedAt])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// ────────────────────────────────────────────────────────────────
+// Domain tables
+// ────────────────────────────────────────────────────────────────
+
+model Module {
+  id             String   @id                 // e.g. "FLA-2026-0001"
+  slug           String   @unique
+  name           String
+  version        String
+  author         String
+  description    String
+  tags           String[]
+  category       String
+  status         String                       // "verified" | "pending" | "failing"
+  slsa           String                       // "L1" | "L2" | "L3" | "L4"
+  trust          Int
+  trustVulns     Int
+  trustSlsa      Int
+  trustSignature Int
+  trustSbom      Int
+  cveCritical    Int
+  cveHigh        Int
+  cveMedium      Int
+  cveLow         Int
+  deploys        Int
+  updatedHours   Int
+  size           String
+  digest         String
+  previewable    Boolean  @default(false)
+  visibility     String   @default("public")  // "public" | "private"
+  pulls30d       Int      @default(0)
+  building       Boolean  @default(false)
+
+  // Canary pipeline artifacts. Populated by scripts/canary/rebuild-canary.sh.
+  // Null until the module has been rebuilt end to end; "status" reflects
+  // whether those artifacts exist yet.
+  imageRef         String?  // e.g. "public.ecr.aws/flareo/vaultwarden"
+  upstreamRef      String?  // what we rebuilt from, for transparency
+  upstreamDigest   String?
+  sbomUrl          String?  // R2 public URL
+  sbomPackages     Int?
+  trivyUrl         String?
+  rekorIndex       String?
+  signerIdentity   String?
+  signerIssuer     String?
+  lastRebuiltAt    DateTime?
+
+  publisherId    String?
+  publisher      User?    @relation(fields: [publisherId], references: [id], onDelete: SetNull)
+
+  builds         Build[]
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([category])
+  @@index([status])
+  @@index([publisherId])
+}
+
+model Build {
+  id            String   @id   // e.g. "#0847"
+  moduleSlug    String
+  module        Module   @relation(fields: [moduleSlug], references: [slug], onDelete: Cascade)
+  startedAt     DateTime
+  sourceCommit  String
+  stagesJson    String   @db.Text
+  createdAt     DateTime @default(now())
+
+  @@index([moduleSlug])
+}
+
+model Submission {
+  id           String   @id
+  moduleName   String
+  version      String
+  author       String
+  submittedAt  DateTime
+  // Status lifecycle:
+  //   pending      → waiting on reviewer
+  //   approved     → reviewer accepted, worker will pick up
+  //   building     → worker is currently building
+  //   built        → success, module published to catalog
+  //   failed       → build failed (user's fault: bad Dockerfile, etc.)
+  //   scan_rejected → build succeeded but Trivy found critical CVEs
+  //   rejected     → reviewer rejected
+  //   changes_requested → reviewer asked for edits, submitter still owns it
+  status       String   @default("pending")
+  queueAgeSec  Int
+  flagsJson    String   @db.Text
+  autoCosign   Boolean
+  autoTrivy    Boolean
+  autoSlsa     Boolean
+  decidedAt    DateTime?
+  decidedById  String?
+  decidedBy    User?    @relation("decider", fields: [decidedById], references: [id], onDelete: SetNull)
+  createdAt    DateTime @default(now())
+
+  // Submitter link. Nullable because the pre-migration rows were
+  // stashing the userId in flagsJson; the migration backfills this
+  // from flagsJson where possible.
+  submitterId  String?
+  submitter    User?    @relation("submitter", fields: [submitterId], references: [id], onDelete: SetNull)
+
+  // Dockerfile storage. The Dockerfile itself lives in R2 to avoid
+  // stuffing multi-KB build files into Postgres. We keep a sha256
+  // here for integrity verification at build time.
+  dockerfileUrl      String?
+  dockerfileSha256   String?
+  // Opt-in network access during build. Default off; reviewer flips
+  // this on if the submission explicitly requires it. When true, the
+  // worker uses the constrained-network namespace (HTTPS to a
+  // whitelist of package registries only).
+  requiresNetwork    Boolean  @default(false)
+
+  // Build lifecycle timestamps. NULL until the worker claims the row.
+  buildStartedAt     DateTime?
+  buildCompletedAt   DateTime?
+  // Error classification when status=failed or status=scan_rejected.
+  //   "user"   — Dockerfile or submission was wrong (user's fault)
+  //   "system" — worker/infra failed (our fault — possibly retryable)
+  //   "scan"   — build succeeded, Trivy found CVEs
+  buildErrorKind     String?
+  // Error text safe to email the submitter. Does not include stack
+  // traces or host paths; internal details go to Sentry.
+  buildErrorMessage  String?  @db.Text
+  // Full build log, in R2. Accessible to submitter via a signed URL
+  // in their decision email.
+  buildLogUrl        String?
+
+  // Result artifacts on success.
+  resultImageRef     String?  // e.g. "public.ecr.aws/flareo/my-app"
+  resultDigest       String?  // "sha256:..." that we signed
+  resultSbomUrl      String?  // R2 URL to CycloneDX SBOM
+  resultRekorIndex   String?  // cosign transparency-log index
+
+  auditEntries SubmissionAudit[]
+
+  @@index([status])
+  @@index([decidedById])
+  @@index([submitterId])
+  // Compound index — the build worker polls with this combination
+  // ("approved" + oldest first). Having the index means the poll is
+  // a single index scan, not a table scan.
+  @@index([status, submittedAt])
+}
+
+/// Audit trail for reviewer actions on submissions. One row per
+/// approve/reject/request-changes/retry action. Not shown in the
+/// admin UI v1 — kept for legal defensibility if a submitter disputes
+/// a decision, and for reviewer pattern-recognition later ("this
+/// reviewer rejects 80% of submissions — too strict?").
+model SubmissionAudit {
+  id           String   @id @default(cuid())
+  submissionId String
+  submission   Submission @relation(fields: [submissionId], references: [id], onDelete: Cascade)
+  reviewerId   String
+  reviewer     User       @relation(fields: [reviewerId], references: [id], onDelete: Cascade)
+  // "approved" | "rejected" | "requested_changes" | "retried" | "cancelled"
+  action       String
+  // The reviewer's note. For rejections this is the email body sent
+  // to the submitter; for approvals it's an internal note.
+  notes        String?    @db.Text
+  // Whether the reviewer set requiresNetwork=true when approving.
+  // Tracked separately so we can audit "how often does the network
+  // escape hatch get used?"
+  grantedNetwork Boolean  @default(false)
+  createdAt    DateTime   @default(now())
+
+  @@index([submissionId])
+  @@index([reviewerId])
+  @@index([createdAt])
+}
+
+model ApiKey {
+  id         String    @id
+  userId     String?
+  user       User?     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  label      String
+  tokenHash  String                          // sha256 hex of the raw token
+  tokenMask  String                          // display only, e.g. "fla_••••••••abc1"
+  scopesJson String    @db.Text
+  createdAt  DateTime  @default(now())
+  lastUsedAt DateTime?
+  revoked    Boolean   @default(false)
+
+  @@index([userId])
+  @@index([revoked])
+}
+
+model Notification {
+  id      String   @id @default(cuid())
+  userId  String?
+  user    User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind    String
+  title   String
+  body    String
+  at      String
+  read    Boolean  @default(false)
+  href    String?
+  createdAt DateTime @default(now())
+
+  @@index([userId, read])
+}
+
+model Job {
+  id           String   @id                   // short numeric string, e.g. "0853"
+  userId       String?
+  user         User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  moduleSlug   String
+  moduleName   String
+  version      String
+  status       String                         // "queued" | "running" | "success" | "failed" | "cancelled"
+  startedAt    DateTime
+  currentStage Int
+  percent      Int
+  stagesJson   String   @db.Text
+  createdAt    DateTime @default(now())
+
+  @@index([userId])
+  @@index([status])
+}
+
+model Incident {
+  id          String   @id
+  title       String
+  detectedAt  DateTime
+  durationSec Int
+  status      String
+  body        String   @db.Text
+  timelineJson String  @db.Text
+}
+
+model WaitlistEntry {
+  // Email-keyed signup list for closed-beta early access. Collected via
+  // /signup or the nav CTA. Drained manually in batches as capacity opens.
+  id         String   @id @default(cuid())
+  email      String   @unique
+  // How the person heard about Flareo — free-text, optional, capped to 280
+  referrer   String?  @db.VarChar(280)
+  // UTM-style source tag, e.g. "hn-launch" or "reddit-selfhosted"
+  source     String?  @db.VarChar(64)
+  // The raw X-Forwarded-For chain at signup time (first value only),
+  // stored for basic abuse triage. Truncated to 64 chars.
+  ipSnapshot String?  @db.VarChar(64)
+  // UA string for the same reason. Truncated to 200.
+  userAgent  String?  @db.VarChar(200)
+  createdAt  DateTime @default(now())
+  // Set when we've actually invited them and they've signed up.
+  invitedAt  DateTime?
+  invitedBy  String?  // admin user id who sent the invite
+
+  @@index([createdAt])
+  @@index([invitedAt])
+}

@@ -1,0 +1,120 @@
+# Admission policies
+
+Admission policies block unsigned or out-of-policy images from being deployed to your cluster. For Flareo-style signatures, this means your Kubernetes admission controller runs the same `cosign verify` checks described in [verify-cli](/docs/verify-cli) — on every pod, before it starts.
+
+## Flareo's first-party policies
+
+Ready-to-apply policy templates live at [github.com/flareo/flareo-admission](https://github.com/flareo/flareo-admission). Three variants:
+
+| File                                    | Controller                  | Behavior                              |
+|-----------------------------------------|-----------------------------|---------------------------------------|
+| `flareo-admission.yaml`                 | Kyverno 1.10+               | Require valid signature               |
+| `flareo-admission-strict.yaml`          | Kyverno 1.11+               | Signature + live catalog status check |
+| `flareo-admission-sigstore.yaml`        | sigstore/policy-controller  | Require valid signature               |
+
+Apply the base policy (Kyverno) in one command:
+
+```sh
+kubectl apply -f https://raw.githubusercontent.com/flareo/flareo-admission/main/flareo-admission.yaml
+```
+
+All three policies ship with `validationFailureAction: Audit` so you can observe what would be rejected without breaking production. Flip to `Enforce` when you're confident.
+
+## What they do
+
+All three policies only apply to images matching `public.ecr.aws/flareo/*`. Images from other registries (Docker Hub, your company registry, GHCR, etc.) are unaffected. The policies add a gate for the Flareo namespace; they don't change how other images are handled.
+
+The Kyverno strict variant adds a live call to `flareo.dev/api/v1/verify` at admission time. This ensures the module's current catalog status is `verified` (not `pending` or `failing`). Trade-off: adds ~200-500ms per pod creation and makes admission depend on `flareo.dev` being reachable.
+
+Most clusters should start with the basic policy.
+
+## Alternative: author your own
+
+If you prefer to write the policy yourself, all three sample files are short and well-commented. Copy whichever controller you use and adapt the `imageReferences` glob to include your own trusted registries.
+
+The core Kyverno policy, inlined:
+
+```yaml
+apiVersion: kyverno.io/v2beta1
+kind: ClusterPolicy
+metadata:
+  name: require-flareo-signature
+spec:
+  validationFailureAction: Audit
+  rules:
+    - name: verify-flareo-signatures
+      match:
+        any:
+          - resources: { kinds: [Pod] }
+      verifyImages:
+        - imageReferences:
+            - "public.ecr.aws/flareo/*"
+          attestors:
+            - entries:
+                - keyless:
+                    subject: "https://github.com/flareo/*"
+                    issuer: "https://token.actions.githubusercontent.com"
+                    rekor:
+                      url: "https://rekor.sigstore.dev"
+```
+
+## Warn vs. enforce
+
+Start with `validationFailureAction: Audit` (Kyverno) or `mode: warn` (Policy Controller). This logs violations without blocking deploys. Once you've confirmed every production image is actually signed, flip to `Enforce`.
+
+Flipping to Enforce before you're ready blocks critical pods at 3 AM. Don't skip the audit phase.
+
+## Querying Flareo's own admission verdict
+
+For each public module, Flareo runs the catalog's active admission policy server-side and exposes the verdict at:
+
+```
+GET https://flareo.dev/api/v1/modules/<slug>/policy
+```
+
+The response is a JSON document with the top-level decision (`pass`, `warn`, or `fail`), the policy revision that produced it, the per-rule breakdown, and the input snapshot the evaluator saw. Consumers can chain this into their own admission pipelines as a higher-level signal than the raw signature check — "Flareo's reviewers have looked at this and the catalog's policy passed."
+
+The policy itself is OPA-shaped JSON evaluated by a pure-TypeScript evaluator; the data shape matches what an OPA bundle carries internally. If you operate your own internal Flareo and want to substitute Rego at runtime, the input/output contract doesn't change.
+
+Example Kyverno extension that consults this endpoint:
+
+```yaml
+- name: check-flareo-policy-verdict
+  match:
+    any:
+      - resources:
+          kinds: [Pod]
+  context:
+    - name: verdict
+      apiCall:
+        urlPath: "/api/v1/modules/{{ images.containers.imageRef | parseImageReference | .repository | trimSuffix('vaultwarden') }}/policy"
+        jmesPath: "verdict"
+  validate:
+    message: "Flareo policy verdict is not 'pass'"
+    deny:
+      conditions:
+        - key: "{{ verdict }}"
+          operator: NotEquals
+          value: "pass"
+```
+
+This adds a live HTTP call at admission time. Same latency / availability tradeoffs as the strict-mode policy file: ~200-500ms added to each pod creation, and Flareo being unreachable fails closed.
+
+## VEX integration
+
+Trivy is noisy. A typical mature container image flags 5-30 CVEs that aren't actually exploitable in the way the image is configured (the vulnerable function is unreachable, the dep is bundled but never called, the issue is patched in the distribution backport). Flareo's reviewer team annotates these via the [Vulnerability Exploitability eXchange (VEX)](https://github.com/openvex/spec) spec.
+
+Each module exposes its OpenVEX 0.2.0 document at:
+
+```
+GET https://flareo.dev/api/v1/modules/<slug>/vex
+```
+
+If your scanner supports VEX (Trivy, Grype, Snyk, and others all do), point it at this URL when scanning a Flareo module. CVEs annotated `not_affected` or `fixed` get suppressed; you see the residual real-risk findings, not the noise.
+
+The admission policy referenced above already does this on the server side: the per-rule CVE thresholds run against post-VEX counts, not raw scanner output.
+
+## Next steps
+
+- [Verify from the CLI](/docs/verify-cli) — the same verification, manually
+- [Signing](/docs/signing) — what the signature proves and doesn't

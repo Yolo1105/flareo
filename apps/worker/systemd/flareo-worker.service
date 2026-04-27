@@ -1,0 +1,70 @@
+[Unit]
+Description=Flareo build worker
+Documentation=https://github.com/flareo/flareo-worker
+After=network-online.target docker.service
+Wants=network-online.target
+Requires=docker.service
+
+[Service]
+Type=simple
+User=flareo-worker
+Group=flareo-worker
+WorkingDirectory=/opt/flareo-worker
+
+# Credentials live in an env file only root can read. Systemd re-reads
+# this on restart, so rotating secrets is: edit file → restart unit.
+EnvironmentFile=/etc/flareo-worker/env
+
+# Must be in the docker group to talk to the daemon. We do NOT run as
+# root because the daemon has userns-remap, so commands spawned from
+# here get mapped to an unprivileged user even when they think they're
+# root inside the container.
+SupplementaryGroups=docker
+
+# Actual start command. We use tsx in dev but for production the
+# systemd unit runs the pre-built JS from dist/.
+ExecStart=/usr/bin/node /opt/flareo-worker/dist/index.js
+
+# Send shutdown signal; give it 30s to finish any in-flight build
+# step before SIGKILL. The worker's own logic will either finish
+# the step or give up at the top of the next iteration.
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Restart on crash. Not on success (that means shutdown was
+# intentional).
+Restart=on-failure
+RestartSec=10
+
+# Harden process. Most of these are standard systemd hardening;
+# NoNewPrivileges is especially important because we work with
+# Docker.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectKernelLogs=true
+ProtectControlGroups=true
+RestrictNamespaces=true
+LockPersonality=true
+MemoryDenyWriteExecute=false  # Node/V8 needs JIT; can't enable this
+
+# We need to write to these paths (logs, heartbeat, build staging).
+ReadWritePaths=/var/lib/flareo-worker
+ReadWritePaths=/var/log/flareo-worker
+
+# Resource limits. Worker itself is small; build containers have their
+# own limits set by docker build flags.
+MemoryMax=1G
+TasksMax=512
+
+# stdout/stderr go to the systemd journal; our JSON-lines format means
+# journalctl works fine for filtering.
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=flareo-worker
+
+[Install]
+WantedBy=multi-user.target

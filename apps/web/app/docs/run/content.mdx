@@ -1,0 +1,112 @@
+# Run a module ephemerally
+
+`flareo run <slug>` pulls a verified module and runs it locally on your machine with an isolated docker volume, an auto-generated host port, and a TTL after which the container is stopped and the volume removed. Designed for "test this with my own data, throw the state away when done" evaluation.
+
+This is the local-substrate alternative to per-user hosted previews. Your laptop runs the module; nothing about your data leaves the machine.
+
+## When to use this vs the shared demo
+
+| If you want to... | Use |
+|---|---|
+| Click around to see what a module looks like | [Shared preview demos](/docs/previews) |
+| Test the module with credentials, secrets, or real data | `flareo run` |
+| Persist data between launches | `flareo pull` + your own `docker run` |
+| Deploy to a server | `flareo compose` to generate a docker-compose.yaml |
+
+## Usage
+
+```sh
+flareo run <slug>
+flareo run <slug> --ttl-minutes 30 --port 8081
+flareo run <slug> --no-verify
+```
+
+The container runs in the foreground. Output URL prints to stderr along with the teardown command. **Ctrl-C** cleanly stops the container and removes the volume; **TTL fires** after the configured minutes; either way teardown happens automatically.
+
+## Worked example: Vaultwarden
+
+```sh
+$ flareo run vaultwarden
+
+resolving vaultwarden
+  found Vaultwarden v1.32.7
+  digest sha256:a1b2c3...
+
+checking signature
+  ✓ signature valid
+
+pulling docker public.ecr.aws/flareo/vaultwarden@sha256:a1b2c3...
+
+starting Vaultwarden on http://localhost:54321
+
+  ────────────────────────────────────────────────────────────
+  Vaultwarden is running ephemerally.
+
+  Open:        http://localhost:54321
+  Auto-stop:   in 60 minutes
+  Stop now:    Ctrl-C or docker stop flareo-ephemeral-vaultwarden-mc8x42
+
+  Note: when this exits the volume is deleted; nothing persists.
+  ────────────────────────────────────────────────────────────
+```
+
+Open `http://localhost:54321` in your browser. Create a vault, add some test entries, see how the UI feels. When you Ctrl-C, the container stops and the volume is gone. Next launch starts from zero.
+
+## Worked example: Uptime Kuma with custom port + short TTL
+
+```sh
+$ flareo run uptime-kuma --port 8081 --ttl-minutes 30
+```
+
+Useful when you want to test for exactly 30 minutes (e.g. a meeting demo) and bind to a port you've already firewalled.
+
+## Flags
+
+| Flag | Effect | Default |
+|---|---|---|
+| `--ttl-minutes <n>` | Auto-stop after n minutes. 0 disables. | 60 |
+| `--port <p>` | Host port to bind. | Random from 49152-65535 |
+| `--no-verify` | Skip Sigstore signature verification | off — verification is on by default |
+| `--quiet` | Suppress the post-launch help block | off |
+
+The TTL cap is 480 (8 hours). Beyond that, you should use `flareo pull` and run the module non-ephemerally with your own `docker run`.
+
+## What's actually happening
+
+1. **Resolve.** Hit the catalog API for the module's pinned digest.
+2. **Verify.** Run cosign keyless verification against the signed digest. Refuse to run if verification fails (override with `--no-verify`).
+3. **Pull.** `docker pull <ref>@<digest>`. Skipped if already cached.
+4. **Run.** `docker run -d --rm --name <unique> -p <host>:<container> -v <volume>:/data <ref>@<digest>`. Volume is freshly created with a unique name per launch.
+5. **Wait.** The CLI holds the foreground. Three exit paths race: Ctrl-C → user-initiated stop; TTL → auto-stop; container exits on its own → exit propagated.
+6. **Teardown.** Stop the container (10-second SIGTERM grace, then SIGKILL) and remove the volume.
+
+## What this does NOT do
+
+- **Doesn't persist data between runs.** That's the feature. If you want persistence, use `flareo pull` and create your own named volume.
+- **Doesn't generate per-module bootstrap configs.** The module handles its own first-boot — Vaultwarden creates its DB on first request, Gitea has an installation wizard, etc. We provide the running container; the module provides its own onboarding.
+- **Doesn't bind to a public address.** Default is localhost-only. If you want others on your network to reach it, that's `flareo pull` + manual `docker run` territory.
+- **Doesn't do GPU passthrough.** Modules that need a GPU (Immich) won't be useful via `flareo run` — they need explicit `--gpus all` flags we don't currently support.
+
+## Requirements
+
+- **Docker or Podman** on PATH. Podman is detected automatically if Docker isn't present.
+- **Linux, macOS, or Windows with WSL2.** Native Windows isn't tested.
+- **Network access to public.ecr.aws** for the initial pull. Subsequent runs use the local cache.
+
+## Troubleshooting
+
+**"port already in use":** the random port allocator doesn't check availability ahead of time. Re-run; the next allocation is statistically very unlikely to collide. Or pass `--port <something-you-know-is-free>`.
+
+**"verification failed":** the module's status in the catalog isn't `verified` (e.g. it's `under_investigation`). Override with `--no-verify` if you understand what that means.
+
+**"docker pull failed":** check your network and that `public.ecr.aws/flareo/<slug>` is reachable. The error from docker is passed through.
+
+**"main app rejected worker secret":** this error doesn't come from `flareo run` — it comes from a misconfigured deployment. If you're seeing it as an end user, file an issue.
+
+**Ctrl-C didn't tear down cleanly:** very rare; if it happens, manual cleanup is `docker stop <name>` + `docker volume rm -f <volume>`. The names are printed in the post-launch help block.
+
+## Next steps
+
+- [Pull and verify without running](/docs/pull-run) — when you want to inspect the image before running
+- [Generate a docker-compose.yaml](/docs/compose) — when you're ready to commit the module to your infrastructure
+- [Full CLI reference](/docs/cli-reference#flareo-run-v030) — every flag, every exit code

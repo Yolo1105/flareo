@@ -1,0 +1,134 @@
+# Replacing Docker Hub in a homelab
+
+Most homelab setups are a collection of Docker Compose files, each pulling from Docker Hub. This works until a Docker Hub image you depend on gets compromised, rug-pulled, or silently retagged. This page walks through replacing Docker Hub pulls with Flareo-verified pulls, one service at a time.
+
+This isn't an all-or-nothing migration. You can start with one high-value service (your password manager, your reverse proxy, your auth provider) and leave the rest alone. The compose files that never change remain untouched; only the images shift.
+
+## The threat model we're responding to
+
+Three real things that have happened in the last few years:
+
+- **Image rug-pulls.** A maintainer loses interest, abandons the repo, an attacker takes over the Docker Hub namespace, and pushes a malicious image under the same tag everyone uses. Pulls of `:latest` or unversioned tags get the malicious image silently.
+- **Typosquatting.** An attacker registers `alpine-linix` or `nginx-proxy-manage` and waits for a copy-paste typo in someone's compose file. Your server pulls from the lookalike; the malicious image looks close enough at boot that you don't notice for days.
+- **Hub policy changes.** Docker Hub's pull-rate limits, sunset of "official" vs. community badges, and changing retention policies all shift the ground under you. Images that were free to pull yesterday may hit a paywall tomorrow.
+
+Flareo addresses all three by publishing from one controlled pipeline, signing every image with keyless cosign, and exposing the verification surface to you so you can enforce signatures as a deploy-time check.
+
+## The migration pattern
+
+For each service in your homelab, the pattern is:
+
+1. Find the Flareo equivalent (or confirm there isn't one yet — not every Docker Hub image is in our catalog)
+2. Pin to a specific Flareo digest
+3. Update your compose file
+4. Run `docker compose pull && docker compose up -d`
+5. Verify the service still works
+6. Move on to the next
+
+It's intentionally unglamorous. No daemon changes, no registry config, no Kubernetes admission controllers yet (that's a separate step, covered later). You're just swapping image references.
+
+## Step 1: audit what you pull
+
+In your compose-files directory:
+
+```sh
+grep -hE "image:" */docker-compose.yaml | sort | uniq -c | sort -rn
+```
+
+You'll see something like:
+
+```
+   4 image: caddy:2-alpine
+   3 image: postgres:16-alpine
+   2 image: vaultwarden/server:latest
+   2 image: gitea/gitea:latest
+   1 image: lscr.io/linuxserver/jellyfin:latest
+   1 image: louislam/uptime-kuma:1
+   1 image: containrrr/watchtower
+```
+
+The ones using `:latest` or generic floating tags are the biggest lift — they're the ones that can silently change out from under you. Put them at the top of your migration list.
+
+## Step 2: find the Flareo equivalents
+
+For each service, check the catalog:
+
+```sh
+flareo search vaultwarden
+flareo search gitea
+flareo search uptime-kuma
+```
+
+Or use the web interface at [flareo.dev/catalog](/catalog). The catalog covers popular homelab services: password managers, reverse proxies, monitoring tools, auth providers, media servers, Git forges. It does NOT cover databases, runtime base images (Alpine, Debian, distroless), or infrastructure shims (Watchtower, Traefik/Caddy). For those, stick with upstream — the Flareo signature story applies most strongly to application-layer containers holding your data.
+
+Services that aren't in the catalog yet can be proposed via the [publishing flow](/docs/publishing). You publish your own module, the same pipeline signs it, and you pull from `public.ecr.aws/flareo/<your-slug>` just like any other.
+
+## Step 3: pin to a verified digest
+
+For each service you're migrating:
+
+```sh
+flareo show vaultwarden
+# → digest: public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+```
+
+Then verify before you trust it:
+
+```sh
+flareo verify public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+```
+
+Three green checks — signature, SBOM, scan — means the image is what it claims to be. If verify fails, don't deploy.
+
+## Step 4: update the compose file
+
+Before:
+
+```yaml
+services:
+  vaultwarden:
+    image: vaultwarden/server:latest
+    # ...
+```
+
+After:
+
+```yaml
+services:
+  vaultwarden:
+    image: public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+    # ...
+```
+
+Restart the service:
+
+```sh
+docker compose pull
+docker compose up -d
+```
+
+The service should start the same way. Flareo rebuilds from upstream source, so the behavior is identical to what upstream ships; only the provenance differs.
+
+## Step 5: verify it still works, then move on
+
+Open the service in a browser. Check logs for a minute. If everything looks normal, the migration for that service is done. Move to the next.
+
+The whole process for a typical 5-service homelab takes about 30 minutes, most of which is re-checking that services still work.
+
+## What you've gained
+
+- Every service now pulls from a pipeline whose provenance you can trace. `public.ecr.aws/flareo/*` images are all built from source in GitHub Actions, signed with Fulcio, logged to Rekor. You can audit the exact build that produced any image you run.
+- Digest pins mean your compose files are reproducible. Spin up the same stack on a new host six months from now and you get the same bits, not the latest-tagged drift.
+- CVE status is surfaced centrally. When upstream ships a critical CVE, the Flareo catalog flips the module to `status: failing` and you can watch that via API from your monitoring.
+
+## What you haven't done
+
+- Infrastructure containers (databases, reverse proxies, Alpine bases) are still upstream pulls. The signature story applies less cleanly there — you'd mostly be signing rebuilds of images that already have their own upstream-signed supply chains (official images, distroless, etc). The juice isn't worth the squeeze.
+- Deploy-time enforcement (refusing to pull anything that isn't Flareo-signed) requires admission policies or a pull-time gate. See [Admission policies](/docs/admission) for Kubernetes; for plain Docker, a pre-pull wrapper script is the current approach.
+- Automatic updates aren't wired — you still manually bump digest pins when upstream ships a new version. Automated bumps with signature re-verification are on the roadmap.
+
+## Next steps
+
+- [Verify images in CI/CD](/docs/uses/ci-cd) — gate deployment pipelines on Flareo signatures
+- [Admission policies](/docs/admission) — enforce Flareo-only pulls in Kubernetes
+- [Deploy Vaultwarden in 5 minutes](/docs/uses/vaultwarden) — the concrete walkthrough for a single service

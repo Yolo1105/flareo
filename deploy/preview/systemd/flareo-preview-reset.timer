@@ -1,0 +1,18 @@
+# /etc/systemd/system/flareo-preview-reset.timer
+#
+# Fires flareo-preview-reset.service daily at midnight UTC.
+# `Persistent=true` ensures a reset runs on boot if we missed one while
+# the box was down.
+
+[Unit]
+Description=Daily reset of Flareo preview demos
+Documentation=https://flareo.dev
+
+[Timer]
+OnCalendar=*-*-* 00:00:00 UTC
+Persistent=true
+RandomizedDelaySec=0
+Unit=flareo-preview-reset.service
+
+[Install]
+WantedBy=timers.target

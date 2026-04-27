@@ -1,0 +1,139 @@
+# Deploy Vaultwarden in 5 minutes
+
+A concrete walkthrough: from zero to a running, Flareo-verified Vaultwarden instance on a small VPS. Uses the Flareo CLI, Docker Compose, and a Caddy reverse proxy. Everything stays pinned to a cryptographically verified digest.
+
+## Why Vaultwarden
+
+Vaultwarden is a Rust reimplementation of the Bitwarden server, compatible with Bitwarden clients (iOS, Android, browser, CLI). It's a good first target because:
+
+- It's small (single container, ~90 MB)
+- The upstream project is active and well-maintained
+- Running your own password manager is one of the most-cited homelab use cases
+- It's in the Flareo canary catalog, so we can point at a specific signed digest throughout this guide
+
+## What you need
+
+- A machine with Docker installed. A €6/month VPS is plenty; I'm using a Hetzner CX22 for this guide.
+- A domain name pointing at that machine — Caddy wants it for Let's Encrypt.
+- The Flareo CLI installed per the [install guide](/docs/install).
+- About 5 minutes.
+
+## Step 1: find the verified digest
+
+```sh
+flareo show vaultwarden
+```
+
+You'll see something like:
+
+```
+vaultwarden @ 1.34.3
+  digest:      public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+  signed by:   https://github.com/flareo/flareo-signer-workflows/.github/workflows/sign.yml@refs/tags/v1
+  scan:        0 critical, 0 high, 2 medium
+  updated:     4h ago
+```
+
+Copy that digest. We'll pin to it in the compose file so Docker pulls the exact image we verified, not whatever `:latest` happens to mean today.
+
+## Step 2: verify it yourself
+
+Never take our word for signature status. Verify before you deploy:
+
+```sh
+flareo verify public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
+```
+
+You should see three green lines — signature present and valid, SBOM exists, scan status current. Internally this hits Sigstore's public transparency log; no Flareo server sits in the verification path. You can verify from a different machine, a different network, a different decade — the guarantee holds as long as Sigstore does.
+
+If verify fails, stop. Either the digest is wrong (typo?) or something genuinely weird is going on — email hello@flareo.dev before deploying.
+
+## Step 3: generate a pinned compose file
+
+```sh
+flareo compose vaultwarden > docker-compose.yaml
+```
+
+This produces a `docker-compose.yaml` with:
+
+- The digest-pinned image reference from step 1
+- A named volume for the encrypted database
+- Environment variables set to sensible defaults
+- A restart policy that survives host reboots
+
+Edit it to taste. The defaults are conservative (no signup by default, no admin panel exposed, HTTPS-only). You'll want to set `DOMAIN` to your own domain.
+
+## Step 4: add Caddy for HTTPS
+
+Vaultwarden needs to be HTTPS for the browser extension to connect. Caddy handles certs automatically. Create a `Caddyfile` alongside your compose file:
+
+```
+vault.example.com {
+  reverse_proxy vaultwarden:80
+}
+```
+
+And add a `caddy` service to the compose file:
+
+```yaml
+caddy:
+  image: caddy:2-alpine
+  restart: unless-stopped
+  ports:
+    - "80:80"
+    - "443:443"
+  volumes:
+    - ./Caddyfile:/etc/caddy/Caddyfile:ro
+    - caddy_data:/data
+    - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
+```
+
+Caddy's base image isn't currently a Flareo module — for infrastructure containers like reverse proxies we typically recommend sticking with the upstream image. Flareo's signature story matters most for the application containers holding your data.
+
+## Step 5: run it
+
+```sh
+docker compose up -d
+```
+
+Tail the logs for a minute to make sure both containers start cleanly:
+
+```sh
+docker compose logs -f
+```
+
+Caddy will reach out to Let's Encrypt, get a cert, and start serving. Vaultwarden will create its SQLite database on the mounted volume. First boot takes about 15 seconds on a small VPS.
+
+## Step 6: create your account
+
+Open `https://vault.example.com` in a browser. You should see the Bitwarden web client loading from your own server. Click "Create account", pick a strong master password, and you're in.
+
+A minute later, install the Bitwarden browser extension or mobile app and point it at your own URL in settings. Everything just works because Vaultwarden speaks the real Bitwarden protocol.
+
+## What you've actually done
+
+Leaving the happy-path walkthrough: here's the security story. You:
+
+- Pinned to a specific image digest, so Docker can't silently pull a different image later
+- Verified that the image was built by Flareo's public pipeline, signed with the public Fulcio CA, and logged to the public Rekor transparency log
+- Reviewed the SBOM and scan status before the image touched your infrastructure
+
+If Flareo is ever compromised and starts signing malicious images, you'll notice immediately — the signer identity on `flareo verify` would show an unexpected workflow identity. If the image is ever tampered with in transit or at rest, the digest pin catches it. If a new CVE lands in Vaultwarden upstream, the daily Flareo rebuild picks it up and our module page will flip to `status: failing` — your own monitoring can watch that API and alert.
+
+## Backup, updates, and maintenance
+
+**Backup:** the whole state is in the Docker volume mounted at `/data` inside the container. `docker run --rm -v vault_data:/src -v $PWD:/dst alpine tar -czf /dst/vault-backup.tar.gz -C /src .` pulls a snapshot. Do this on a cron; the Vaultwarden project itself recommends daily.
+
+**Updates:** when upstream ships a new Vaultwarden release, Flareo rebuilds typically within 24-48 hours. Check `flareo show vaultwarden` periodically (or subscribe to release notifications on the module page). Update by editing the digest in your compose file and running `docker compose pull && docker compose up -d`.
+
+**Rotation:** best practice for long-running deploys is pinning to a fresh digest every few months, not chasing updates more often. A hot monthly churn just means more opportunities to pull in a fresh bug.
+
+## Next steps
+
+- Set up an [automatic backup](https://github.com/dani-garcia/vaultwarden/wiki/Backing-up-your-vault) per the upstream wiki
+- Read [Admission policies](/docs/admission) if you're running this in Kubernetes rather than plain Docker
+- Read [Replacing Docker Hub in a homelab](/docs/uses/replacing-docker-hub) for the broader pattern of switching to signed-only pulls across your whole homelab

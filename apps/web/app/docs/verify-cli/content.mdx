@@ -1,0 +1,114 @@
+# Verify from the CLI
+
+The web verification tool is convenient. The CLI version is the source of truth. This page lists the commands to verify a Flareo image end-to-end from your own terminal.
+
+## What you need
+
+- [cosign](https://docs.sigstore.dev/cosign/installation/) v2.4 or later
+- [trivy](https://trivy.dev/latest/getting-started/installation/) (optional, for CVE scanning)
+- a container image reference — with a digest, always with a digest
+
+## Signature verification
+
+The foundational check. Did the Flareo GitHub Actions identity really sign this digest?
+
+```sh
+cosign verify \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+Expected output:
+
+```
+Verification for public.ecr.aws/flareo/vaultwarden@sha256:abc...
+The following checks were performed:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The code-signing certificate was verified using trusted certificate authority certificates
+```
+
+If this fails, either the image isn't signed by Flareo, or (rare) Sigstore's trust root changed and your cosign is out of date.
+
+## SBOM retrieval
+
+Every Flareo image has an attached CycloneDX SBOM. Fetch it:
+
+```sh
+cosign download sbom public.ecr.aws/flareo/vaultwarden@sha256:abc123... > sbom.json
+```
+
+The SBOM lists every package that went into the image with its version and license. You can diff two SBOMs across builds to see exactly what changed:
+
+```sh
+cosign download sbom <old-digest> > old.json
+cosign download sbom <new-digest> > new.json
+diff <(jq -S '.components' old.json) <(jq -S '.components' new.json)
+```
+
+## CVE scan
+
+Flareo runs Trivy on every build and publishes the report. You can run your own:
+
+```sh
+trivy image public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+Or pull Flareo's report:
+
+```sh
+curl -s https://flareo.dev/api/v1/modules/vaultwarden | jq -r .scanUrl | xargs curl -s | jq .Results
+```
+
+The two reports should agree on what's installed; they may disagree on severity if one has a fresher vulnerability database.
+
+## Provenance attestation
+
+```sh
+cosign verify-attestation \
+  --type slsaprovenance \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  public.ecr.aws/flareo/vaultwarden@sha256:abc123...
+```
+
+The attestation body is a base64-encoded JSON that describes the build environment, source git commit, and build steps. Decode with:
+
+```sh
+cosign verify-attestation ... | jq -r .payload | base64 -d | jq .predicate
+```
+
+## Compact pre-deploy check
+
+Drop this into a Makefile or CI job that runs before deploying:
+
+```sh
+#!/bin/sh
+set -e
+IMAGE="public.ecr.aws/flareo/vaultwarden@sha256:abc123..."
+
+cosign verify \
+  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
+  "$IMAGE" > /dev/null
+
+echo "✓ $IMAGE verified"
+```
+
+Exit code 0 means good to deploy. Anything else, stop.
+
+## Shortcut: flareo verify
+
+The CLI wraps all of the above:
+
+```sh
+flareo verify public.ecr.aws/flareo/vaultwarden@sha256:abc...
+```
+
+Runs signature verification, pulls the CVE scan result from the API, prints a concise summary, and exits with a code that reflects the verdict (0 verified/signed, 1 unsigned, 2 invalid, 5 error). Scriptable out of the box.
+
+## Next steps
+
+- [Admission policies](/docs/admission) — enforce these checks at the Kubernetes level
+- [API reference](/docs/api-reference) — fetch module metadata programmatically

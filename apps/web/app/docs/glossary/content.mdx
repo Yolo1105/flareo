@@ -1,0 +1,91 @@
+# Glossary
+
+Plain-English definitions for the acronyms and jargon that show up across Flareo's docs, tools, and status pages.
+
+## Canary rebuild
+
+Flareo's daily CI job that rebuilds every module from upstream source, regardless of whether upstream shipped a new version. Catches silent dependency breakage, lets us pick up upstream bug fixes within a day, and ensures every module in the catalog has a recent signature.
+
+## Content-addressable
+
+An addressing scheme where the name of a thing is derived from its content. `sha256:abc...` is content-addressable; `:latest` is not. Content-addressable addresses can't be silently replaced — if the content changes, the address changes.
+
+## Cosign
+
+The [Sigstore](#sigstore) CLI tool for signing and verifying container images and other artifacts. What we use to produce our signatures and what you use to verify them. `brew install cosign` or see [docs.sigstore.dev/cosign/installation](https://docs.sigstore.dev/cosign/installation/).
+
+## Digest
+
+The sha256 hash of an OCI manifest. Sometimes called the "image ID" in Docker UX. Every unique image has exactly one digest. Tags point at digests and can be moved; digests cannot.
+
+## Fulcio
+
+Sigstore's [certificate authority](https://docs.sigstore.dev/fulcio/). Issues short-lived (~10 minutes) signing certificates based on OIDC identity. The CA that underwrites every Flareo signature.
+
+## Keyless signing
+
+Code signing without a long-lived private key. Instead, a signer authenticates to Fulcio with an OIDC token, gets a short-lived certificate, uses it to sign, and the certificate expires. Relies on the [Rekor](#rekor) transparency log to preserve timestamped proof that the signature was valid when made.
+
+## Module
+
+In Flareo, a container image we rebuild, sign, and publish. Identified by a slug like `vaultwarden`. 12 modules in the catalog for the closed beta.
+
+## OCI image
+
+An image following the [Open Container Initiative](https://opencontainers.org) standards. Docker images are OCI images. So are cosign signature manifests. So is everything else that speaks the container registry protocol.
+
+## OIDC
+
+OpenID Connect. A standard for identity providers (GitHub, Google, etc.) to mint verifiable tokens about a user's identity. Flareo's builds authenticate to Fulcio using GitHub Actions' OIDC tokens, which is how the signatures end up attributable to `https://github.com/flareo/...`.
+
+## Rebuild
+
+A new build of an existing module, usually triggered by an upstream version bump or by our daily canary schedule. Each rebuild gets a fresh signature and a new Rekor log entry.
+
+## Rekor
+
+Sigstore's [transparency log](https://docs.sigstore.dev/rekor/). An append-only Merkle tree of every signature Sigstore has issued. Signatures stay verifiable forever by looking up their inclusion proof, even after the signing certificate has expired.
+
+## SBOM
+
+Software Bill of Materials. A structured list of every package, library, and file that went into a build. Flareo publishes a [CycloneDX](https://cyclonedx.org) SBOM for every image.
+
+## Sigstore
+
+The [Sigstore project](https://sigstore.dev/): a collection of open-source tools and public infrastructure for signing, verifying, and logging software artifacts. Umbrella for Fulcio (CA), Rekor (transparency log), cosign (CLI), and the trust root.
+
+## SLSA
+
+Supply-chain Levels for Software Artifacts. A framework for describing how trustworthy a build is, ranging from L0 (nothing guaranteed) to L4 (hermetic, two-party reviewed, reproducible builds). Flareo is at SLSA L2 today: automated builds with signed provenance. L3 requires job isolation we haven't invested in yet.
+
+## Slug
+
+The URL-safe kebab-case identifier for a module. `vaultwarden`, `uptime-kuma`, `adguard-home`. Stable; never changes after publication.
+
+## TUF
+
+The Update Framework. The system that distributes Sigstore's trust root (the set of public keys used to verify Fulcio certificates). You're trusting TUF every time you run cosign, but cosign handles it transparently.
+
+## Transparency log
+
+An append-only, tamper-evident log that anyone can query. Rekor is Sigstore's transparency log. Critical property: it's impossible to remove or retroactively modify an entry without everyone noticing.
+
+## Trivy
+
+An open-source vulnerability scanner from [Aqua Security](https://trivy.dev). Flareo runs it on every build; results are published to R2 and linked from each module's receipts section.
+
+## Trust score
+
+A 0-100 composite score Flareo computes for every module. Weighted blend of CVE status (50%), SLSA level (20%), signature freshness (15%), and SBOM completeness (15%). See [signing](/docs/signing).
+
+## Trust root
+
+The set of public keys that anchor a chain of trust. In Sigstore, it's distributed via TUF. Updating the trust root is how the Sigstore maintainers rotate keys or add new verifiers.
+
+## Upstream
+
+The original project a Flareo module is built from. `upstream` for the `vaultwarden` module is [github.com/dani-garcia/vaultwarden](https://github.com/dani-garcia/vaultwarden). We rebuild from upstream source on our CI; we don't mirror prebuilt images.
+
+## Verified / Signed / Unsigned / Invalid
+
+The four happy-path `status` values returned by the verify API. See [verify](/docs/verify).

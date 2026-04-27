@@ -1,0 +1,48 @@
+# Verify any container
+
+The verification tool at [flareo.dev/verify](https://flareo.dev/verify) is not limited to Flareo-signed modules. It works on any OCI image, from any registry, as long as the image has a Sigstore signature manifest attached in the standard `:sha256-<digest>.sig` form.
+
+## What the tool actually does
+
+Given an image reference like `registry.example.com/app:v1.2.3`:
+
+1. **Parse.** Splits the ref into registry, repository, tag, and (if given) digest. Supports Docker Hub shorthand (`alpine:3.20`), GHCR, ECR Public, Quay, and any other v2-compliant OCI registry.
+
+2. **Resolve tag → digest.** If you gave a tag, the tool does a HEAD request to the registry's manifest endpoint to pin down the sha256 digest. Tags can be moved; digests cannot. All subsequent checks run against the digest.
+
+3. **Find the signature.** cosign writes signatures as a sibling image tagged `<repo>:sha256-<hex>.sig`. The tool HEAD-requests that tag. If it 404s, the image is unsigned.
+
+4. **Cross-reference with the Flareo catalog.** If the digest matches a Flareo-signed module, we enrich the result with the catalog metadata — trust score, CVE counts, SBOM link, scan report link.
+
+## Possible results
+
+**Verified.** The image has a valid Sigstore signature AND it's in the Flareo catalog with an acceptable CVE status. You see the signer identity, Rekor log index, and full catalog metadata.
+
+**Signed.** The image has a Sigstore signature but isn't in the Flareo catalog. We report the signature exists but don't make a trust claim. You'd want to verify the signature yourself with `cosign verify` and your own identity expectations.
+
+**Unsigned.** No Sigstore signature manifest exists for this image. Very common for images pushed without a signing step. Not a statement about the image being bad — just a statement that there's no cryptographic provenance to check.
+
+**Invalid.** A signature exists but we found a reason to reject it. For Flareo modules, this includes "signature is valid but the image has a critical CVE so we pulled it from the catalog." For non-Flareo images, this is currently not reachable; offline Sigstore bundle validation lands in v0.2.0 of the CLI (Horizon 2 for the web tool).
+
+**Error.** We couldn't reach the registry, the manifest was malformed, or something else went wrong. Retry first; if it persists, the registry may be throttling anonymous manifest requests.
+
+## Why the web tool doesn't validate the full Sigstore bundle
+
+The web tool confirms a signature *manifest* exists on the registry, surfaces what's there (signer identity from the certificate, Rekor inclusion proof if discoverable, SBOM/SLSA attestation links when present), and runs a Trivy CVE scan against the image. What it does NOT do is walk the Fulcio certificate chain end-to-end against the trust root client-side — that runs in the CLI's `flareo verify`, which has the full `cosign verify` semantics.
+
+This is deliberate, and we say it out loud: **if you want end-to-end cryptographic proof, use the CLI**. The web tool is for the "does this image have signing set up correctly, what's in it, what does the catalog say about it" workflow. It's not a substitute for `cosign verify` against your own identity expectations, and we don't pretend otherwise. Whether full client-side bundle walking is worth adding to the web tool depends on whether the bottleneck for users is "can't easily install a CLI" — feedback welcome via the contact link in the footer.
+
+## Rate limits
+
+The `/api/v1/verify` endpoint is rate-limited to:
+
+- 60 requests per hour per IP for unauthenticated callers
+- 600 requests per hour per user for authenticated callers
+
+If you need more, sign in with GitHub — that alone bumps you to the authenticated bucket.
+
+## Next steps
+
+- Pull the verified image: [Pull and run](/docs/pull-run)
+- Generate a docker-compose.yaml with pinned digests: [Generate compose files](/docs/compose)
+- Run the same check offline: [Verify from the CLI](/docs/verify-cli)
