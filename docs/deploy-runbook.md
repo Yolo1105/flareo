@@ -13,9 +13,12 @@ If a step fails, **stop**. Don't continue. Paste the error in the next session a
 - A Cloudflare R2 bucket for SBOM/build-log storage
 - A Stripe account (test mode is fine for initial deploy)
 - A Plausible account at https://plausible.io
-- The Hetzner box for the shared preview demos (already exists per `deploy/preview/`)
+- > **Historical (ADR-013).** The Hetzner box for shared preview demos
+  > (`deploy/preview/`) was decommissioned and `*.preview.flareo.dev` has
+  > lapsed. Do not provision a new box. See
+  > [`docs/adr/ADR-013-preview-disposition.md`](adr/ADR-013-preview-disposition.md).
 - A worker host — **historical (ADR-012):** previously a small VPS with Docker + cosign + Trivy for the retired Dockerfile build path; not required for the current republish / verify product
-- Anthropic-compatible domain DNS (the project assumes you control `flareo.app` and, for shared demos, preview subdomains documented under `deploy/preview/`)
+- Domain DNS for `flareo.app`. > **Historical (ADR-013):** shared-demo preview subdomains under `deploy/preview/` are retired — do not configure them.
 
 ---
 
@@ -150,7 +153,12 @@ vercel --prod
 
 ---
 
-## 6. Wire F0 analytics
+## 6. Wire F0 analytics — historical (retired)
+
+> **Historical (ADR-013).** The shared preview host was decommissioned and
+> `*.preview.flareo.dev` has lapsed. Do not follow the steps below on a live
+> system. Kept as a record of how the F0 analytics injection was provisioned.
+> See [`docs/adr/ADR-013-preview-disposition.md`](adr/ADR-013-preview-disposition.md).
 
 On the Hetzner preview box (per `deploy/preview/README.md`):
 
@@ -168,17 +176,17 @@ git pull   # pulls in the F0 caddy injection from this session
 systemctl restart caddy
 ```
 
-**Success check:**
+**Success check (historical):**
 ```sh
 curl -sI https://s-vaultwarden-demo.preview.flareo.dev | grep -i x-flareo-analytics
 ```
 Should return a header confirming the injection is live.
 
-**Then mark day-0 in decisions.md:**
+**Then mark day-0 in decisions.md (historical — G-1 is now unmeasurable):**
 
 Edit `docs/decisions.md`, find the G-1 section, fill in the "Day-0 anchor" line with today's date in `YYYY-MM-DD UTC` format. Add a calendar reminder for 30 days from now: "F0 decision day — read conversion rate, follow G-1 pre-committed branch."
 
-This is the most important step. Without it the gate doesn't exist.
+This was the most important step when the preview host existed. Without it the gate didn't exist. The gate is retained as a record; the Plausible property no longer does.
 
 ---
 
@@ -305,12 +313,10 @@ Visit:
 
 ---
 
-## 12. Mark deployment date and stop
+## 12. Mark deployment date and stop — partly historical
 
 In decisions.md:
-- G-1: write the day-0 anchor
-- Add a top-of-file dated entry: "YYYY-MM-DD: production deploy. F0 clock running."
+- G-1: day-0 anchor — **historical (ADR-013).** The F0 preview analytics property no longer exists; do not start this clock.
+- Add a top-of-file dated entry: "YYYY-MM-DD: production deploy." (omit "F0 clock running" — that gate is unmeasurable).
 
-**Then stop adding code.** For 30 days. Read F0 numbers daily without acting. At day 30, run the G-1 gate.
-
-The discipline is the whole product.
+**Then stop adding code** unless a real trigger in `docs/decisions.md` fires under today's artifact framing (ADR-011). The discipline is the whole product.
