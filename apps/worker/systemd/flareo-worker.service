@@ -1,9 +1,10 @@
 [Unit]
 Description=Flareo build worker
 Documentation=https://github.com/flareo/flareo-worker
-After=network-online.target docker.service
+After=network-online.target
 Wants=network-online.target
-Requires=docker.service
+# Requires=docker.service — retired with the build path (ADR-012).
+# The worker no longer talks to a local Docker daemon / DinD.
 
 [Service]
 Type=simple
@@ -15,11 +16,7 @@ WorkingDirectory=/opt/flareo-worker
 # this on restart, so rotating secrets is: edit file → restart unit.
 EnvironmentFile=/etc/flareo-worker/env
 
-# Must be in the docker group to talk to the daemon. We do NOT run as
-# root because the daemon has userns-remap, so commands spawned from
-# here get mapped to an unprivileged user even when they think they're
-# root inside the container.
-SupplementaryGroups=docker
+# SupplementaryGroups=docker — retired (ADR-012). No Docker socket access.
 
 # Actual start command. We use tsx in dev but for production the
 # systemd unit runs the pre-built JS from dist/.
@@ -55,8 +52,8 @@ MemoryDenyWriteExecute=false  # Node/V8 needs JIT; can't enable this
 ReadWritePaths=/var/lib/flareo-worker
 ReadWritePaths=/var/log/flareo-worker
 
-# Resource limits. Worker itself is small; build containers have their
-# own limits set by docker build flags.
+# Resource limits. Worker itself is small; build containers previously
+# had their own limits set by docker build flags (see legacy/build.ts).
 MemoryMax=1G
 TasksMax=512
 

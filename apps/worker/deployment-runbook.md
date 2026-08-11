@@ -1,10 +1,16 @@
 # Build worker deployment runbook
 
+> **HISTORICAL.** Build-host provisioning below (Docker Engine, userns-remap,
+> ECR docker login, smoke `docker build`) applied to the retired Dockerfile
+> build path. See ADR-012. Kept as an operations record; do not follow these
+> steps for new hosts unless deliberately reviving that path.
+
 Sequence to take the worker from scratch code to a running service on a fresh Hetzner box. Follow in order; skipping steps is how you end up with a half-configured worker that silently fails builds.
 
 ## Day 1 — host setup (~2 hours)
 
-Rent a fresh Hetzner AX41-NVMe. SSH in as root.
+> **Historical (ADR-012).** Docker Engine install and related tooling below
+> were for the sandboxed `docker build` path, which no longer runs.
 
 ```sh
 apt update && apt upgrade -y
@@ -54,6 +60,9 @@ ufw --force enable
 
 ## Day 1 — user and directories
 
+> **Historical (ADR-012).** `usermod -aG docker` and the `flareo-build`
+> remap user were for the retired host Docker sandbox.
+
 ```sh
 useradd -r -m -d /opt/flareo-worker -s /bin/bash flareo-worker
 usermod -aG docker flareo-worker
@@ -71,6 +80,9 @@ chmod 700 /etc/flareo-worker
 ```
 
 ## Day 1 — Docker userns-remap
+
+> **Historical (ADR-012).** userns-remap was the primary host-side control
+> for the retired DinD / `docker build` sandbox.
 
 This is the single most important security control. Without it, a container-escape bug gives host-root.
 
@@ -125,6 +137,9 @@ chown root:root /etc/flareo-worker/env
 ```
 
 Also configure ECR auth:
+
+> **Historical (ADR-012).** `docker login` against ECR Public was required
+> for the retired push-after-build path.
 
 ```sh
 sudo -u flareo-worker mkdir -p ~flareo-worker/.docker

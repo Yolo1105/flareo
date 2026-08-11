@@ -3,7 +3,7 @@
  *
  * Polls the DB for approved submissions. For each one:
  *   1. Fetch the Dockerfile from R2 (or flagsJson fallback)
- *   2. docker build in sandbox
+ *   2. docker build in sandbox — retired (ADR-012); see legacy/build.ts
  *   3. Trivy scan — reject if CRITICAL/HIGH
  *   4. Generate SBOM
  *   5. Push to ECR
@@ -25,7 +25,6 @@ import {
   markFailed,
   markFailedOrRetry,
   publishModuleFromSubmission,
-  appendBuildLogLine,
   type ApprovedRow,
   type RetryDecision,
   type WorkerPrisma,
@@ -36,11 +35,6 @@ import {
   writeBuildLog,
   writeSbom,
 } from "./r2.js";
-import {
-  dockerBuild,
-  cleanupBuildDir,
-  removeLocalImage,
-} from "./build.js";
 import { scanImage, generateSbom } from "./scan.js";
 import { pushToEcr, signImage } from "./sign.js";
 import { evaluatePolicy } from "./policy.js";
@@ -118,6 +112,15 @@ async function notifyMainApp(
   }
 }
 
+/**
+ * Processes historical approved rows only.
+ *
+ * The Dockerfile build path was retired (ADR-012); new public
+ * submissions are not accepted. This function is kept so leftover
+ * or in-flight rows can still be drained. Preserving the surrounding
+ * retry, dead-letter, and heartbeat machinery matters more than
+ * deleting an otherwise quiet code path.
+ */
 async function processSubmission(
   ctx: WorkerContext,
   row: ApprovedRow
@@ -227,82 +230,20 @@ async function processSubmission(
     return;
   }
 
-  // 2. Build. Stream stdout/stderr chunks to the BuildLogLine table
-  //    as they arrive so the submission detail page's live-log panel
-  //    can show progress. The streaming is advisory: if a chunk fails
-  //    to land, the build still succeeds and the final full-text log
-  //    still gets uploaded to R2 below.
-  //
-  //    We serialize writes with a chained promise (`writeChain`) so
-  //    that concurrent chunks land in emitted order and the seq
-  //    counter stays monotonic — Node fires 'data' handlers
-  //    synchronously but the DB write is async. Without the chain,
-  //    a slow first chunk could land after a fast second chunk and
-  //    invert the visible log order.
-  let chunkSeq = 0;
-  let writeChain: Promise<void> = Promise.resolve();
-  // Emit an opening system marker so the log panel has something to
-  // render immediately even before the child produces its first line.
-  writeChain = writeChain
-    .then(() =>
-      appendBuildLogLine(ctx.prisma, {
-        submissionId: row.id,
-        seq: chunkSeq++,
-        text: `--- build started for ${row.moduleName}@${row.version} ---\n`,
-        stream: "system",
-      })
-    )
-    .catch(() => {}); // streaming is best-effort
-
-  const buildResult = await dockerBuild({
-    submissionId: row.id,
-    slug: row.moduleName,
-    dockerfile,
-    buildRoot: ctx.config.buildRoot,
-    timeoutMs: ctx.config.buildTimeoutMs,
-    requiresNetwork: row.requiresNetwork,
-    onChunk: ({ text, stream }) => {
-      const seq = chunkSeq++;
-      writeChain = writeChain
-        .then(() =>
-          appendBuildLogLine(ctx.prisma, {
-            submissionId: row.id,
-            seq,
-            text,
-            stream,
-          })
-        )
-        .catch(() => {}); // a dropped chunk is acceptable
-    },
-  });
-
-  // Wait for any pending writes to land before we move on to the
-  // R2 upload and status update. Bounded by however many chunks the
-  // DB can ingest; in practice builds have dozens of chunks, not
-  // thousands. A 5-second ceiling guards against a stuck DB.
-  await Promise.race([
-    writeChain,
-    new Promise<void>((resolve) => setTimeout(resolve, 5000)),
-  ]);
-
-  // Final system marker (success or failure; the seq ordering
-  // guarantees this lands after every runtime chunk).
-  writeChain = writeChain
-    .then(() =>
-      appendBuildLogLine(ctx.prisma, {
-        submissionId: row.id,
-        seq: chunkSeq++,
-        text: buildResult.success
-          ? `--- build succeeded in ${buildResult.durationMs}ms ---\n`
-          : `--- build failed after ${buildResult.durationMs}ms ---\n`,
-        stream: "system",
-      })
-    )
-    .catch(() => {});
-  await Promise.race([
-    writeChain,
-    new Promise<void>((resolve) => setTimeout(resolve, 2000)),
-  ]);
+  // 2. Build — retired (ADR-012). The sandbox wrapper lives at
+  //    ./legacy/build.ts and is intentionally not imported. Fail closed
+  //    so any leftover approved row is surfaced rather than executed.
+  //    Steps 3–8 below are retained structurally but are unreachable
+  //    while this result stays unsuccessful.
+  const buildResult = {
+    success: false as boolean,
+    imageTag: "",
+    logText:
+      "build path retired (ADR-012); dockerBuild is no longer invoked\n",
+    durationMs: 0,
+    errorSummary:
+      "The Dockerfile build path has been retired. See ADR-012.",
+  };
 
   // Always write the log, success or failure.
   let buildLogUrl: string | null = null;
@@ -339,7 +280,6 @@ async function processSubmission(
       submissionId: row.id,
       result: "failed",
     });
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -354,8 +294,6 @@ async function processSubmission(
       buildLogUrl,
       err,
     });
-    await removeLocalImage(buildResult.imageTag);
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -375,8 +313,6 @@ async function processSubmission(
       result: "scan_rejected",
       cveList: scanResult.cves.slice(0, 20).map((c) => `${c.id} (${c.pkg})`),
     });
-    await removeLocalImage(buildResult.imageTag);
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -402,8 +338,6 @@ async function processSubmission(
       buildLogUrl,
       err,
     });
-    await removeLocalImage(buildResult.imageTag);
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -426,8 +360,6 @@ async function processSubmission(
       buildLogUrl,
       err,
     });
-    await removeLocalImage(buildResult.imageTag);
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -447,8 +379,6 @@ async function processSubmission(
       buildLogUrl,
       err,
     });
-    await removeLocalImage(buildResult.imageTag);
-    await cleanupBuildDir(ctx.config.buildRoot, row.id);
     return;
   }
 
@@ -589,8 +519,8 @@ async function processSubmission(
   });
 
   // 8. Cleanup.
-  await removeLocalImage(buildResult.imageTag);
-  await cleanupBuildDir(ctx.config.buildRoot, row.id);
+  // Local image / build-dir cleanup lived with dockerBuild (legacy/).
+  // No-op after ADR-012 — nothing was built on this host.
 }
 
 /**

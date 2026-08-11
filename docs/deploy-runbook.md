@@ -14,7 +14,7 @@ If a step fails, **stop**. Don't continue. Paste the error in the next session a
 - A Stripe account (test mode is fine for initial deploy)
 - A Plausible account at https://plausible.io
 - The Hetzner box for the shared preview demos (already exists per `deploy/preview/`)
-- A worker host — a small VPS (Hetzner CX21, DigitalOcean droplet, or similar) with Docker + cosign + Trivy installed
+- A worker host — **historical (ADR-012):** previously a small VPS with Docker + cosign + Trivy for the retired Dockerfile build path; not required for the current republish / verify product
 - Anthropic-compatible domain DNS (the project assumes you control `flareo.app` and, for shared demos, preview subdomains documented under `deploy/preview/`)
 
 ---
@@ -205,6 +205,11 @@ Restart the main app (Vercel redeploys automatically). Restart the worker proces
 ---
 
 ## 8. Deploy the worker
+
+> **Historical (ADR-012).** Build-host provisioning (Docker-equipped VPS,
+> `After=docker.service`, local `docker build`) applied to the retired
+> Dockerfile build path. Kept as a record; do not provision a new DinD /
+> build host for current product scope.
 
 On your worker host (the Docker-equipped VPS):
 

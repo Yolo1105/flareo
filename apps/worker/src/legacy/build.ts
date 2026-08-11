@@ -1,4 +1,14 @@
 /**
+ * LEGACY — retained as a record of the sandbox design (ADR-012).
+ *
+ * Not reachable from any active code path. Changing this file no
+ * longer requires re-running the red-team playbook because it no
+ * longer runs.
+ *
+ * See: docs/adr/ADR-012-retire-build-path.md
+ */
+
+/**
  * docker build wrapper.
  *
  * This is the most security-sensitive file in the worker. The flags
