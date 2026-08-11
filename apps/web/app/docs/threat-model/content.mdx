@@ -1,62 +1,96 @@
 # Threat model
 
-What Flareo protects against, what it doesn't, and what we'd like to protect against but can't yet.
+What Flareo protects against, what it doesn't, and which paths that
+could execute third-party code have been removed.
+
+## Trust boundary (verify-and-republish)
+
+Flareo has two tracks:
+
+- **Catalog (Track A):** re-publish a pinned upstream image with
+  receipts. Bits are identical to upstream; Flareo did not rebuild.
+- **Verify (Track B):** check the Sigstore signature of any image.
+  Outside the catalog, the response is signature status only — no
+  on-demand scan, no trust score.
+
+The trust boundary is: Flareo attests to **signature, SBOM, scan, and
+recorded upstream digest** for catalog images, and to **signature
+status** for anything else. It does not vouch for upstream intent, and
+it does not execute stranger-supplied build inputs anymore.
+
+## Paths that execute third-party code
+
+- **Dockerfile builds — removed.** Accepting an arbitrary Dockerfile
+  onto infrastructure that holds a signing identity was the fatal case:
+  a sandbox escape reaching that identity collapses the trust model.
+  An open build path is also an abuse magnet and is incompatible with
+  reproducibility claims. The sandbox implementation is preserved at
+  `apps/worker/src/legacy/build.ts`
+  ([ADR-012](https://github.com/Yolo1105/flareo/blob/main/docs/adr/ADR-012-retire-build-path.md)).
+
+- **Shared demo instances — retired.** Seven fixed images on a single
+  host (`s-*-demo.preview.flareo.dev`), no user input. The host and
+  its domain are gone; ops scripts live under `docs/archive/deploy-preview`.
+
+- **Per-user preview allocation** was never more than a stub behind a
+  disabled feature flag. It remains gated off
+  ([ADR-013](https://github.com/Yolo1105/flareo/blob/main/docs/adr/ADR-013-preview-disposition.md)).
 
 ## In scope
 
-**Supply-chain tampering during pull.** If an attacker on your network or at an upstream mirror tries to swap the image you're pulling for a malicious one, Sigstore verification against a pinned digest detects it. The content hash won't match; cosign fails loudly.
+**Supply-chain tampering during pull.** Sigstore verification against a
+pinned digest detects a swapped image.
 
-**Registry account takeover.** If our ECR Public account is compromised and an attacker pushes a new image under an existing tag, the signature won't verify because the attacker can't sign with the Flareo GitHub OIDC identity. Your pinned digest remains valid, and anyone verifying an attacker's new image gets a signature mismatch.
+**Registry account takeover.** An attacker who pushes under Flareo's
+ECR namespace still cannot produce a signature from Flareo's OIDC
+identity. Pinned digests remain valid.
 
-**Unauthorized rebuilds.** Only CI jobs running from the `flareo` organization's protected branches produce signatures. An attacker who forks the repo and runs their own CI produces a different signer identity, which `cosign verify --certificate-identity-regexp 'https://github.com/flareo/.+'` rejects.
+**Unauthorized signing identities.** Forks that run their own CI
+produce a different certificate identity; verifiers that pin the
+expected identity reject them.
 
-**Silent upstream compromise (partial).** If upstream ships a backdoored release, our Trivy scan won't catch it (scanners look for known CVEs, not zero-days). The SBOM we generate does document every package that went in, so a retroactive audit is possible. We'll often be the first to notice because a republish run exposes the compromise to more eyes — and `lastRebuiltAt` makes gaps visible when the pipeline stalls.
+**Silent upstream compromise (partial).** Trivy will not catch
+zero-days. The SBOM documents what went in; `lastRebuiltAt` makes
+pipeline gaps visible.
 
 ## Out of scope
 
-**Your local build environment.** If your laptop has a compromised Docker daemon or a malicious shell alias, Flareo's verification tells you nothing about whether the image you *actually ran* matches the image you verified. Run containers on a clean host.
+**Your local runtime.** Verification does not prove the image you
+actually ran matches the image you verified.
 
-**Upstream maliciousness.** The author of a project we package could publish a malicious release. Flareo's signature attests only that *we* built the release from upstream source; it does not attest that the upstream source is trustworthy. Signing is not vouching.
+**Upstream maliciousness.** A Flareo signature attests that Flareo
+re-published a given digest with receipts — not that upstream intent
+is trustworthy.
 
-**Side-channel leaks.** Running untrusted container code still risks CPU-level side-channel attacks (Spectre, Meltdown, and friends). Flareo images run as ordinary containers; they don't use gVisor or similar sandboxes.
+**Side-channel leaks, DoS against Flareo infra, encryption of your
+volumes.** Ordinary container and ops concerns outside this project's
+scope.
 
-**Denial-of-service attacks on Flareo infrastructure.** If flareo.app goes down, nothing catastrophic happens — you can still verify images against Sigstore directly without us — but the catalog and web tool are unavailable.
+## Red-team playbook
 
-**Attacks against your data at rest.** Flareo doesn't encrypt your container volumes or manage secrets. That's your infrastructure's job.
+[`docs/red-team-playbook.md`](https://github.com/Yolo1105/flareo/blob/main/docs/red-team-playbook.md)
+lists 14 attacks across 4 categories. It was written against the
+**build path**. Most of those attacks no longer have a live target —
+that is the intended outcome of retiring the path, not an omission in
+coverage.
 
-## What we'd like to protect against but don't yet
+## What signal we do ship
 
-**Hermetic, isolated builders.** Today's republish pipeline re-signs upstream images and records signed provenance with the upstream digest. It does not run each job on an isolated build platform that would support stronger build-provenance claims. If your admission posture requires that bar, file an issue and we'll reconsider.
+- Cosign keyless signatures on catalog modules, with Rekor index
+- Trivy results plus OpenVEX annotation per module
+- Upstream digest recorded for byte-equivalence checks
+- Admission policy templates (Kyverno, sigstore/policy-controller) in
+  Audit mode
+- Catalog policy verdicts at `/api/v1/modules/<slug>/policy`
 
-**Reproducible builds.** We don't currently verify that two independent builds of the same upstream source produce bit-identical images. Rebuilds are deterministic in intent (pinned base images, locked dependencies) but we haven't invested in the tooling to *prove* bit-for-bit reproducibility. Diffoscope-based CI is on the medium-term list.
+## Reporting
 
-**Runtime admission enforcement, server-side.** We ship admission *policies* (Kyverno, sigstore-policy-controller) at [/docs/admission](/docs/admission) and a per-module policy verdict endpoint at `/api/v1/modules/<slug>/policy`. What we don't yet operate is a hosted admission controller that proxies pulls — that's downstream from this catalog and would be a bigger product than what we're trying to be.
-
-## What signal we DO ship
-
-To save you reading the rest of the docs to find out what threats Flareo's catalog actively addresses:
-
-- **Image tampering between build and pull.** Cosign keyless signature on every module, verified by `flareo verify` or `cosign verify` directly against the Rekor transparency log. If an attacker substitutes the image, the signature breaks.
-- **CVEs in the image, with reviewer-judged context.** Trivy scan results plus a per-module OpenVEX 0.2.0 document (`/api/v1/modules/<slug>/vex`) where the reviewer team annotates which findings are actually exploitable. See [/docs/vex](/docs/vex) for the four statuses, scanner integration, and how `not_affected` is policed.
-- **Build provenance you can audit.** Signed provenance with the upstream digest recorded on every module — what was re-published, from what upstream digest, with a Rekor log entry. Verifiable independent of Flareo.
-- **Catalog-level admission verdict.** The active admission policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, provenance signals, composite trust score) is evaluated against every module. Verdict at `/api/v1/modules/<slug>/policy` with the per-rule breakdown. Higher-level signal than "a signature exists" — it's "a known set of rules cleared, including the ones VEX-suppressed."
-
-## Trust we ask you to extend
-
-To use Flareo, you're trusting:
-
-- Sigstore's public-good infrastructure (Fulcio, Rekor, TUF trust root)
-- GitHub Actions as an OIDC issuer
-- The `flareo` organization's control of its GitHub repositories and ECR Public account
-- AWS for hosting the public images
-
-Plus whichever trust chains you extend to your OS, container runtime, and network. Flareo adds one layer to that stack; it doesn't replace any existing ones.
-
-## What to do if you find a vulnerability
-
-Open a private report via [GitHub Security Advisories](https://github.com/Yolo1105/flareo/security/advisories/new). We'll respond within 72 hours and work toward coordinated disclosure.
+Open a private report via
+[GitHub Security Advisories](https://github.com/Yolo1105/flareo/security/advisories/new).
+Do not file public issues for active vulnerabilities.
 
 ## Next steps
 
-- [How we sign modules](/docs/signing) — the cryptographic details
-- [Verify from the CLI](/docs/verify-cli) — run the checks yourself
+- [How we sign modules](/docs/signing)
+- [Verify from the CLI](/docs/verify-cli)
+- [Admission policies](/docs/admission)
