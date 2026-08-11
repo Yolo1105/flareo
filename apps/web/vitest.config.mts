@@ -4,6 +4,10 @@ import { defineConfig } from "vitest/config";
 /**
  * Vitest config for the web app's pure-logic tests.
  *
+ * Why `.mts`: apps/web's package.json has no `"type": "module"`, so a
+ * `.ts` config was loaded as CJS and Vitest printed a configLoader
+ * warning on every run. `.mts` forces the ESM path.
+ *
  * Why we need a config at all:
  * apps/web resolves `@/*` via tsconfig paths. Vitest needs the same
  * alias so tests can import the same modules the app uses.
@@ -23,7 +27,7 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname),
+      "@": path.resolve(import.meta.dirname),
     },
     extensions: [".ts", ".tsx", ".js"],
   },
