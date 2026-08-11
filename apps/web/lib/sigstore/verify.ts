@@ -108,12 +108,46 @@ export async function verifyImage(imageRef: string): Promise<VerifyResult> {
 
   const mod = await findModuleByDigest(digest);
   const crypto = await verifyDigestSignature(parsed, digest);
+  return mapVerifyOutcome({
+    imageRef,
+    digest,
+    outcome: crypto,
+    catalog: mod,
+  });
+}
 
-  if (crypto.kind === "error") {
-    return errorResult(imageRef, crypto.code, crypto.message);
+/** Post-digest cryptographic outcome (no network). */
+export type CryptoVerifyOutcome =
+  | { kind: "unsigned" }
+  | { kind: "invalid"; message: string }
+  | { kind: "error"; code: string; message: string }
+  | {
+      kind: "verified";
+      signerIdentity: string | null;
+      signerIssuer: string | null;
+      rekorLogIndex: string | null;
+      integratedAt: string | null;
+    };
+
+/**
+ * Map a verification outcome plus optional catalog row to a
+ * VerifyResult. Bundle values always win over catalog fields; a
+ * stored value that diverges from the artifact is surfaced in
+ * errorMessage. Exported for unit tests.
+ */
+export function mapVerifyOutcome(input: {
+  imageRef: string;
+  digest: string;
+  outcome: CryptoVerifyOutcome;
+  catalog: CatalogModule | null;
+}): VerifyResult {
+  const { imageRef, digest, outcome, catalog } = input;
+
+  if (outcome.kind === "error") {
+    return errorResult(imageRef, outcome.code, outcome.message);
   }
 
-  if (crypto.kind === "unsigned") {
+  if (outcome.kind === "unsigned") {
     return {
       status: "unsigned",
       imageRef,
@@ -128,7 +162,7 @@ export async function verifyImage(imageRef: string): Promise<VerifyResult> {
     };
   }
 
-  if (crypto.kind === "invalid") {
+  if (outcome.kind === "invalid") {
     return {
       status: "invalid",
       imageRef,
@@ -138,62 +172,17 @@ export async function verifyImage(imageRef: string): Promise<VerifyResult> {
       rekorLogIndex: null,
       rekorUrl: null,
       integratedAt: null,
-      flareoModule: mod
-        ? {
-            slug: mod.slug,
-            name: mod.name,
-            version: mod.version,
-            trust: mod.trust,
-            cves: {
-              critical: mod.cveCritical,
-              high: mod.cveHigh,
-              medium: mod.cveMedium,
-              low: mod.cveLow,
-            },
-            sbomUrl: mod.sbomUrl ?? null,
-            scanUrl: mod.trivyUrl ?? null,
-          }
-        : null,
-      errorMessage: crypto.message,
+      flareoModule: catalogModulePayload(catalog),
+      errorMessage: outcome.message,
     };
   }
 
-  // crypto.kind === "verified"
-  return mapVerifiedOutcome({
-    imageRef,
-    digest,
-    signerIdentity: crypto.signerIdentity,
-    signerIssuer: crypto.signerIssuer,
-    rekorLogIndex: crypto.rekorLogIndex,
-    integratedAt: crypto.integratedAt,
-    catalog: mod,
-  });
-}
-
-/**
- * Map a successful cryptographic verification plus optional catalog row
- * to a VerifyResult. Bundle values always win over catalog fields; a
- * stored value that diverges from the artifact is surfaced in
- * errorMessage. Exported for unit tests.
- */
-export function mapVerifiedOutcome(input: {
-  imageRef: string;
-  digest: string;
-  signerIdentity: string | null;
-  signerIssuer: string | null;
-  rekorLogIndex: string | null;
-  integratedAt: string | null;
-  catalog: CatalogModule | null;
-}): VerifyResult {
   const {
-    imageRef,
-    digest,
-    catalog,
     signerIdentity,
     signerIssuer,
     rekorLogIndex,
     integratedAt,
-  } = input;
+  } = outcome;
 
   const mismatches: string[] = [];
   if (catalog) {
@@ -262,42 +251,17 @@ export function mapVerifiedOutcome(input: {
       ? `https://search.sigstore.dev/?logIndex=${rekorLogIndex}`
       : null,
     integratedAt,
-    flareoModule: {
-      slug: catalog.slug,
-      name: catalog.name,
-      version: catalog.version,
-      trust: catalog.trust,
-      cves: {
-        critical: catalog.cveCritical,
-        high: catalog.cveHigh,
-        medium: catalog.cveMedium,
-        low: catalog.cveLow,
-      },
-      sbomUrl: catalog.sbomUrl ?? null,
-      scanUrl: catalog.trivyUrl ?? null,
-    },
+    flareoModule: catalogModulePayload(catalog),
     errorMessage: mismatchNote,
   };
 }
 
 // ─── cryptographic verification ──────────────────────────────────
 
-type CryptoOutcome =
-  | {
-      kind: "verified";
-      signerIdentity: string | null;
-      signerIssuer: string | null;
-      rekorLogIndex: string | null;
-      integratedAt: string | null;
-    }
-  | { kind: "unsigned" }
-  | { kind: "invalid"; message: string }
-  | { kind: "error"; code: string; message: string };
-
 async function verifyDigestSignature(
   parsed: ParsedRef,
   digest: string,
-): Promise<CryptoOutcome> {
+): Promise<CryptoVerifyOutcome> {
   const sigTag = digest.replace(":", "-") + ".sig";
   const manifest = await fetchManifestJson(parsed, sigTag);
 
@@ -394,6 +358,26 @@ function errorResult(imageRef: string, code: string, message: string): VerifyRes
     integratedAt: null,
     flareoModule: null,
     errorMessage: `${code}: ${message}`,
+  };
+}
+
+function catalogModulePayload(
+  catalog: CatalogModule | null,
+): VerifyResult["flareoModule"] {
+  if (!catalog) return null;
+  return {
+    slug: catalog.slug,
+    name: catalog.name,
+    version: catalog.version,
+    trust: catalog.trust,
+    cves: {
+      critical: catalog.cveCritical,
+      high: catalog.cveHigh,
+      medium: catalog.cveMedium,
+      low: catalog.cveLow,
+    },
+    sbomUrl: catalog.sbomUrl ?? null,
+    scanUrl: catalog.trivyUrl ?? null,
   };
 }
 

@@ -58,6 +58,9 @@ jobs:
       - name: Lint
         run: npm run lint
 
+      - name: Unit tests
+        run: npm test
+
   build:
     name: Next.js build
     runs-on: ubuntu-22.04
