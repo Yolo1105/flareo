@@ -1,3 +1,4 @@
+/* eslint-disable react/no-unescaped-entities -- marketing copy; avoid rewriting large prose */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { PageHero } from "@/components/ui/PageHero";

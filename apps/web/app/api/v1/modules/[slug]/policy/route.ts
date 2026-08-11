@@ -56,8 +56,8 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
       { status: 404 },
     );
   }
-  const module = shapeToModule(row);
-  if (module.visibility !== "public") {
+  const mod = shapeToModule(row);
+  if (mod.visibility !== "public") {
     return NextResponse.json(
       apiError(
         "forbidden",
@@ -70,7 +70,7 @@ export async function GET(_req: NextRequest, ctx: Ctx) {
   // Lazy-evaluate: if no cached verdict, compute and persist now.
   let result = await getVerdict(slug);
   if (!result) {
-    const fresh = await evaluateAndPersist(module);
+    const fresh = await evaluateAndPersist(mod);
     result = fresh;
   }
 

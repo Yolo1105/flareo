@@ -163,7 +163,7 @@ export async function createReport(
       reporter: { select: { name: true, username: true } },
       triagedBy: { select: { name: true } },
     } as never,
-  })) as DbRow;
+  })) as unknown as DbRow;
 
   return { ok: true, report: rowToReport(row) };
 }
@@ -190,7 +190,7 @@ export async function listReportsForAdmin(opts: {
       reporter: { select: { name: true, username: true } },
       triagedBy: { select: { name: true } },
     } as never,
-  })) as DbRow[];
+  })) as unknown as DbRow[];
   return rows.map(rowToReport);
 }
 
@@ -258,7 +258,7 @@ export async function getReportsByReporter(
       reporter: { select: { name: true, username: true } },
       triagedBy: { select: { name: true } },
     } as never,
-  })) as DbRow[];
+  })) as unknown as DbRow[];
   return rows.map(rowToReport);
 }
 

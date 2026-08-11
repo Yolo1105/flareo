@@ -22,18 +22,29 @@ type ModuleRow = {
   lastRebuiltAt: Date | null;
 };
 
+const EMPTY_STATS: CatalogStats = {
+  moduleCount: 0,
+  verifiedCount: 0,
+  builds7d: 0,
+  scanPassPct: 100,
+  openCves: 0,
+  lastRebuildAt: null,
+};
+
 export async function getCatalogStats(): Promise<CatalogStats> {
   if (!process.env.DATABASE_URL) {
-    return {
-      moduleCount: 0,
-      verifiedCount: 0,
-      builds7d: 0,
-      scanPassPct: 100,
-      openCves: 0,
-      lastRebuildAt: null,
-    };
+    return EMPTY_STATS;
   }
 
+  try {
+    return await loadCatalogStats();
+  } catch {
+    // Unreachable DB (CI placeholder URL, local without Postgres, etc.)
+    return EMPTY_STATS;
+  }
+}
+
+async function loadCatalogStats(): Promise<CatalogStats> {
   const [moduleCount, modulesUnknown, verifiedCount] = await Promise.all([
     prisma.module.count({ where: { visibility: "public" } }),
     prisma.module.findMany({

@@ -76,17 +76,26 @@ export async function GET(req: NextRequest) {
   }
 
   // Cursor pagination: skip items up to and including `cursor`.
-  const cursorClause = query.data.cursor
-    ? { cursor: { slug: query.data.cursor }, skip: 1 }
-    : {};
-
   const take = query.data.limit;
-  const rows = (await prisma.module.findMany({
+  const findArgs: {
+    where: Record<string, unknown>;
+    orderBy: ({ deploys: "desc" } | { slug: "asc" })[];
+    take: number;
+    cursor?: { slug: string };
+    skip?: number;
+  } = {
     where,
     orderBy: [{ deploys: "desc" }, { slug: "asc" }],
     take: take + 1, // one extra to know if there's a next page
-    ...cursorClause,
-  })) as Array<Record<string, unknown>>;
+  };
+  if (query.data.cursor) {
+    findArgs.cursor = { slug: query.data.cursor };
+    findArgs.skip = 1;
+  }
+
+  const rows = (await prisma.module.findMany(findArgs)) as Array<
+    Record<string, unknown>
+  >;
 
   const hasMore = rows.length > take;
   const page = hasMore ? rows.slice(0, take) : rows;

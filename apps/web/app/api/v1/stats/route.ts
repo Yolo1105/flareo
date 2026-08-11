@@ -10,9 +10,13 @@ import { getCatalogStats } from "@/lib/db/stats";
  * traffic doesn't stampede the DB.
  */
 export const runtime = "nodejs";
-export const revalidate = 60;
+// Force dynamic so `next build` with a placeholder DATABASE_URL does not
+// try to prerender against a unreachable database (Web CI).
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   const stats = await getCatalogStats();
-  return NextResponse.json(stats);
+  return NextResponse.json(stats, {
+    headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=30" },
+  });
 }

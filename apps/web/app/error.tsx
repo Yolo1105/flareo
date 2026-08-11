@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import Link from "next/link";
 
 /**
  * Root error boundary. Catches render errors from any public or app
@@ -55,12 +56,12 @@ export default function RootError({
             >
               Try again
             </button>
-            <a
+            <Link
               href="/"
               className="border border-hairline px-4 py-2 font-body text-[13px] font-medium text-ink transition-colors hover:border-ink-ghost"
             >
               Back to home
-            </a>
+            </Link>
           </div>
         </div>
       </div>

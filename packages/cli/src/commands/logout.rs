@@ -9,10 +9,7 @@ pub async fn run() -> Result<(), CliError> {
     let removed = clear()?;
     if removed {
         eprintln!("{} Signed out.", "✓".green());
-        eprintln!(
-            "  Removed {}.",
-            path.display().to_string().bright_black()
-        );
+        eprintln!("  Removed {}.", path.display().to_string().bright_black());
     } else {
         eprintln!("{} Not signed in — nothing to remove.", "✓".yellow());
     }

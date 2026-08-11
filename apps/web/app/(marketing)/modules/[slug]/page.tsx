@@ -37,11 +37,11 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   try {
-    const module = await getModuleBySlug(slug);
-    if (module) {
+    const mod = await getModuleBySlug(slug);
+    if (mod) {
       return {
-        title: `${module.name.toLowerCase()}@${module.version}`,
-        description: `${module.description}. Signed provenance, upstream digest recorded. Trust score ${module.trust}, verified by Flareo.`,
+        title: `${mod.name.toLowerCase()}@${mod.version}`,
+        description: `${mod.description}. Signed provenance, upstream digest recorded. Trust score ${mod.trust}, verified by Flareo.`,
       };
     }
   } catch (err) {
@@ -53,18 +53,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function ModuleDetailPage({ params }: Props) {
   const { slug } = await params;
 
-  let module = null;
+  let mod = null;
   try {
-    module = await getModuleBySlug(slug);
+    mod = await getModuleBySlug(slug);
   } catch (err) {
     console.error(`[modules/${slug}] database unreachable`, err);
   }
-  if (!module) notFound();
+  if (!mod) notFound();
   // After notFound() (return type `never` from next/navigation), TS
-  // narrows `module` to non-null. Capture as a const so the type stays
+  // narrows `mod` to non-null. Capture as a const so the type stays
   // narrowed through downstream JSX prop checks. The non-null assertion
   // is safe here — notFound() doesn't return.
-  const moduleNonNull: NonNullable<typeof module> = module!;
+  const moduleNonNull: NonNullable<typeof mod> = mod!;
 
   // Rebuild history is best-effort — if the DB is unreachable (or the
   // ModuleRebuild table is empty because canary hasn't run yet), the

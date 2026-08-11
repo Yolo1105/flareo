@@ -7,9 +7,9 @@
 use clap::{Parser, Subcommand};
 
 mod api;
+mod commands;
 mod config;
 mod errors;
-mod commands;
 
 use errors::CliError;
 
@@ -199,9 +199,12 @@ enum Commands {
 
 fn init_logging(verbose: bool) {
     use tracing_subscriber::{fmt, EnvFilter};
-    let default = if verbose { "flareo=debug" } else { "flareo=warn" };
-    let filter = EnvFilter::try_from_default_env()
-        .unwrap_or_else(|_| EnvFilter::new(default));
+    let default = if verbose {
+        "flareo=debug"
+    } else {
+        "flareo=warn"
+    };
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new(default));
     fmt()
         .with_env_filter(filter)
         .with_target(false)
@@ -224,35 +227,17 @@ async fn main() {
         Commands::Login => commands::login::run(&api_url).await,
         Commands::Whoami => commands::whoami::run(&api_url).await,
         Commands::Logout => commands::logout::run().await,
-        Commands::Search { query, limit } => {
-            commands::search::run(&api_url, &query, limit).await
-        }
-        Commands::Verify { image_ref } => {
-            commands::verify::run(&api_url, &image_ref).await
-        }
-        Commands::Pull { slug, no_verify } => {
-            commands::pull::run(&api_url, &slug, no_verify).await
-        }
+        Commands::Search { query, limit } => commands::search::run(&api_url, &query, limit).await,
+        Commands::Verify { image_ref } => commands::verify::run(&api_url, &image_ref).await,
+        Commands::Pull { slug, no_verify } => commands::pull::run(&api_url, &slug, no_verify).await,
         Commands::Run {
             slug,
             ttl_minutes,
             port,
             no_verify,
             quiet,
-        } => {
-            commands::run::run(
-                &api_url,
-                &slug,
-                ttl_minutes,
-                port,
-                no_verify,
-                quiet,
-            )
-            .await
-        }
-        Commands::Update { slug, current } => {
-            commands::update::run(&api_url, &slug, current).await
-        }
+        } => commands::run::run(&api_url, &slug, ttl_minutes, port, no_verify, quiet).await,
+        Commands::Update { slug, current } => commands::update::run(&api_url, &slug, current).await,
         Commands::Compose {
             slug,
             port,

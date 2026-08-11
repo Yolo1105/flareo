@@ -135,10 +135,7 @@ pub fn v1_url(base: &str, path: &str) -> String {
 }
 
 /// Apply the user's stored auth token to a request builder, if one exists.
-pub fn with_auth(
-    req: reqwest::RequestBuilder,
-    token: Option<&str>,
-) -> reqwest::RequestBuilder {
+pub fn with_auth(req: reqwest::RequestBuilder, token: Option<&str>) -> reqwest::RequestBuilder {
     match token {
         Some(t) if !t.is_empty() => req.bearer_auth(t),
         _ => req,
@@ -169,9 +166,7 @@ const MAX_TOTAL_WAIT: Duration = Duration::from_secs(300);
 ///
 /// The caller pairs this with `parse_response()` when a typed body
 /// is needed; or calls `fetch::<T>(...)` for the combined helper.
-pub async fn send_with_retry(
-    req: reqwest::RequestBuilder,
-) -> Result<reqwest::Response, CliError> {
+pub async fn send_with_retry(req: reqwest::RequestBuilder) -> Result<reqwest::Response, CliError> {
     let start = Instant::now();
     let mut current = req;
 
@@ -235,9 +230,7 @@ pub async fn send_with_retry(
 /// module detail, verify lookup. POST endpoints that mutate state
 /// (publish) can also use this safely because the server hasn't
 /// processed the request body when it returns 429.
-pub async fn fetch<T: DeserializeOwned>(
-    req: reqwest::RequestBuilder,
-) -> Result<T, CliError> {
+pub async fn fetch<T: DeserializeOwned>(req: reqwest::RequestBuilder) -> Result<T, CliError> {
     let resp = send_with_retry(req).await?;
     parse_response(resp).await
 }
@@ -256,7 +249,8 @@ fn parse_retry_after(headers: &reqwest::header::HeaderMap) -> Option<Duration> {
 /// Exponential backoff fallback when no `Retry-After` is present.
 /// Attempt 0 → 1s, attempt 1 → 2s, attempt 2 → 4s, attempt 3 → 8s.
 fn backoff_for_attempt(attempt: u32) -> Duration {
-    let secs: u64 = 1u64.saturating_shl(attempt);
+    // checked_shl saturates at u64::MAX for attempt >= 64 (unreachable in practice).
+    let secs = 1u64.checked_shl(attempt).unwrap_or(u64::MAX);
     Duration::from_secs(secs)
 }
 

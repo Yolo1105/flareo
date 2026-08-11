@@ -97,7 +97,7 @@ export async function listReviewsForModule(
     include: {
       author: { select: { name: true, image: true } },
     } as never,
-  })) as DbRow[];
+  })) as unknown as DbRow[];
   return rows.map(rowToReview);
 }
 
@@ -261,7 +261,7 @@ export async function upsertReview(input: UpsertInput): Promise<UpsertResult> {
     include: {
       author: { select: { name: true, image: true } },
     } as never,
-  })) as DbRow;
+  })) as unknown as DbRow;
 
   // Post-write moderation reset. Only flagged → visible; hidden stays.
   if (existing && row.moderation === "flagged") {
@@ -344,7 +344,7 @@ export async function listReviewsForModeration(
     include: {
       author: { select: { name: true, image: true } },
     } as never,
-  })) as DbRow[];
+  })) as unknown as DbRow[];
   return rows.map(rowToReview);
 }
 
@@ -367,7 +367,7 @@ export async function getMyReview(
     include: {
       author: { select: { name: true, image: true } },
     } as never,
-  })) as DbRow | null;
+  })) as unknown as DbRow | null;
   return row ? rowToReview(row) : null;
 }
 
@@ -404,7 +404,7 @@ export async function listReviewsForLandingWall(
     include: {
       author: { select: { name: true, image: true } },
     } as never,
-  })) as DbRow[];
+  })) as unknown as DbRow[];
 
   return candidates
     .filter((r) => r.body.trim().length >= 80)

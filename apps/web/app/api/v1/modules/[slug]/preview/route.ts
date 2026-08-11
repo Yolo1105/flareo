@@ -46,7 +46,7 @@ export async function POST(_req: NextRequest, ctx: Ctx) {
   const { slug } = await ctx.params;
 
   // Look up the module — allocator needs digest + previewable flag.
-  const module = (await prisma.module.findUnique({
+  const mod = (await prisma.module.findUnique({
     where: { slug } as never,
     select: {
       slug: true,
@@ -61,12 +61,12 @@ export async function POST(_req: NextRequest, ctx: Ctx) {
     status: string;
   } | null;
 
-  if (!module) {
+  if (!mod) {
     return NextResponse.json(apiError("not_found", "module not found"), {
       status: 404,
     });
   }
-  if (!module.previewable) {
+  if (!mod.previewable) {
     return NextResponse.json(
       apiError(
         "not_previewable",
@@ -75,7 +75,7 @@ export async function POST(_req: NextRequest, ctx: Ctx) {
       { status: 400 },
     );
   }
-  if (module.status !== "verified") {
+  if (mod.status !== "verified") {
     return NextResponse.json(
       apiError(
         "not_verified",
@@ -122,7 +122,7 @@ export async function POST(_req: NextRequest, ctx: Ctx) {
   const result = await allocator.allocate({
     userId,
     moduleSlug: slug,
-    digest: module.digest,
+    digest: mod.digest,
     containerPort: 8080, // TODO derive from module compose template
   });
 

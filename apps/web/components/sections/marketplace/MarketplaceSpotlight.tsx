@@ -62,7 +62,7 @@ export function MarketplaceSpotlight({ module, blurb, aggregate }: Props) {
           {blurb && (
             <blockquote className="mt-5 border-l-2 border-accent bg-canvas-panel p-4 font-body text-[13.5px] italic leading-[1.6] text-ink-mute">
               <span className="mb-1 block font-mono text-[9.5px] not-italic tracking-[0.14em] text-accent">
-                EDITOR'S NOTE
+                EDITOR&apos;S NOTE
               </span>
               {blurb}
             </blockquote>

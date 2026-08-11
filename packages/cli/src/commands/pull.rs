@@ -89,11 +89,11 @@ pub async fn run(api_url: &str, slug: &str, no_verify: bool) -> Result<(), CliEr
         eprintln!("{} signature", "checking".bold());
 
         let verify_url = v1_url(api_url, "/verify");
-        let v: VerifyResponse = fetch(
-            with_auth(client()?.post(&verify_url), token).json(&VerifyRequest {
+        let v: VerifyResponse = fetch(with_auth(client()?.post(&verify_url), token).json(
+            &VerifyRequest {
                 image_ref: &pinned_ref,
-            }),
-        )
+            },
+        ))
         .await?;
 
         match v.status.as_str() {
@@ -126,12 +126,7 @@ pub async fn run(api_url: &str, slug: &str, no_verify: bool) -> Result<(), CliEr
 
     // ── Step 5: docker pull ─────────────────────────────────────
     eprintln!();
-    eprintln!(
-        "{} {} {}",
-        "pulling".bold(),
-        runtime,
-        pinned_ref.cyan()
-    );
+    eprintln!("{} {} {}", "pulling".bold(), runtime, pinned_ref.cyan());
     eprintln!();
 
     let status = Command::new(runtime)
@@ -141,9 +136,7 @@ pub async fn run(api_url: &str, slug: &str, no_verify: bool) -> Result<(), CliEr
         .stdout(Stdio::inherit())
         .stderr(Stdio::inherit())
         .status()
-        .map_err(|e| {
-            CliError::Other(anyhow::anyhow!("failed to invoke {}: {}", runtime, e))
-        })?;
+        .map_err(|e| CliError::Other(anyhow::anyhow!("failed to invoke {}: {}", runtime, e)))?;
 
     if !status.success() {
         return Err(CliError::Other(anyhow::anyhow!(

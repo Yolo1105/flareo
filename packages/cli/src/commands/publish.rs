@@ -79,7 +79,9 @@ pub async fn run(api_url: &str) -> Result<(), CliError> {
     })?;
 
     // Optionally include Dockerfile.
-    let dockerfile = fs::read_to_string("Dockerfile").ok().filter(|s| !s.is_empty());
+    let dockerfile = fs::read_to_string("Dockerfile")
+        .ok()
+        .filter(|s| !s.is_empty());
 
     eprintln!();
     eprintln!(

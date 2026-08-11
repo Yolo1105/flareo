@@ -84,7 +84,7 @@ export function Stage03Sbom({ module, sbom }: Props) {
         <strong className="font-medium text-ink">What this means in plain English:</strong>{" "}
         if a CVE is discovered in any of these {totalComponents} components
         tomorrow, Flareo can identify every published module that includes it
-        within minutes — and trigger a rebuild for each. That's the unlock
+        within minutes — and trigger a rebuild for each. That&apos;s the unlock
         SBOMs make possible.
       </div>
     </StageShell>

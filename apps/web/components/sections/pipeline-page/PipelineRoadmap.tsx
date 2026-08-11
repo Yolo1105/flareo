@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 /**
  * Closing roadmap section.
  *
@@ -39,7 +41,7 @@ export function PipelineRoadmap() {
           &quot;OPA-based;&quot; that&apos;s how we got there.
         </p>
         <div className="mt-6 grid grid-cols-1 gap-3 md:grid-cols-3">
-          <a
+          <Link
             href="/app/admin/policy"
             className="block border border-hairline bg-canvas p-4 transition-colors hover:border-accent"
           >
@@ -53,8 +55,8 @@ export function PipelineRoadmap() {
               Reviewer-only. Save creates a new revision; older
               revisions stay in the audit trail.
             </div>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/app/admin/vex"
             className="block border border-hairline bg-canvas p-4 transition-colors hover:border-accent"
           >
@@ -68,8 +70,8 @@ export function PipelineRoadmap() {
               Mark Trivy findings not_affected / fixed / under
               investigation per OpenVEX 0.2.0.
             </div>
-          </a>
-          <a
+          </Link>
+          <Link
             href="/roadmap"
             className="block border border-hairline bg-canvas p-4 transition-colors hover:border-accent"
           >
@@ -83,7 +85,7 @@ export function PipelineRoadmap() {
               What&apos;s shipped, what&apos;s in progress, what&apos;s
               planned. Honest dates only.
             </div>
-          </a>
+          </Link>
         </div>
       </div>
     </section>

@@ -79,16 +79,15 @@ pub async fn run(force: bool) -> Result<(), CliError> {
     let name = prompt("display name", &title_case(&slug))?;
     let version = prompt("version", "0.1.0")?;
     let author = prompt("author", "")?;
-    let description = prompt_long(
-        "description (at least 10 chars; 1-2 sentences of what this does)",
-    )?;
+    let description =
+        prompt_long("description (at least 10 chars; 1-2 sentences of what this does)")?;
 
     eprintln!();
     eprintln!("  categories:");
     for (i, c) in CATEGORIES.iter().enumerate() {
         eprintln!("    {}  {}", i + 1, c);
     }
-    let category = prompt_choice(&CATEGORIES.iter().copied().collect::<Vec<_>>(), "productivity")?;
+    let category = prompt_choice(CATEGORIES, "productivity")?;
 
     let license = prompt("license (SPDX identifier)", "MIT")?;
     let upstream_url = prompt("upstream URL (https://github.com/...)", "")?;
@@ -145,10 +144,7 @@ fn prompt(label: &str, default: &str) -> Result<String, CliError> {
     stdin.lock().read_line(&mut line)?;
     let v = line.trim();
     if v.is_empty() && default.is_empty() {
-        return Err(CliError::Other(anyhow::anyhow!(
-            "'{}' is required",
-            label
-        )));
+        return Err(CliError::Other(anyhow::anyhow!("'{}' is required", label)));
     }
     Ok(if v.is_empty() {
         default.to_string()
@@ -190,10 +186,7 @@ fn prompt_choice(choices: &[&str], default: &str) -> Result<String, CliError> {
                 return Ok(choices[n - 1].to_string());
             }
         }
-        eprintln!(
-            "  {} not a valid category. Try again.",
-            "✗".red()
-        );
+        eprintln!("  {} not a valid category. Try again.", "✗".red());
     }
 }
 

@@ -147,10 +147,7 @@ pub async fn run(
         short_digest(&module.digest).bright_white().bold()
     );
     if let Some(rebuilt) = &module.last_rebuilt_at {
-        eprintln!(
-            "    built:   {}",
-            rebuilt.bright_black()
-        );
+        eprintln!("    built:   {}", rebuilt.bright_black());
     }
 
     if let (Some(crit), Some(high)) = (module.cve_critical, module.cve_high) {
@@ -190,10 +187,21 @@ pub async fn run(
 
     eprintln!();
     eprintln!("  {}", "To upgrade".bright_black());
-    eprintln!("    {} {}", "$".bright_black(), format!("flareo pull {}", slug).bright_white());
+    eprintln!(
+        "    {} {}",
+        "$".bright_black(),
+        format!("flareo pull {}", slug).bright_white()
+    );
     eprintln!();
-    eprintln!("  {}", "Or pull the digest-pinned ref directly".bright_black());
-    eprintln!("    {} {}", "$".bright_black(), format!("docker pull {}", pinned_ref).bright_white());
+    eprintln!(
+        "  {}",
+        "Or pull the digest-pinned ref directly".bright_black()
+    );
+    eprintln!(
+        "    {} {}",
+        "$".bright_black(),
+        format!("docker pull {}", pinned_ref).bright_white()
+    );
     eprintln!();
     eprintln!(
         "  {}",

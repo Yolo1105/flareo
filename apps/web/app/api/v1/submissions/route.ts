@@ -454,7 +454,7 @@ export async function POST(req: NextRequest) {
   // from there.
   try {
     await prisma.$transaction(
-      async (tx: typeof prisma) => {
+      async (tx) => {
         // Re-check the cap for the requested visibility. Read both
         // counts scoped to that visibility — a private submission
         // doesn't consume public quota and vice versa.

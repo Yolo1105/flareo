@@ -86,7 +86,7 @@ export async function listActiveFeatured(limit = 6): Promise<FeaturedItem[]> {
       },
       curator: { select: { name: true } },
     } as never,
-  })) as FeaturedRow[];
+  })) as unknown as FeaturedRow[];
   return rows
     .filter((r) => r.module != null && r.module.visibility === "public")
     .map(rowToFeatured);
@@ -108,7 +108,7 @@ export async function listAllFeaturedAdmin(): Promise<FeaturedItem[]> {
       },
       curator: { select: { name: true } },
     } as never,
-  })) as FeaturedRow[];
+  })) as unknown as FeaturedRow[];
   return rows.filter((r) => r.module != null).map(rowToFeatured);
 }
 
@@ -237,18 +237,18 @@ export async function computeTrending(limit = 8): Promise<TrendingEntry[]> {
       moduleSlug: { in: slugs },
       moderation: { not: "hidden" },
       createdAt: { gte: fourteenDaysAgo },
-    } as never,
-    _count: { _all: true } as never,
-  })) as Array<{ moduleSlug: string; _count: { _all: number } }>;
+    },
+    _count: { _all: true },
+  })) as unknown as Array<{ moduleSlug: string; _count: { _all: number } }>;
 
   const avgRows = (await prisma.moduleReview.groupBy({
     by: ["moduleSlug"],
     where: {
       moduleSlug: { in: slugs },
       moderation: { not: "hidden" },
-    } as never,
-    _avg: { rating: true } as never,
-  })) as Array<{ moduleSlug: string; _avg: { rating: number | null } }>;
+    },
+    _avg: { rating: true },
+  })) as unknown as Array<{ moduleSlug: string; _avg: { rating: number | null } }>;
 
   const recentCountBySlug = new Map(
     recentRows.map((r) => [r.moduleSlug, r._count._all]),

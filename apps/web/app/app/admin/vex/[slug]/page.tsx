@@ -41,8 +41,8 @@ export default async function AdminVexModulePage({ params }: Props) {
   })) as ModuleShape | null;
   if (!row) notFound();
 
-  const module = shapeToModule(row!);
-  const trivyReport = buildTrivyReport(module);
+  const mod = shapeToModule(row!);
+  const trivyReport = buildTrivyReport(mod);
   const statements = await listForModule(slug);
 
   // Index statements by CVE for fast lookup as we render each finding.
@@ -64,7 +64,7 @@ export default async function AdminVexModulePage({ params }: Props) {
     <>
       <ViewHeader
         eyebrow="ADMIN · VEX"
-        title={`Annotate · ${module.name}`}
+        title={`Annotate · ${mod.name}`}
         subtitle={`${trivyReport.vulnerabilities.length} Trivy findings · ${statements.length} VEX statements on file. Click any finding to annotate.`}
       />
 
@@ -78,20 +78,20 @@ export default async function AdminVexModulePage({ params }: Props) {
           </Link>
           <span>
             <span className="text-ink-ghost">MODULE:</span>{" "}
-            <span className="text-ink">{module.slug}</span>
+            <span className="text-ink">{mod.slug}</span>
           </span>
           <span>
             <span className="text-ink-ghost">VERSION:</span>{" "}
-            <span className="text-ink">{module.version}</span>
+            <span className="text-ink">{mod.version}</span>
           </span>
           <span>
             <span className="text-ink-ghost">DIGEST:</span>{" "}
             <span className="text-ink-mute">
-              {module.digest.replace("sha256:", "").slice(0, 16)}…
+              {mod.digest.replace("sha256:", "").slice(0, 16)}…
             </span>
           </span>
           <a
-            href={`/api/v1/modules/${module.slug}/vex`}
+            href={`/api/v1/modules/${mod.slug}/vex`}
             target="_blank"
             rel="noopener noreferrer"
             className="ml-auto text-accent hover:text-accent-hot"
@@ -114,7 +114,7 @@ export default async function AdminVexModulePage({ params }: Props) {
             {sortedFindings.map((vuln) => (
               <FindingRow
                 key={vuln.cve}
-                module={module}
+                module={mod}
                 vuln={vuln}
                 existing={byCve.get(vuln.cve) ?? null}
               />
@@ -145,7 +145,7 @@ function severityRank(s: TrivyVuln["severity"]): number {
  * client component handling the actual writes.
  */
 function FindingRow({
-  module,
+  module: mod,
   vuln,
   existing,
 }: {
@@ -211,7 +211,7 @@ function FindingRow({
       </div>
 
       <VexAnnotationForm
-        moduleSlug={module.slug}
+        moduleSlug={mod.slug}
         cve={vuln.cve}
         // Pass the Trivy-reported severity through to the form so the
         // upsert payload includes it. Normalized to lowercase to match

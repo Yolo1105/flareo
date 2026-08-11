@@ -35,11 +35,16 @@ pub async fn run(api_url: &str) -> Result<(), CliError> {
     };
 
     let url = v1_url(base, "/whoami");
-    let who: WhoamiResponse =
-        fetch(with_auth(client()?.get(&url), Some(&auth.token))).await?;
+    let who: WhoamiResponse = fetch(with_auth(client()?.get(&url), Some(&auth.token))).await?;
 
     println!();
-    print_kv("user", who.name.as_deref().or(who.id.as_deref()).unwrap_or("<unknown>"));
+    print_kv(
+        "user",
+        who.name
+            .as_deref()
+            .or(who.id.as_deref())
+            .unwrap_or("<unknown>"),
+    );
     if let Some(email) = &who.email {
         print_kv("email", email);
     }

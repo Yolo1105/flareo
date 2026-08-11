@@ -28,15 +28,15 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function ModulePreviewPage({ params }: Props) {
   const { slug } = await params;
-  let module = null;
+  let mod = null;
   try {
-    module = await getModuleBySlug(slug);
+    mod = await getModuleBySlug(slug);
   } catch (err) {
     console.error(`[preview/${slug}] database unreachable`, err);
   }
-  if (!module) notFound();
+  if (!mod) notFound();
   // After notFound() (return type `never`), capture narrowed module.
-  const moduleSafe = module!;
+  const moduleSafe = mod!;
   if (!moduleSafe.previewable) {
     return (
       <>

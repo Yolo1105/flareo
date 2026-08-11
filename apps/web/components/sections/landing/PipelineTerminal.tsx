@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { SectionHeader } from "@/components/ui/SectionHeader";
 
 /**
@@ -90,12 +91,12 @@ export function PipelineTerminal() {
           The terminal above is animated. The receipts it produced are real
           — and clickable.
         </div>
-        <a
+        <Link
           href="/modules/vaultwarden"
           className="font-mono text-[11px] text-accent hover:text-accent-hot"
         >
           See the actual provenance trail for this build →
-        </a>
+        </Link>
       </div>
     </section>
   );

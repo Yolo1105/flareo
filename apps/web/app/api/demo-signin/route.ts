@@ -156,7 +156,7 @@ export async function POST(req: NextRequest) {
     value: sessionToken,
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure: false,
     expires,
     path: "/",
   });

@@ -205,10 +205,7 @@ pub async fn run(
 
     let hints = hints_for(&module.slug);
     let port = host_port.unwrap_or(hints.as_ref().map(|h| h.host_port).unwrap_or(8080));
-    let container_port = hints
-        .as_ref()
-        .map(|h| h.container_port)
-        .unwrap_or(port);
+    let container_port = hints.as_ref().map(|h| h.container_port).unwrap_or(port);
     let domain_value = domain
         .map(|s| s.to_string())
         .unwrap_or_else(|| format!("{}.your-domain.example", module.slug));
@@ -306,7 +303,10 @@ fn render_compose(
     ));
     out.push_str("#\n");
     out.push_str("# Image pinned by digest. To upgrade, run:\n");
-    out.push_str(&format!("#   flareo compose {} > docker-compose.yaml\n", module.slug));
+    out.push_str(&format!(
+        "#   flareo compose {} > docker-compose.yaml\n",
+        module.slug
+    ));
     out.push_str("# and diff against this file.\n");
     if let Some(h) = hints {
         if !h.notes.is_empty() {
@@ -320,7 +320,7 @@ fn render_compose(
         out.push_str("# NOTE: this module doesn't have per-module compose hints yet.\n");
         out.push_str("# The defaults below may need tuning — review before deploying.\n");
     }
-    out.push_str("\n");
+    out.push('\n');
 
     out.push_str("services:\n");
 
@@ -390,10 +390,7 @@ fn render_compose(
         out.push_str("      - ./Caddyfile:/etc/caddy/Caddyfile:ro\n");
         out.push_str("      - caddy_data:/data\n");
         out.push_str("      - caddy_config:/config\n");
-        out.push_str(&format!(
-            "    depends_on:\n      - {}\n",
-            module.slug
-        ));
+        out.push_str(&format!("    depends_on:\n      - {}\n", module.slug));
     }
 
     // Volumes block.

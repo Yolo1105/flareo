@@ -173,7 +173,7 @@ export async function recordRebuildAttempt(
   const advancesLastRebuilt =
     input.outcome === "success" || input.outcome === "upstream_unchanged";
 
-  const row = await prisma.$transaction(async (tx: typeof prisma) => {
+  const row = await prisma.$transaction(async (tx) => {
     const inserted = (await tx.moduleRebuild.create({
       data: {
         moduleSlug: input.moduleSlug,

@@ -69,10 +69,13 @@ jobs:
           DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
         run: npx prisma generate
 
-      - name: Apply migrations
+      # Migrations in this repo are incremental deltas against a schema that
+      # was originally established with `db push`; they do not bootstrap an
+      # empty database. Sync the full schema for CI instead.
+      - name: Apply schema
         env:
           DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
-        run: npx prisma migrate deploy
+        run: npx prisma db push
 
       - name: Seed demo data
         env:

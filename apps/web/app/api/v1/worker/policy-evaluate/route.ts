@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
   // Same exact/heuristic split as lib/db/policy.ts:evaluateAndPersist.
   // Statements with cveSeverity → subtract by actual severity bucket.
   // Statements without → pessimistic fallback (criticals first).
-  let exactSuppressions: { critical: number; high: number; medium: number; low: number } =
+  const exactSuppressions: { critical: number; high: number; medium: number; low: number } =
     { critical: 0, high: 0, medium: 0, low: 0 };
   let heuristicSuppressed = 0;
   try {

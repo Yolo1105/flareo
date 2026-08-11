@@ -290,7 +290,7 @@ export async function upgradeUserPlan(args: {
   stripeCustomerId: string;
   stripeSubscriptionId: string;
 }): Promise<UpgradeResult> {
-  return await prisma.$transaction(async (tx: typeof prisma) => {
+  return await prisma.$transaction(async (tx) => {
     const existing = (await tx.user.findUnique({
       where: { id: args.userId },
       select: {

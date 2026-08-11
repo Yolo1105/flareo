@@ -25,7 +25,7 @@ import Stripe from "stripe";
 
 // Pin a specific API version so future Stripe API changes don't
 // silently alter response shapes. Bumping is a deliberate act.
-const STRIPE_API_VERSION = "2024-12-18.acacia" as const;
+const STRIPE_API_VERSION = "2025-02-24.acacia" as const;
 
 let cachedClient: Stripe | null = null;
 

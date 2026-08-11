@@ -243,7 +243,7 @@ export async function softDeleteAccount(userId: string): Promise<void> {
   // Using the interactive callback form of $transaction, which types
   // cleanly across all Prisma client versions. Each step is awaited
   // sequentially inside one transaction; any error rolls back all three.
-  await prisma.$transaction(async (tx: typeof prisma) => {
+  await prisma.$transaction(async (tx) => {
     await tx.user.update({
       where: { id: userId },
       data: {

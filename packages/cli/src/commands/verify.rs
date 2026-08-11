@@ -29,6 +29,7 @@ struct VerifyRequest<'a> {
 struct VerifyResponse {
     status: String,
     #[serde(rename = "imageRef")]
+    #[allow(dead_code)]
     image_ref: String,
     #[serde(rename = "resolvedDigest")]
     resolved_digest: Option<String>,
@@ -76,17 +77,11 @@ pub async fn run(api_url: &str, image_ref: &str) -> Result<(), CliError> {
     let url = v1_url(api_url, "/verify");
 
     eprintln!();
-    eprintln!(
-        "{} {}",
-        "verifying".bold(),
-        image_ref.cyan()
-    );
+    eprintln!("{} {}", "verifying".bold(), image_ref.cyan());
     eprintln!();
 
-    let body: VerifyResponse = fetch(
-        with_auth(client()?.post(&url), token).json(&VerifyRequest { image_ref }),
-    )
-    .await?;
+    let body: VerifyResponse =
+        fetch(with_auth(client()?.post(&url), token).json(&VerifyRequest { image_ref })).await?;
 
     render(&body);
 
@@ -99,7 +94,9 @@ pub async fn run(api_url: &str, image_ref: &str) -> Result<(), CliError> {
         "unsigned" => Err(CliError::Other(anyhow::anyhow!("unsigned"))),
         "invalid" => Err(CliError::Other(anyhow::anyhow!(
             "invalid: {}",
-            body.error_message.as_deref().unwrap_or("signature rejected")
+            body.error_message
+                .as_deref()
+                .unwrap_or("signature rejected")
         ))),
         "error" => Err(CliError::ApiError {
             status: 502,
@@ -128,40 +125,20 @@ fn render(r: &VerifyResponse) {
     println!();
 
     if let Some(digest) = &r.resolved_digest {
-        println!(
-            "  {}    {}",
-            "digest".bright_black(),
-            digest
-        );
+        println!("  {}    {}", "digest".bright_black(), digest);
     }
 
     if let Some(identity) = &r.signer_identity {
-        println!(
-            "  {}    {}",
-            "signer".bright_black(),
-            identity
-        );
+        println!("  {}    {}", "signer".bright_black(), identity);
     }
     if let Some(issuer) = &r.signer_issuer {
-        println!(
-            "  {}    {}",
-            "issuer".bright_black(),
-            issuer
-        );
+        println!("  {}    {}", "issuer".bright_black(), issuer);
     }
     if let Some(idx) = &r.rekor_log_index {
-        println!(
-            "  {}     {}",
-            "rekor".bright_black(),
-            idx
-        );
+        println!("  {}     {}", "rekor".bright_black(), idx);
     }
     if let Some(url) = &r.rekor_url {
-        println!(
-            "  {}   {}",
-            "rekor url".bright_black(),
-            url.cyan()
-        );
+        println!("  {}   {}", "rekor url".bright_black(), url.cyan());
     }
 
     // Catalog enrichment
@@ -174,11 +151,7 @@ fn render(r: &VerifyResponse) {
             format!("({} v{})", m.name, m.version).bright_black()
         );
         let trust_rendered = format_trust(m.trust);
-        println!(
-            "    {} {}",
-            "trust    ".bright_black(),
-            trust_rendered
-        );
+        println!("    {} {}", "trust    ".bright_black(), trust_rendered);
         println!(
             "    {} {}",
             "cves     ".bright_black(),
@@ -210,14 +183,20 @@ fn render(r: &VerifyResponse) {
     println!();
     match r.status.as_str() {
         "verified" => {
-            println!("  {}", "Image is signed by Flareo and passes trust checks.".bright_black());
+            println!(
+                "  {}",
+                "Image is signed by Flareo and passes trust checks.".bright_black()
+            );
         }
         "signed" => {
             println!(
                 "  {}",
                 "Image is Sigstore-signed but not in the Flareo catalog.".bright_black()
             );
-            println!("  {}", "  We cannot attest to it beyond 'signature present'.".bright_black());
+            println!(
+                "  {}",
+                "  We cannot attest to it beyond 'signature present'.".bright_black()
+            );
         }
         "unsigned" => {
             println!(
@@ -255,13 +234,19 @@ fn format_trust(trust: i32) -> String {
 
 fn format_cves(c: &CveCounts) -> String {
     if c.critical > 0 {
-        format!("{} critical, {} high, {} medium, {} low", c.critical, c.high, c.medium, c.low)
-            .red()
-            .to_string()
+        format!(
+            "{} critical, {} high, {} medium, {} low",
+            c.critical, c.high, c.medium, c.low
+        )
+        .red()
+        .to_string()
     } else if c.high > 0 {
-        format!("0 critical, {} high, {} medium, {} low", c.high, c.medium, c.low)
-            .yellow()
-            .to_string()
+        format!(
+            "0 critical, {} high, {} medium, {} low",
+            c.high, c.medium, c.low
+        )
+        .yellow()
+        .to_string()
     } else {
         format!("0 critical, 0 high, {} medium, {} low", c.medium, c.low)
             .green()

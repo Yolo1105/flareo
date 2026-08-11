@@ -147,11 +147,11 @@ pub async fn run(
         }
 
         let verify_url = v1_url(api_url, "/verify");
-        let v: VerifyResponse = fetch(
-            with_auth(client()?.post(&verify_url), token).json(&VerifyRequest {
+        let v: VerifyResponse = fetch(with_auth(client()?.post(&verify_url), token).json(
+            &VerifyRequest {
                 image_ref: &pinned_ref,
-            }),
-        )
+            },
+        ))
         .await?;
 
         match v.status.as_str() {
@@ -227,14 +227,16 @@ pub async fn run(
             "{} {} on {}",
             "starting".bold(),
             module.name.cyan(),
-            format!("http://localhost:{}", host_port).bright_white().bold()
+            format!("http://localhost:{}", host_port)
+                .bright_white()
+                .bold()
         );
     }
 
     let run_status = Command::new(runtime)
         .args([
             "run",
-            "-d", // detached
+            "-d",   // detached
             "--rm", // delete container record on stop
             "--name",
             &container_name,
@@ -249,9 +251,7 @@ pub async fn run(
         .stderr(Stdio::inherit())
         .status()
         .await
-        .map_err(|e| {
-            CliError::Other(anyhow::anyhow!("failed to start container: {}", e))
-        })?;
+        .map_err(|e| CliError::Other(anyhow::anyhow!("failed to start container: {}", e)))?;
 
     if !run_status.success() {
         // docker run printed its own error; clean up the volume in
@@ -502,10 +502,7 @@ fn print_help_block(
 ) {
     eprintln!();
     eprintln!("  {}", "─".repeat(60).bright_black());
-    eprintln!(
-        "  {} is running ephemerally.",
-        name.bold()
-    );
+    eprintln!("  {} is running ephemerally.", name.bold());
     eprintln!();
     eprintln!(
         "  Open:        {}",

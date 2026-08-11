@@ -96,7 +96,7 @@ ${module.version}: digest: ${module.digest} size: 1638
         </div>
         <p className="mx-auto mb-4 max-w-[480px] font-body text-[12.5px] text-ink-softer">
           Pull it from the registry, browse it in the marketplace, or read the
-          full receipt chain from this submission's perspective.
+          full receipt chain from this submission&apos;s perspective.
         </p>
         <div className="flex flex-wrap justify-center gap-2">
           <Link
