@@ -15,6 +15,7 @@ import { ComposePreview } from "@/components/sections/landing/ComposePreview";
 import { PricingPreview } from "@/components/sections/landing/PricingPreview";
 import { listActiveFeatured } from "@/lib/db/curation";
 import { listReviewsForLandingWall, type ReviewRow } from "@/lib/db/reviews";
+import { getCatalogStats, type CatalogStats } from "@/lib/db/stats";
 
 // Force dynamic so the homepage refreshes featured + reviews on each
 // load without needing revalidation. Both queries are cheap (small
@@ -31,20 +32,20 @@ export const dynamic = "force-dynamic";
  *   01b Install — first concrete CTA
  *   02 Problem — why this exists at all
  *   02a Pipeline terminal — how the verification works (animated)
- *   03 Metrics — live counts of what's been verified
- *   03a Catalog preview — top 4 modules by deploys
- *   04 Featured — editorially curated picks (NEW, marketplace surface)
- *   05 Reviews wall — operator quotes (NEW, marketplace surface)
+ *   03 Metrics — live counts from getCatalogStats()
+ *   03a Catalog preview — top modules
+ *   04 Featured — editorially curated picks
+ *   05 Reviews wall — operator quotes
  *   06 Compose preview — multi-module example
  *   07 Pricing — entry point to /pricing
  *
- * Both Featured and Reviews are conditional. They render nothing
- * when the DB is empty (or unreachable), so a fresh / unseeded
- * deployment shows the original landing flow without empty stubs.
+ * Featured, Reviews, and Metrics omit themselves when the DB is
+ * empty or unreachable.
  */
 export default async function LandingPage() {
   let featured: FeaturedLandingItem[] = [];
   let reviews: ReviewRow[] = [];
+  let stats: CatalogStats | null = null;
 
   try {
     const items = await listActiveFeatured(4);
@@ -59,6 +60,12 @@ export default async function LandingPage() {
     // Same — silently omit.
   }
 
+  try {
+    stats = await getCatalogStats();
+  } catch {
+    // Same — MetricsStrip omits itself; never fall back to constants.
+  }
+
   return (
     <>
       <HeroSection />
@@ -67,7 +74,7 @@ export default async function LandingPage() {
       <ProblemSection />
       <BeforeAfterSection />
       <PipelineTerminal />
-      <MetricsStrip />
+      {stats ? <MetricsStrip stats={stats} /> : null}
       <CatalogPreview />
       <FeaturedStrip items={featured} />
       <ReviewsWall reviews={reviews} />
