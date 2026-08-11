@@ -1,54 +1,51 @@
 # ────────────────────────────────────────────────────────────────
-# Canary rebuild workflow.
+# Republish workflow.
 #
-# Runs every Sunday at 02:00 UTC. One matrix job per module rebuilds
-# it end-to-end (pull upstream, re-tag, push to ECR Public, SBOM, CVE
-# scan, cosign keyless sign via GHA OIDC, upload artifacts to R2,
-# write metadata to Postgres).
+# Pulls pinned upstream images, re-tags into ECR Public, generates
+# SBOM + Trivy scan, signs with cosign keyless via GHA OIDC, uploads
+# artifacts to R2, and upserts Module metadata.
 #
-# Can also be run manually with workflow_dispatch, optionally scoped
-# to a single module via the `only` input.
+# Manual dispatch only for now. A scheduled job that fails quietly
+# for months is worse than no schedule; the site will show
+# lastRebuiltAt instead of asserting a cadence. (See T-303.)
+# To re-enable a schedule later, restore the cron block below and
+# confirm the pipeline is green under workflow_dispatch first.
 #
-# Required repo secrets (set in GitHub org or repo secrets):
-#   AWS_ACCESS_KEY_ID
-#   AWS_SECRET_ACCESS_KEY
-#   ECR_PUBLIC_URL
-#   R2_ACCOUNT_ID
-#   R2_ACCESS_KEY_ID
-#   R2_SECRET_ACCESS_KEY
-#   R2_BUCKET_NAME
-#   DATABASE_URL         (Neon pooled connection)
-#
-# All external actions are pinned by full commit SHA (post-tj-actions
-# hardening best practice). When you bump an action version, update
-# both the SHA and the comment with the semver tag it corresponds to.
+# Required repo secrets:
+#   AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ECR_PUBLIC_URL,
+#   R2_ACCOUNT_ID, R2_ACCESS_KEY_ID, R2_SECRET_ACCESS_KEY,
+#   R2_BUCKET_NAME, DATABASE_URL
 # ────────────────────────────────────────────────────────────────
 
-name: canary-rebuild
+name: republish
 
 on:
-  schedule:
-    # 02:00 UTC every Sunday. Pick your maintenance window.
-    - cron: "0 2 * * 0"
+  # schedule:
+  #   # Disabled until the pipeline has run successfully via
+  #   # workflow_dispatch at least once (owner task O-4 / T-303).
+  #   - cron: "0 2 * * 0"
   workflow_dispatch:
     inputs:
       only:
-        description: "Rebuild only one module (slug). Leave empty to rebuild all."
+        description: "Republish only one module (slug). Leave empty to republish all."
         required: false
         type: string
 
-# Needed for cosign keyless signing via the runner's OIDC token.
 permissions:
   id-token: write
   contents: read
 
 concurrency:
-  group: canary-rebuild
+  group: republish
   cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: apps/web
 
 jobs:
   rebuild:
-    name: rebuild ${{ matrix.module }}
+    name: republish ${{ matrix.module }}
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -74,8 +71,6 @@ jobs:
           echo "skipping ${{ matrix.module }} (only=${{ inputs.only }})"
           exit 0
 
-      # Harden runner: block egress by default, allow only the hosts we need.
-      # Pinned to v2.11.0.
       - name: harden runner
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         uses: step-security/harden-runner@c6295a65d1254861815972266d5933fd6e532bdf
@@ -104,28 +99,27 @@ jobs:
             ghga.anchore.io:443
             storage.googleapis.com:443
 
-      # Pinned to v4.2.2
       - name: checkout
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
 
-      # Pinned to v4.1.0
       - name: setup node
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
         with:
           node-version: "22"
           cache: npm
+          cache-dependency-path: package-lock.json
 
       - name: install project deps (for prisma + tsx)
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
+        working-directory: .
         run: npm ci --ignore-scripts
 
       - name: generate prisma client
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         run: npx prisma generate
 
-      # Cosign, pinned to v3.8.1 via installer v3.8.0
       - name: install cosign
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb
@@ -162,7 +156,7 @@ jobs:
           echo "AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}" >> "$GITHUB_ENV"
           echo "AWS_REGION=us-east-1" >> "$GITHUB_ENV"
 
-      - name: rebuild ${{ matrix.module }}
+      - name: republish ${{ matrix.module }}
         if: ${{ inputs.only == '' || inputs.only == matrix.module }}
         env:
           ECR_PUBLIC_URL: ${{ secrets.ECR_PUBLIC_URL }}
@@ -171,13 +165,14 @@ jobs:
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           R2_BUCKET_NAME: ${{ secrets.R2_BUCKET_NAME }}
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        # Path still scripts/canary until T-202 renames to republish/
         run: ./scripts/canary/rebuild-canary.sh ${{ matrix.module }}
 
       - name: upload run artifacts
         if: ${{ always() && (inputs.only == '' || inputs.only == matrix.module) }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: canary-${{ matrix.module }}
+          name: republish-${{ matrix.module }}
           path: |
             /tmp/flareo-canary-*/artifacts/
           if-no-files-found: ignore

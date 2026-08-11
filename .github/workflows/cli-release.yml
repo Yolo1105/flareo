@@ -28,6 +28,9 @@ jobs:
   build:
     name: Build ${{ matrix.target }}
     runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: packages/cli
     strategy:
       fail-fast: false
       matrix:
@@ -69,8 +72,8 @@ jobs:
           path: |
             ~/.cargo/registry
             ~/.cargo/git
-            target
-          key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+            packages/cli/target
+          key: ${{ runner.os }}-${{ matrix.target }}-cargo-${{ hashFiles('packages/cli/Cargo.lock') }}
 
       - name: Build
         env:
@@ -118,9 +121,9 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: |
-            ${{ steps.stage.outputs.archive }}
-            ${{ steps.stage.outputs.archive }}.sha256
-            ${{ steps.stage.outputs.archive }}.cosign.bundle
+            packages/cli/${{ steps.stage.outputs.archive }}
+            packages/cli/${{ steps.stage.outputs.archive }}.sha256
+            packages/cli/${{ steps.stage.outputs.archive }}.cosign.bundle
 
   release:
     name: Publish GitHub Release
@@ -150,7 +153,7 @@ jobs:
           # $HOME/.local/bin/flareo (configurable via FLAREO_INSTALL_DIR).
           set -eu
 
-          REPO="flareo/flareo-cli"
+          REPO="Yolo1105/flareo"
           BIN_NAME="flareo"
           INSTALL_DIR="${FLAREO_INSTALL_DIR:-$HOME/.local/bin}"
 
@@ -205,7 +208,7 @@ jobs:
             echo "Verifying cosign signature..."
             cosign verify-blob \
               --bundle "$ARCHIVE.cosign.bundle" \
-              --certificate-identity-regexp 'https://github.com/flareo/.+' \
+              --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
               --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
               "$ARCHIVE" && echo "Signature verified."
           else
