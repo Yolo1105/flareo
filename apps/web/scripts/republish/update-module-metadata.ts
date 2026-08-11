@@ -1,16 +1,16 @@
 /**
  * update-module-metadata.ts
  *
- * Writes the results of one canary rebuild into the Module table.
- * Called from scripts/canary/rebuild-canary.sh after the image has
- * been pushed, scanned, SBOM'd, and signed.
+ * Writes the results of one republish run into the Module table.
+ * Called from scripts/republish/republish.sh after the image has
+ * been re-tagged, scanned, SBOM'd, and signed (not rebuilt).
  *
  * Reads everything from env vars (set by the shell script) so this
  * file stays a single focused unit of code. If a required var is
  * missing, we bail with a clear error.
  *
  * Writes are upsert-style: matched on slug, everything else gets
- * overwritten with the new canary run's values. This means if you
+ * overwritten with the new run's values. This means if you
  * re-run the pipeline for the same slug, the module row is updated
  * in place rather than duplicated.
  */

@@ -1,23 +1,28 @@
 #!/usr/bin/env bash
 # ────────────────────────────────────────────────────────────────
-# rebuild-canary.sh
+# republish.sh
 #
-# End-to-end rebuild for a single canary module. Given a module slug,
-# this script:
+# Re-publishes a pinned upstream image with Flareo receipts. Given a
+# module slug, this script:
 #
-#   1. Loads the module config from canary-modules/<slug>.sh
-#   2. Pulls the pinned upstream image
-#   3. Re-tags to our ECR Public namespace
-#   4. Pushes to ECR Public
-#   5. Generates a CycloneDX SBOM via Syft
-#   6. Runs Trivy CVE scan, saves the JSON report
-#   7. Uploads both artifacts to Cloudflare R2
-#   8. Signs the image with cosign keyless (OIDC identity)
-#   9. Captures the Rekor log index
-#  10. Writes all real metadata to Postgres via update-module-metadata.ts
+#   1. Loads the module config from modules/<slug>.sh
+#   2. Pulls the pinned upstream image (does NOT build it)
+#   3. Records the upstream digest for byte-equivalence checks
+#   4. Re-tags to our ECR Public namespace (bits unchanged)
+#   5. Pushes to ECR Public
+#   6. Generates a CycloneDX SBOM via Syft
+#   7. Runs Trivy CVE scan, saves the JSON report
+#   8. Uploads both artifacts to Cloudflare R2
+#   9. Signs the image with cosign keyless (OIDC identity)
+#  10. Captures the Rekor log index
+#  11. Writes metadata to Postgres via update-module-metadata.ts
+#
+# The image bits are identical to upstream. We re-publish with
+# receipts so a stranger can verify signature + upstream digest
+# without trusting Flareo.
 #
 # Usage:
-#   ./rebuild-canary.sh vaultwarden
+#   ./republish.sh vaultwarden
 #
 # Required environment variables:
 #   AWS_ACCESS_KEY_ID          for ECR push
@@ -31,11 +36,10 @@
 #   DATABASE_URL               Postgres URL (Neon pooled connection)
 #
 # Required tools (installed separately):
-#   docker, aws, cosign, syft, trivy, jq, node (20+), npx
+#   docker, aws, cosign, syft, trivy, jq, node (22+), npx
 #
-# Designed to be callable both locally (for Week 1 testing) and from
-# GitHub Actions (for the scheduled rebuild). Exits non-zero on any
-# failure so CI fails loudly.
+# Callable locally and from GitHub Actions (workflow_dispatch).
+# Exits non-zero on any failure so CI fails loudly.
 # ────────────────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -50,7 +54,7 @@ fi
 
 INPUT_SLUG="$1"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-MODULE_CONFIG="${SCRIPT_DIR}/canary-modules/${INPUT_SLUG}.sh"
+MODULE_CONFIG="${SCRIPT_DIR}/modules/${INPUT_SLUG}.sh"
 
 if [[ ! -f "${MODULE_CONFIG}" ]]; then
   echo "error: module config not found: ${MODULE_CONFIG}" >&2
@@ -82,7 +86,7 @@ source "${MODULE_CONFIG}"
 
 FLAREO_REPO="${ECR_PUBLIC_URL}/${SLUG}"
 FLAREO_TAGGED="${FLAREO_REPO}:${VERSION}"
-WORKDIR="$(mktemp -d -t flareo-canary-XXXX)"
+WORKDIR="$(mktemp -d -t flareo-republish-XXXX)"
 ARTIFACTS_DIR="${WORKDIR}/artifacts"
 mkdir -p "${ARTIFACTS_DIR}"
 trap 'rm -rf "${WORKDIR}"' EXIT
@@ -260,10 +264,10 @@ export FLAREO_REKOR_INDEX="${REKOR_INDEX}"
 export FLAREO_SIGNER_IDENTITY="${SIGNER_IDENTITY}"
 export FLAREO_SIGNER_ISSUER="${SIGNER_ISSUER}"
 
-# Resolve the project root: scripts/canary -> ../..
+# Resolve the project root: scripts/republish -> ../..
 PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 cd "${PROJECT_ROOT}"
-npx tsx scripts/canary/update-module-metadata.ts \
+npx tsx scripts/republish/update-module-metadata.ts \
   || fail "update-module-metadata.ts failed"
 
 log "done: ${FLAREO_PINNED}"
