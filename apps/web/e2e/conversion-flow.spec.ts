@@ -49,15 +49,16 @@ test("marketplace renders and module cards are clickable", async ({ page }) => {
   await page.goto("/marketplace");
   // Page heading present.
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-  // At least one module card with a link to /modules/<slug>. Use a
-  // regex to avoid hardcoding which slug is featured today.
-  const moduleLinks = page.locator('a[href^="/modules/"]');
-  await expect(moduleLinks.first()).toBeVisible();
-  // Click the first one and confirm we land on a module detail page.
-  const firstLink = moduleLinks.first();
-  const href = await firstLink.getAttribute("href");
-  await firstLink.click();
-  await expect(page).toHaveURL(new RegExp(`${href}$`));
+  // Prefer the spotlight CTA — a plain Link click — over any nested
+  // receipts links that may share the /modules/ prefix.
+  const moduleLink = page
+    .getByRole("link", { name: /see full receipts|view →/i })
+    .first();
+  await expect(moduleLink).toBeVisible();
+  const href = await moduleLink.getAttribute("href");
+  expect(href).toMatch(/^\/modules\/[^/?#]+/);
+  await moduleLink.click();
+  await expect(page).toHaveURL(new RegExp(`${href?.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`));
   // Module hero block renders.
   await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
 });
@@ -129,8 +130,8 @@ test("pricing page renders three tiers", async ({ page }) => {
 
 test("signup page form is interactive", async ({ page }) => {
   await page.goto("/signup");
-  // Email input.
-  const emailInput = page.getByPlaceholder(/email/i).first();
+  // Email input — match by type; placeholder is "you@example.com".
+  const emailInput = page.locator('input[type="email"]').first();
   await expect(emailInput).toBeVisible();
   await emailInput.fill("e2e-test@example.com");
   // Don't actually submit — that would land in the waitlist DB.
