@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     "The Flareo module catalog — verified, signed, and cryptographically attested containers with full SBOMs.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 /**
  * Catalog — main discovery surface.
@@ -33,53 +33,57 @@ export const dynamic = "force-dynamic";
  * the lib/data/modules.ts fixture.
  */
 export default async function CatalogPage() {
-  let modules: Module[] | null = null;
-  let featured: FeaturedStripItem[] = [];
-  let trending: TrendingStripItem[] = [];
-
-  if (hasDatabaseUrl()) {
-    try {
-      // Main grid: ALL public modules, any verification status. The
-      // client-side filter bar narrows by category/query/sort.
-      const rows = (await prisma.module.findMany({
-        where: { visibility: "public" } as never,
-        include: {
-          publisher: { select: { username: true } },
-        } as never,
-      })) as Array<
-        ModuleShape & { publisher?: { username: string | null } | null }
-      >;
-      modules = rows.map((r) => ({
-        ...shapeToModule(r),
-        publisherUsername: r.publisher?.username ?? null,
-      }));
-    } catch (err) {
-      console.error("[catalog] failed to load modules from database", err);
-    }
-  } else {
+  const db = hasDatabaseUrl();
+  if (!db) {
     console.error("[catalog] DATABASE_URL is not set; catalog unavailable");
   }
 
-  try {
-    const items = await listActiveFeatured(6);
-    featured = items.map((f) => ({
+  const [modulesR, featuredR, trendingR] = await Promise.allSettled([
+    db
+      ? prisma.module.findMany({
+          where: { visibility: "public" },
+          include: {
+            publisher: { select: { username: true } },
+          },
+        })
+      : Promise.reject(new Error("no DATABASE_URL")),
+    listActiveFeatured(6),
+    computeTrending(8),
+  ]);
+
+  let modules: Module[] | null = null;
+  if (modulesR.status === "fulfilled") {
+    const rows = modulesR.value as Array<
+      ModuleShape & { publisher?: { username: string | null } | null }
+    >;
+    modules = rows.map((r) => ({
+      ...shapeToModule(r),
+      publisherUsername: r.publisher?.username ?? null,
+    }));
+  } else {
+    console.error("[catalog] failed to load modules from database", modulesR.reason);
+  }
+
+  let featured: FeaturedStripItem[] = [];
+  if (featuredR.status === "fulfilled") {
+    featured = featuredR.value.map((f) => ({
       module: f.module,
       blurb: f.blurb,
       position: f.position,
     }));
-  } catch (err) {
-    console.error("[catalog] failed to load featured strip", err);
+  } else {
+    console.error("[catalog] failed to load featured strip", featuredR.reason);
   }
 
-  try {
-    const ranked = await computeTrending(8);
-    trending = ranked.map((t) => ({
+  let trending: TrendingStripItem[] = [];
+  if (trendingR.status === "fulfilled") {
+    trending = trendingR.value.map((t) => ({
       module: t.module,
       recentReviews: t.components.recentReviews,
       avgRating: t.components.avgRating,
     }));
-  } catch (err) {
-    console.error("[catalog] failed to load trending strip", err);
+  } else {
+    console.error("[catalog] failed to load trending strip", trendingR.reason);
   }
 
   if (modules === null) {

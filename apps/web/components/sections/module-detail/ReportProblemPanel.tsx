@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSession } from "next-auth/react";
 import type { Module } from "@/lib/types";
 import {
   REPORT_CATEGORIES,
@@ -10,7 +11,6 @@ import {
 
 interface Props {
   module: Module;
-  currentUserId: string | null;
 }
 
 /**
@@ -24,8 +24,11 @@ interface Props {
  *     module for 7 days; panel shows confirmation)
  *
  * Anonymous viewers see the link but get a sign-in prompt on click.
+ * Session is read on the client so the parent page can stay in ISR.
  */
-export function ReportProblemPanel({ module, currentUserId }: Props) {
+export function ReportProblemPanel({ module }: Props) {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ?? null;
   const [open, setOpen] = useState(false);
   const [category, setCategory] = useState<ReportCategory>("broken");
   const [body, setBody] = useState("");

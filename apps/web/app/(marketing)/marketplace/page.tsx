@@ -28,7 +28,7 @@ export const metadata: Metadata = {
     "Discover, preview, and take away verified containers. The Flareo marketplace surfaces editorial picks, trending modules, and what operators are saying — all backed by full provenance.",
 };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 /**
  * /marketplace — the demand-side discovery surface.

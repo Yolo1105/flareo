@@ -12,7 +12,7 @@ interface Props {
   params: Promise<{ username: string }>;
 }
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { username } = await params;

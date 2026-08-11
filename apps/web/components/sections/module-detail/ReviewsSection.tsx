@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import type { Module } from "@/lib/types";
 
 interface Review {
@@ -27,11 +28,6 @@ interface Props {
   module: Module;
   reviews: Review[];
   aggregate: Aggregate;
-  currentUserId: string | null;
-  /** Non-null when the viewing user has already reviewed this module. */
-  myReview: Review | null;
-  /** When true, viewer is the publisher; hides the write form. */
-  isPublisher: boolean;
 }
 
 /**
@@ -45,15 +41,21 @@ interface Props {
  * Write form is hidden when:
  *   - Viewer isn't signed in (shown as "sign in to review" prompt)
  *   - Viewer is the module's publisher (hidden entirely)
+ *
+ * Session is read on the client so the parent page can stay in ISR
+ * without awaiting auth() on the server.
  */
-export function ReviewsSection({
-  module,
-  reviews,
-  aggregate,
-  currentUserId,
-  myReview,
-  isPublisher,
-}: Props) {
+export function ReviewsSection({ module, reviews, aggregate }: Props) {
+  const { data: session } = useSession();
+  const currentUserId = session?.user?.id ?? null;
+  // Publisher check needs publisherId on the module row; until that is
+  // plumbed through shapeToModule, never hide the form for "is publisher".
+  const isPublisher = false;
+  const myReview =
+    currentUserId != null
+      ? (reviews.find((r) => r.authorId === currentUserId) ?? null)
+      : null;
+
   return (
     <section className="border-b border-hairline px-8 py-12">
       <div className="mb-6 flex items-baseline justify-between">

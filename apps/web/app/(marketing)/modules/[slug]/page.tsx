@@ -5,9 +5,7 @@ import { listRecentRebuildsForModule } from "@/lib/db/module-rebuilds";
 import {
   listReviewsForModule,
   getReviewAggregate,
-  getMyReview,
 } from "@/lib/db/reviews";
-import { auth } from "@/lib/auth/config";
 import { ModuleHero } from "@/components/sections/module-detail/ModuleHero";
 import { TrustBreakdown } from "@/components/sections/module-detail/TrustBreakdown";
 import { ReceiptsSection } from "@/components/sections/module-detail/ReceiptsSection";
@@ -27,6 +25,10 @@ interface Props {
 // complete even if the database is unreachable at build time. At
 // request time the page reads live data from Postgres only — never
 // the fixture catalog.
+//
+// Session-dependent UI (write review, report, preview CTA) reads the
+// session on the client via useSession — awaiting auth() here would
+// force the whole page dynamic and void this ISR window.
 export const revalidate = 60;
 
 export async function generateStaticParams() {
@@ -60,60 +62,52 @@ export default async function ModuleDetailPage({ params }: Props) {
     console.error(`[modules/${slug}] database unreachable`, err);
   }
   if (!mod) notFound();
-  // After notFound() (return type `never` from next/navigation), TS
-  // narrows `mod` to non-null. Capture as a const so the type stays
-  // narrowed through downstream JSX prop checks. The non-null assertion
-  // is safe here — notFound() doesn't return.
   const moduleNonNull: NonNullable<typeof mod> = mod!;
 
-  // Rebuild history is best-effort — if the DB is unreachable (or the
-  // ModuleRebuild table is empty because canary hasn't run yet), the
-  // component's empty-state copy handles it. Don't block the page on it.
-  let rebuilds: Awaited<ReturnType<typeof listRecentRebuildsForModule>> = [];
-  try {
-    rebuilds = await listRecentRebuildsForModule(slug, 10);
-  } catch (err) {
-    console.error(`[modules/${slug}] failed to load rebuild history`, err);
+  const [rebuildsR, reviewsR, aggregateR] = await Promise.allSettled([
+    listRecentRebuildsForModule(slug, 10),
+    listReviewsForModule(slug),
+    getReviewAggregate(slug),
+  ]);
+
+  const rebuilds =
+    rebuildsR.status === "fulfilled" ? rebuildsR.value : [];
+  if (rebuildsR.status === "rejected") {
+    console.error(
+      `[modules/${slug}] failed to load rebuild history`,
+      rebuildsR.reason,
+    );
   }
 
-  // Reviews — also best-effort.
-  const session = await auth();
-  const currentUserId = session?.user?.id ?? null;
-
-  let reviews: Awaited<ReturnType<typeof listReviewsForModule>> = [];
-  let aggregate: Awaited<ReturnType<typeof getReviewAggregate>> = {
-    count: 0,
-    average: null,
-    histogram: [0, 0, 0, 0, 0],
-  };
-  let myReview: Awaited<ReturnType<typeof getMyReview>> = null;
-  try {
-    const [r, a] = await Promise.all([
-      listReviewsForModule(slug),
-      getReviewAggregate(slug),
-    ]);
-    reviews = r;
-    aggregate = a;
-    if (currentUserId) {
-      myReview = await getMyReview(slug, currentUserId);
-    }
-  } catch (err) {
-    console.error(`[modules/${slug}] failed to load reviews`, err);
-  }
-
-  // Publisher check — hide the write form when the viewer owns the
-  // module. publisherId lives on the Module row.
-  let isPublisher = false;
-  if (currentUserId) {
-    const modWithPublisher = moduleNonNull as typeof moduleNonNull & {
-      publisherId?: string | null;
-    };
-    isPublisher = modWithPublisher.publisherId === currentUserId;
+  const reviews = reviewsR.status === "fulfilled" ? reviewsR.value : [];
+  const aggregate =
+    aggregateR.status === "fulfilled"
+      ? aggregateR.value
+      : {
+          count: 0,
+          average: null as number | null,
+          histogram: [0, 0, 0, 0, 0] as [
+            number,
+            number,
+            number,
+            number,
+            number,
+          ],
+        };
+  if (reviewsR.status === "rejected" || aggregateR.status === "rejected") {
+    console.error(
+      `[modules/${slug}] failed to load reviews`,
+      reviewsR.status === "rejected"
+        ? reviewsR.reason
+        : aggregateR.status === "rejected"
+          ? aggregateR.reason
+          : undefined,
+    );
   }
 
   return (
     <>
-      <ModuleHero module={moduleNonNull} userSignedIn={Boolean(currentUserId)} />
+      <ModuleHero module={moduleNonNull} />
       <TrustBreakdown module={moduleNonNull} />
       <ReceiptsSection module={moduleNonNull} />
       <DeploySection module={moduleNonNull} />
@@ -123,14 +117,8 @@ export default async function ModuleDetailPage({ params }: Props) {
         module={moduleNonNull}
         reviews={reviews}
         aggregate={aggregate}
-        currentUserId={currentUserId}
-        myReview={myReview}
-        isPublisher={isPublisher}
       />
-      <ReportProblemPanel
-        module={moduleNonNull}
-        currentUserId={currentUserId}
-      />
+      <ReportProblemPanel module={moduleNonNull} />
     </>
   );
 }

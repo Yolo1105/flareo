@@ -1,4 +1,7 @@
+"use client";
+
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import type { Module } from "@/lib/types";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import { Button } from "@/components/ui/Button";
@@ -7,14 +10,11 @@ import { LaunchPrivatePreviewButton } from "./LaunchPrivatePreviewButton";
 
 interface Props {
   module: Module;
-  /** Whether the current viewer is signed in. Plumbed through from
-   *  the page component so analytics events can include it as a
-   *  prop (high-signal for whether previews convert better for
-   *  signed-in vs anonymous visitors). */
-  userSignedIn?: boolean;
 }
 
-export function ModuleHero({ module, userSignedIn = false }: Props) {
+export function ModuleHero({ module }: Props) {
+  const { data: session } = useSession();
+  const userSignedIn = Boolean(session?.user);
   const lastRebuilt = formatLastRebuiltAt(module.lastRebuiltAt);
 
   return (
