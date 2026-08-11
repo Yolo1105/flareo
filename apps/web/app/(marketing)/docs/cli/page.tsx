@@ -104,36 +104,36 @@ export default function CliReferencePage() {
               Get the binary.
             </h2>
             <p className="mb-4 max-w-[620px] font-body text-[14.5px] leading-[1.65] text-ink-softer">
-              Pick the install path that matches your setup. The{" "}
-              <span className="text-ink">one-line curl script</span> is the
-              fastest; package managers are recommended for reproducible
-              machine setup.
+              Build from source until signed release binaries are published.
+              Requires a Rust toolchain (1.80+).
             </p>
             <div className="grid grid-cols-3 border border-hairline">
-              <div className="border-r border-hairline bg-canvas-deep p-4">
+              <div className="col-span-2 border-r border-hairline bg-canvas-deep p-4">
                 <div className="mb-1.5 font-mono text-[9.5px] font-medium tracking-[0.14em] text-ink-faint">
-                  SHELL
+                  SOURCE / RECOMMENDED
                 </div>
-                <div className="overflow-x-auto whitespace-nowrap font-mono text-[12px] text-ink">
-                  <span className="text-accent">$</span> /bin/bash -c
-                  &quot;$(curl -fsSL https://flareo.sh/install)&quot;
-                </div>
-              </div>
-              <div className="border-r border-hairline bg-canvas-deep p-4">
-                <div className="mb-1.5 font-mono text-[9.5px] font-medium tracking-[0.14em] text-ink-faint">
-                  HOMEBREW
-                </div>
-                <div className="font-mono text-[12px] text-ink">
-                  <span className="text-accent">$</span> brew install flareo
+                <div className="space-y-1 overflow-x-auto font-mono text-[11px] leading-[1.55] text-ink">
+                  <div>
+                    <span className="text-accent">$</span> git clone
+                    https://github.com/Yolo1105/flareo.git
+                  </div>
+                  <div>
+                    <span className="text-accent">$</span> cd
+                    flareo/packages/cli
+                  </div>
+                  <div>
+                    <span className="text-accent">$</span> cargo build
+                    --release
+                  </div>
                 </div>
               </div>
               <div className="bg-canvas-deep p-4">
                 <div className="mb-1.5 font-mono text-[9.5px] font-medium tracking-[0.14em] text-ink-faint">
-                  CARGO
+                  RELEASES
                 </div>
-                <div className="font-mono text-[12px] text-ink">
-                  <span className="text-accent">$</span> cargo install flareo-cli
-                </div>
+                <p className="font-body text-[11.5px] leading-[1.45] text-ink-softer">
+                  Signed archives will ship once the release workflow runs.
+                </p>
               </div>
             </div>
           </section>

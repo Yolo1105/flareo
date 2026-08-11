@@ -32,7 +32,7 @@ flareo/
 
 **`apps/worker`** is a long-running Node process that picks up approved submissions from the database queue, builds them in a sandboxed environment, runs Trivy for vulnerability scanning, signs the resulting image with Sigstore (`cosign`), pushes to ECR Public, and writes the result back to the main app via an authenticated callback.
 
-**`packages/cli`** is a Rust binary that end users install (`brew install flareo` once published). It pulls a module's manifest, verifies the cosign signature against the published key, runs Trivy locally as a second-opinion scan, and either pulls the image or aborts with a verification failure. Independent Cargo project.
+**`packages/cli`** is a Rust binary built from this repository (`cargo build --release` in `packages/cli`). It is a thin client over the Flareo verify API: it requests signature verification for an image reference and surfaces the result. Independent Cargo project.
 
 **`deploy/kubernetes`** holds the OPA Gatekeeper manifests (`flareo-admission.yaml`, `flareo-admission-strict.yaml`, `flareo-admission-sigstore.yaml`) that operators install in their cluster to enforce "only verified images can run."
 

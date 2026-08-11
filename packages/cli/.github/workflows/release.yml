@@ -231,18 +231,22 @@ jobs:
         with:
           files: release-assets/*
           body: |
-            Download and install:
+            Build from source (supported path until you trust these
+            release archives):
 
             ```sh
-            curl -fsSL https://flareo.dev/install | sh
+            git clone https://github.com/Yolo1105/flareo.git
+            cd flareo/packages/cli
+            cargo build --release
             ```
 
-            Verify with cosign (optional but recommended):
+            Or download an archive from this release and verify with
+            cosign (optional but recommended):
 
             ```sh
             cosign verify-blob \
               --bundle flareo-<tag>-<target>.tar.gz.cosign.bundle \
-              --certificate-identity-regexp 'https://github.com/flareo/.+' \
+              --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
               --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
               flareo-<tag>-<target>.tar.gz
             ```

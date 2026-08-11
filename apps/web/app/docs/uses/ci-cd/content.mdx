@@ -21,10 +21,11 @@ Exit code 0 on success, non-zero on any failure. That's the seam CI/CD hooks int
 A two-step addition to any deploy workflow. First, install the CLI; second, verify each image you're about to deploy.
 
 ```yaml
-- name: Install Flareo CLI
+- name: Build Flareo CLI from source
   run: |
-    curl -fsSL https://flareo.dev/install | sh
-    echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+    git clone --depth 1 https://github.com/Yolo1105/flareo.git
+    cargo build --release --manifest-path flareo/packages/cli/Cargo.toml
+    echo "$PWD/flareo/packages/cli/target/release" >> "$GITHUB_PATH"
 
 - name: Verify image signature
   run: |
@@ -72,11 +73,11 @@ Same pattern, slightly different shell syntax:
 ```yaml
 verify_images:
   stage: verify
-  image: alpine:3.19
+  image: rust:1.80
   before_script:
-    - apk add --no-cache curl bash
-    - curl -fsSL https://flareo.dev/install | bash
-    - export PATH="$HOME/.local/bin:$PATH"
+    - git clone --depth 1 https://github.com/Yolo1105/flareo.git
+    - cargo build --release --manifest-path flareo/packages/cli/Cargo.toml
+    - export PATH="$PWD/flareo/packages/cli/target/release:$PATH"
   script:
     - flareo verify "$VAULTWARDEN_IMAGE"
 

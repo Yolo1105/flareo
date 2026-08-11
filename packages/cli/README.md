@@ -6,18 +6,16 @@ Browse the Flareo catalog, verify signed images, and sign in to your account fro
 
 ## Install
 
-```sh
-curl -fsSL https://flareo.dev/install | sh
-```
-
-Or build from source:
+Build from source (requires Rust 1.80+):
 
 ```sh
-git clone https://github.com/flareo/flareo-cli
-cd packages/cli
+git clone https://github.com/Yolo1105/flareo.git
+cd flareo/packages/cli
 FLAREO_GITHUB_CLIENT_ID=<your-oauth-app-id> cargo build --release
 # Binary at target/release/flareo
 ```
+
+Signed release binaries will be published once the release workflow runs. Until then, building from source is the supported path.
 
 ## Quickstart
 
@@ -55,18 +53,6 @@ flareo --api-url http://localhost:3000 login
 FLAREO_API_URL=http://localhost:3000 flareo login
 ```
 
-## Verifying the installer
-
-The install script verifies sha256 and (optionally) the cosign signature of the downloaded archive. To verify manually:
-
-```sh
-cosign verify-blob \
-  --bundle flareo-v0.1.0-aarch64-apple-darwin.tar.gz.cosign.bundle \
-  --certificate-identity-regexp 'https://github.com/flareo/.+' \
-  --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
-  flareo-v0.1.0-aarch64-apple-darwin.tar.gz
-```
-
 ## Rate limiting
 
 The Flareo API enforces per-user rate limits and returns HTTP 429 with a `Retry-After` header when you hit them. The CLI is polite about this:
@@ -85,4 +71,4 @@ The retry helper lives in `src/api.rs` (`send_with_retry`, `fetch`). `flareo log
 
 ## License
 
-AGPL-3.0-or-later.
+Apache-2.0.
