@@ -79,10 +79,11 @@ export interface Allocator {
  * Stub allocator. Returns mock URLs without launching anything. Used
  * during F1 development before a real substrate is wired up.
  *
- * The mock URLs follow the pattern that real implementations should
- * use: `<short-id>-<slug>.preview.flareo.dev`. This lets the rest of
- * the UI work end-to-end (the URL is shown to users, copied, etc.)
- * without the URL actually resolving.
+ * The mock URLs use a neutral placeholder host
+ * (`<short-id>-<slug>.preview.example.invalid`). The original
+ * `*.preview.flareo.dev` pattern was retired with the shared preview
+ * host (ADR-013). The stub stays so gated UI can still exercise
+ * copy/display flows without resolving a real host.
  */
 export class StubAllocator implements Allocator {
   async allocate(
@@ -91,7 +92,7 @@ export class StubAllocator implements Allocator {
     const shortId = Math.random().toString(36).slice(2, 8);
     const allocation: PreviewAllocation = {
       hostId: `stub-${shortId}-${req.moduleSlug}`,
-      subdomain: `${shortId}-${req.moduleSlug}.preview.flareo.dev`,
+      subdomain: `${shortId}-${req.moduleSlug}.preview.example.invalid`,
       ttlSeconds: 3600,
     };
     // Simulate a brief allocation delay so UI loading states are
