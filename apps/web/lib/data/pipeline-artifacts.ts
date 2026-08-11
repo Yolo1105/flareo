@@ -409,7 +409,7 @@ function buildSlsaProvenance(m: Module): SlsaShape {
         },
         runDetails: {
           builder: {
-            id: "https://github.com/flareo/build@8fa2b19c5",
+            id: "https://github.com/Yolo1105/flareo@8fa2b19c5",
             version: { buildkit: "0.13.1", trivy: "0.54.1" },
           },
           metadata: {
@@ -443,8 +443,8 @@ MIIDfTCCAwOgAwIBAgITMwAA${hexFrom(m.digest, 0, 32)}…[truncated]
     identity: {
       issuer: "https://token.actions.githubusercontent.com",
       subject:
-        "https://github.com/flareo/build/.github/workflows/canary-rebuild.yml@refs/heads/main",
-      san: "https://github.com/flareo/build/.github/workflows/canary-rebuild.yml@refs/heads/main",
+        "https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main",
+      san: "https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main",
     },
   };
 }

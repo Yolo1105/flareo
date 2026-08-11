@@ -18,5 +18,5 @@ spec:
         url: https://fulcio.sigstore.dev
         identities:
           - issuer: https://token.actions.githubusercontent.com
-            subjectRegExp: "https://github.com/flareo/.+"
+            subjectRegExp: "https://github.com/Yolo1105/.+"
   mode: enforce

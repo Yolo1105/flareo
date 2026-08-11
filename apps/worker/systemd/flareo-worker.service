@@ -1,6 +1,6 @@
 [Unit]
 Description=Flareo build worker
-Documentation=https://github.com/flareo/flareo-worker
+Documentation=https://github.com/Yolo1105/flareo
 After=network-online.target
 Wants=network-online.target
 # Requires=docker.service — retired with the build path (ADR-012).

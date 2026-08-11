@@ -357,7 +357,7 @@ export default function PricingPage() {
               <>
                 Yes. The platform is{" "}
                 <span className="text-ink">AGPLv3</span> — the code is at
-                github.com/flareo/flareo. You can run the whole pipeline on
+                github.com/Yolo1105/flareo. You can run the whole pipeline on
                 your own infrastructure, publish to your own registry, and
                 never pay us a dollar.
               </>

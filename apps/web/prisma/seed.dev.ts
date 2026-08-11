@@ -35,7 +35,7 @@ const DEMO_USERS = [
     name: "Admin Reviewer",
     username: "flareo-admin",
     bio: "Runs the Flareo pipeline. Reviews every submission personally until the queue outgrows one pair of hands.",
-    websiteUrl: "https://flareo.dev",
+    websiteUrl: "https://flareo.app",
     role: "admin",
   },
   {

@@ -28,7 +28,7 @@ export const FOOTER_LINKS = [
   { label: "Incidents", href: "/incidents" },
   { label: "Terms", href: "/legal/terms" },
   { label: "Privacy", href: "/legal/privacy" },
-  { label: "GitHub", href: "https://github.com/flareo", external: true },
+  { label: "GitHub", href: "https://github.com/Yolo1105/flareo", external: true },
 ] as const;
 
 /**

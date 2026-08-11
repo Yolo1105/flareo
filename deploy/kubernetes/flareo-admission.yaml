@@ -37,7 +37,7 @@ metadata:
     policies.kyverno.io/description: >-
       Every image pulled from public.ecr.aws/flareo/* must have a valid
       Sigstore signature issued to an identity matching
-      https://github.com/flareo/.+
+      https://github.com/Yolo1105/.+
       This ensures nobody can silently push an unsigned image to the
       Flareo registry namespace and have it scheduled in your cluster.
 spec:
@@ -62,7 +62,7 @@ spec:
           attestors:
             - entries:
                 - keyless:
-                    subject: "https://github.com/flareo/*"
+                    subject: "https://github.com/Yolo1105/*"
                     issuer: "https://token.actions.githubusercontent.com"
                     rekor:
                       url: "https://rekor.sigstore.dev"

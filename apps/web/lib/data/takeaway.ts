@@ -76,7 +76,7 @@ ${envSection}
 
 # Verify the image before pulling:
 #   cosign verify ghcr.io/flareo/${m.slug}@${m.digest.slice(0, 19)}…
-#   --certificate-identity 'https://github.com/flareo/build/.github/workflows/canary-rebuild.yml@refs/heads/main'
+#   --certificate-identity 'https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main'
 #   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'`;
 }
 
@@ -98,7 +98,7 @@ verification:
   cosign:
     enabled: true
     issuer: "https://token.actions.githubusercontent.com"
-    identity: "https://github.com/flareo/build/.github/workflows/canary-rebuild.yml@refs/heads/main"
+    identity: "https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main"
   provenance: ${m.trustBreakdown.provenance}
   sbomDownload: "ghcr.io/flareo/${m.slug}/sbom"
 
@@ -205,7 +205,7 @@ You don't have to trust Flareo's word that this image is signed. Run
 the cosign verify locally yourself:
 
     cosign verify ghcr.io/flareo/${m.slug}@${m.digest} \\
-      --certificate-identity 'https://github.com/flareo/build/.github/workflows/canary-rebuild.yml@refs/heads/main' \\
+      --certificate-identity 'https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main' \\
       --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
 
 You can also pull the SBOM and Trivy scan:

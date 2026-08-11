@@ -14,7 +14,7 @@ The foundational check. Did the Flareo GitHub Actions identity really sign this 
 
 ```sh
 cosign verify \
-  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   public.ecr.aws/flareo/vaultwarden@sha256:abc123...
 ```
@@ -68,7 +68,7 @@ The two reports should agree on what's installed; they may disagree on severity 
 ```sh
 cosign verify-attestation \
   --type slsaprovenance \
-  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   public.ecr.aws/flareo/vaultwarden@sha256:abc123...
 ```
@@ -89,7 +89,7 @@ set -e
 IMAGE="public.ecr.aws/flareo/vaultwarden@sha256:abc123..."
 
 cosign verify \
-  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   "$IMAGE" > /dev/null
 

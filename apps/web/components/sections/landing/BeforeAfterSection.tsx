@@ -160,7 +160,7 @@ function FlareoPane() {
 
 19:45  # cosign verify command is in the README at the top of the bundle
 19:45  $ cosign verify ghcr.io/flareo/uptime-kuma@sha256:9a8b... \\
-           --certificate-identity 'https://github.com/flareo/build/...' \\
+           --certificate-identity 'https://github.com/Yolo1105/flareo/...' \\
            --certificate-oidc-issuer 'https://token.actions.githubusercontent.com'
        Verification for ghcr.io/flareo/uptime-kuma --
          ✓ The cosign claims were validated

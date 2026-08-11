@@ -66,10 +66,10 @@ export function DocsSidebar({ currentSlug }: SidebarProps) {
           ← flareo.app
         </a>
         <a
-          href="https://github.com/flareo"
+          href="https://github.com/Yolo1105/flareo"
           className="mt-1 block font-mono text-[11px] tracking-[0.08em] text-ink-faint hover:text-accent"
         >
-          github.com/flareo
+          github.com/Yolo1105/flareo
         </a>
       </div>
     </nav>

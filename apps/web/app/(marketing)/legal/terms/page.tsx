@@ -137,10 +137,10 @@ export default function TermsPage() {
               canary pipeline — is licensed under AGPL-3.0-or-later.
               Source is at{" "}
               <a
-                href="https://github.com/flareo"
+                href="https://github.com/Yolo1105/flareo"
                 className="text-accent underline"
               >
-                github.com/flareo
+                github.com/Yolo1105/flareo
               </a>
               . The images we publish inherit whatever license the
               upstream project uses; check each module page for the

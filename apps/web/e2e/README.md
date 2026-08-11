@@ -22,7 +22,7 @@ npm run dev          # in one terminal
 npm run test:e2e     # in another
 
 # Against a deployed environment:
-PLAYWRIGHT_BASE_URL=https://staging.flareo.dev npm run test:e2e
+PLAYWRIGHT_BASE_URL=https://localhost:3000 npm run test:e2e
 
 # Single test:
 npx playwright test conversion-flow --grep "marketplace"

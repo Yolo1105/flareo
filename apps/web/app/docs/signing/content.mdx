@@ -18,7 +18,7 @@ To verify, consumers check:
 
 - The signature is valid under the cert
 - The cert was issued by Fulcio
-- The cert's identity matches what they expect (`https://github.com/flareo/...`)
+- The cert's identity matches what they expect (`https://github.com/Yolo1105/...`)
 - The Rekor entry exists and its inclusion proof checks out
 
 No key material for us to lose. No keys for you to distribute.
@@ -30,13 +30,13 @@ Every Flareo image signature claims this identity:
 | Field           | Value                                                   |
 |-----------------|---------------------------------------------------------|
 | OIDC issuer     | `https://token.actions.githubusercontent.com`           |
-| Identity (SAN)  | `https://github.com/flareo/flareo-canary/.github/workflows/canary-rebuild.yml@refs/heads/main` |
+| Identity (SAN)  | `https://github.com/Yolo1105/flareo/.github/workflows/canary-rebuild.yml@refs/heads/main` |
 
 When you verify, use a regex on the identity:
 
 ```sh
 cosign verify \
-  --certificate-identity-regexp 'https://github.com/flareo/.+' \
+  --certificate-identity-regexp 'https://github.com/Yolo1105/.+' \
   --certificate-oidc-issuer 'https://token.actions.githubusercontent.com' \
   public.ecr.aws/flareo/<module>@sha256:<digest>
 ```

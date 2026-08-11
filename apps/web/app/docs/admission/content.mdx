@@ -4,7 +4,7 @@ Admission policies block unsigned or out-of-policy images from being deployed to
 
 ## Flareo's first-party policies
 
-Ready-to-apply policy templates live at [github.com/flareo/flareo-admission](https://github.com/flareo/flareo-admission). Three variants:
+Ready-to-apply policy templates live at [github.com/Yolo1105/flareo](https://github.com/Yolo1105/flareo). Three variants:
 
 | File                                    | Controller                  | Behavior                              |
 |-----------------------------------------|-----------------------------|---------------------------------------|
@@ -52,7 +52,7 @@ spec:
           attestors:
             - entries:
                 - keyless:
-                    subject: "https://github.com/flareo/*"
+                    subject: "https://github.com/Yolo1105/*"
                     issuer: "https://token.actions.githubusercontent.com"
                     rekor:
                       url: "https://rekor.sigstore.dev"
