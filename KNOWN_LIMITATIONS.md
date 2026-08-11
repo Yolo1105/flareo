@@ -46,12 +46,65 @@ so they do not have to.
    `apps/web/lib/sigstore/verify.ts`.
 
 10. **Outstanding dependency advisories.** After non-breaking
-    `npm audit fix`, ~35 vulnerabilities remain in the public lockfile
-    (was 45). Deferred because fixes require major bumps:
+    `npm audit fix`, the public lockfile still reports **35**
+    vulnerabilities (**4 critical**, 7 high, 23 moderate, 1 low) —
+    reproduce with `npm audit --package-lock-only`. Deferred majors
+    remain:
     - `next` / `sharp` (libvips) → would force `next@16`
-    - `tar` via `cacache` / `@sigstore/oci` → breaking Sigstore dep
+    - `tar` via `cacache` / `@sigstore/oci` → breaking Sigstore dep bump
     - `uuid` via `@sentry/webpack-plugin` → would force `@sentry/nextjs@10`
-    Unrelated dependency upgrades are intentionally out of scope.
+
+    The four criticals, individually:
+
+    **`@sigstore/oci` (GHSA-pf56-329r-95rw) — credential confusion.**
+    Can leak registry credentials to an attacker-controlled registry
+    when the library is given stored credentials and an attacker-chosen
+    reference. `POST /api/v1/verify` accepts an arbitrary registry
+    reference from an unauthenticated caller, which looks alarming next
+    to this advisory. **Exposure here:** the live verify path in
+    `apps/web/lib/sigstore/verify.ts` does not import or call
+    `@sigstore/oci`. Registry access uses `fetch` plus
+    `obtainAnonToken()` — the anonymous Docker token flow — and never
+    attaches stored credentials to a registry request. AWS credentials
+    exist in the web environment for ECR republish operations but are
+    not passed on the verify path. The package remains a declared
+    dependency (and pulls in the vulnerable `tar` tree below); the
+    credential-confusion bug is not reachable through the verify
+    endpoint as written. Upgrading is deferred because the Sigstore
+    major that clears it is a breaking change and this path does not
+    actually use the library today.
+
+    **`@auth/core` (GHSA-xmf8-cvqr-rfgj and related) — uncaught
+    exception on malformed `Bearer` headers (plus other Auth.js
+    criticals in the same range).** Reached through
+    `next-auth@5.0.0-beta.25` (pinned) and `@auth/prisma-adapter`.
+    **Exposure here:** Auth.js middleware/session handling can throw on
+    a malformed Authorization header rather than returning a clean
+    401. That is an availability / error-handling issue on
+    authenticated surfaces, not credential theft. The pin to
+    `5.0.0-beta.25` is deliberate; moving to a fixed beta is a
+    deliberate deferral (Auth.js majors have historically reshaped
+    session/edge contracts), not an overlooked `npm update`.
+
+    **`next-auth` — inherits `@auth/core`.** Same pin, same exposure
+    and same deferral reason as above.
+
+    **`tar` (several GHSA, including hardlink path traversal /
+    overwrite).** **Exposure here:** `tar@6.2.1` is a **transitive
+    runtime** dependency of the web app via
+    `@sigstore/oci` → `make-fetch-happen` → `cacache` → `tar` (confirmed
+    with `npm ls tar`). It is not a direct dependency and is not used
+    by application code to extract attacker-supplied archives on the
+    verify or request path. Residual risk is limited to whatever
+    `cacache`/`make-fetch-happen` do when `@sigstore/oci` (or any
+    future caller) fetches and caches registry content — which the
+    live verify path does not invoke. Upgrade is deferred with the
+    `@sigstore/oci` major.
+
+    These four are known, analysed against this codebase, and deferred.
+    The lockfile is public; any reader can reproduce
+    `npm audit --package-lock-only` themselves. Unrelated dependency
+    upgrades remain intentionally out of scope.
 
 11. **Single-host deployment.** Deliberate for a single maintainer.
     Scaling means a larger machine, not a rewrite.
