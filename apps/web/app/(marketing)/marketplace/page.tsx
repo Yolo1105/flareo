@@ -176,7 +176,8 @@ export default async function MarketplacePage() {
 async function safeListFeatured(): Promise<FeaturedItem[]> {
   try {
     return await listActiveFeatured(8);
-  } catch {
+  } catch (err) {
+    console.error("[marketplace] failed to load featured", err);
     return [];
   }
 }
@@ -184,13 +185,17 @@ async function safeListFeatured(): Promise<FeaturedItem[]> {
 async function safeComputeTrending(): Promise<TrendingEntry[]> {
   try {
     return await computeTrending(8);
-  } catch {
+  } catch (err) {
+    console.error("[marketplace] failed to load trending", err);
     return [];
   }
 }
 
 async function safeListAllModules(): Promise<Module[]> {
-  if (!hasDatabaseUrl()) return [];
+  if (!hasDatabaseUrl()) {
+    console.error("[marketplace] DATABASE_URL is not set; modules empty");
+    return [];
+  }
   try {
     const rows = (await prisma.module.findMany({
       where: { visibility: "public" } as never,
@@ -208,7 +213,8 @@ async function safeListAllModules(): Promise<Module[]> {
         ? { ...m, publisherUsername: r.publisher.username }
         : m;
     });
-  } catch {
+  } catch (err) {
+    console.error("[marketplace] failed to load modules from database", err);
     return [];
   }
 }
@@ -216,7 +222,8 @@ async function safeListAllModules(): Promise<Module[]> {
 async function safeListReviews(): Promise<ReviewRow[]> {
   try {
     return await listReviewsForLandingWall(6);
-  } catch {
+  } catch (err) {
+    console.error("[marketplace] failed to load reviews", err);
     return [];
   }
 }
@@ -228,7 +235,8 @@ async function safeGetAggregates(
   try {
     const map = await getAggregatesForSlugs(slugs);
     return Object.fromEntries(map.entries());
-  } catch {
+  } catch (err) {
+    console.error("[marketplace] failed to load review aggregates", err);
     return {};
   }
 }

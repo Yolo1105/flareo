@@ -16,6 +16,10 @@ import { PricingPreview } from "@/components/sections/landing/PricingPreview";
 import { listActiveFeatured } from "@/lib/db/curation";
 import { listReviewsForLandingWall, type ReviewRow } from "@/lib/db/reviews";
 import { getCatalogStats, type CatalogStats } from "@/lib/db/stats";
+import { hasDatabaseUrl } from "@/lib/config/env";
+import { prisma } from "@/lib/db/prisma";
+import { shapeToModule, type ModuleShape } from "@/lib/db/queries";
+import type { Module } from "@/lib/types";
 
 // Force dynamic so the homepage refreshes featured + reviews on each
 // load without needing revalidation. Both queries are cheap (small
@@ -39,31 +43,43 @@ export const dynamic = "force-dynamic";
  *   06 Compose preview — multi-module example
  *   07 Pricing — entry point to /pricing
  *
- * Featured, Reviews, and Metrics omit themselves when the DB is
- * empty or unreachable.
+ * Featured, Reviews, Metrics, and CatalogPreview omit themselves when
+ * the DB is empty or unreachable. Never fall back to fixture modules.
  */
 export default async function LandingPage() {
   let featured: FeaturedLandingItem[] = [];
   let reviews: ReviewRow[] = [];
   let stats: CatalogStats | null = null;
+  let previewModules: Module[] = [];
 
   try {
     const items = await listActiveFeatured(4);
     featured = items.map((f) => ({ module: f.module, blurb: f.blurb }));
-  } catch {
-    // DB unreachable — Featured strip omits itself, no error UI.
+  } catch (err) {
+    console.error("[landing] failed to load featured strip", err);
   }
 
   try {
     reviews = await listReviewsForLandingWall(4);
-  } catch {
-    // Same — silently omit.
+  } catch (err) {
+    console.error("[landing] failed to load reviews wall", err);
   }
 
   try {
     stats = await getCatalogStats();
-  } catch {
-    // Same — MetricsStrip omits itself; never fall back to constants.
+  } catch (err) {
+    console.error("[landing] failed to load catalog stats", err);
+  }
+
+  if (hasDatabaseUrl()) {
+    try {
+      const rows = (await prisma.module.findMany({
+        where: { visibility: "public" } as never,
+      })) as ModuleShape[];
+      previewModules = rows.map(shapeToModule);
+    } catch (err) {
+      console.error("[landing] failed to load catalog preview modules", err);
+    }
   }
 
   return (
@@ -75,7 +91,7 @@ export default async function LandingPage() {
       <BeforeAfterSection />
       <PipelineTerminal />
       {stats ? <MetricsStrip stats={stats} /> : null}
-      <CatalogPreview />
+      <CatalogPreview modules={previewModules} />
       <FeaturedStrip items={featured} />
       <ReviewsWall reviews={reviews} />
       <ComposePreview />

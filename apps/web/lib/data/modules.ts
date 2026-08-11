@@ -1,10 +1,19 @@
 import type { Module } from "@/lib/types";
 
 /**
- * The 12 verified modules in the public Flareo catalog.
- * Trust breakdowns sum to the overall score (vulns+slsa+sig+sbom = trust).
- * Digests, versions, and CVE counts match exactly what the verify tool
- * and catalog and module-detail widgets display.
+ * Fixture module catalog for tests and local development only.
+ *
+ * Must never render as live catalog state. Production surfaces
+ * (catalog, marketplace, landing, module detail, command palette)
+ * read from Postgres; on failure they show an empty or unavailable
+ * state rather than falling back here.
+ *
+ * Seed (`prisma/seed.ts`) and `generateStaticParams` may still import
+ * this list for scaffolding and build-time path discovery.
+ *
+ * Trust breakdowns in the fixture sum to the overall score
+ * (vulns+slsa+sig+sbom = trust). Digests, versions, and CVE counts
+ * are illustrative — they are not live measurements.
  */
 export const MODULES: readonly Module[] = [
   {

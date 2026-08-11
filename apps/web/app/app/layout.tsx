@@ -7,8 +7,13 @@ import { TopBar } from "@/components/layout/app/TopBar";
 import { StatusBar } from "@/components/layout/app/StatusBar";
 import { ToastStack } from "@/components/overlays/ToastStack";
 import { NotificationDrawer } from "@/components/overlays/NotificationDrawer";
-import { CommandPalette } from "@/components/overlays/CommandPalette";
+import {
+  CommandPalette,
+  type CommandPaletteModule,
+} from "@/components/overlays/CommandPalette";
 import { ShortcutOverlay } from "@/components/overlays/ShortcutOverlay";
+import { hasDatabaseUrl } from "@/lib/config/env";
+import { listModules } from "@/lib/db/queries";
 
 export const metadata: Metadata = {
   title: {
@@ -46,6 +51,23 @@ export default async function AppLayout({
   // After redirect() (return type `never`), capture the narrowed user.
   const sessionUser = session!.user!;
 
+  // Live public modules for Cmd+K — empty on DB failure, never fixtures.
+  let paletteModules: CommandPaletteModule[] = [];
+  if (hasDatabaseUrl()) {
+    try {
+      const all = await listModules();
+      paletteModules = all
+        .filter((m) => m.visibility === "public")
+        .map((m) => ({
+          slug: m.slug,
+          name: m.name,
+          description: m.description,
+        }));
+    } catch (err) {
+      console.error("[app] command palette: failed to load modules", err);
+    }
+  }
+
   return (
     <AppShellProvider>
       <div className="relative bg-canvas text-ink">
@@ -74,7 +96,7 @@ export default async function AppLayout({
 
         <ToastStack />
         <NotificationDrawer />
-        <CommandPalette />
+        <CommandPalette modules={paletteModules} />
         <ShortcutOverlay />
       </div>
     </AppShellProvider>

@@ -1,23 +1,32 @@
 import Link from "next/link";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { MODULES } from "@/lib/data/modules";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import type { Module } from "@/lib/types";
 
 /**
- * Landing's catalog preview — shows 4 high-trust modules.
- * Full catalog view lives at /catalog.
+ * Landing's catalog preview — shows up to 4 high-trust modules from
+ * the live DB list. Parent omits this section when the database is
+ * unreachable or the catalog is empty — never fixture data.
  */
-export function CatalogPreview() {
-  const featured = [...MODULES]
+export function CatalogPreview({ modules }: { modules: Module[] }) {
+  if (modules.length === 0) return null;
+
+  const featured = [...modules]
     .sort((a, b) => b.trust - a.trust)
     .slice(0, 4);
+
+  const total = modules.length;
 
   return (
     <section className="border-b border-hairline px-8 py-14">
       <SectionHeader
         num="03"
         label="THE CATALOG"
-        title="12 modules today, growing every week."
+        title={
+          total === 1
+            ? "1 module in the public catalog."
+            : `${total} modules in the public catalog.`
+        }
       >
         Every module has a verified signature, a current SBOM, a SLSA L2+
         attestation, and a one-line pull command. Click any row to see the
@@ -88,7 +97,7 @@ export function CatalogPreview() {
           href="/catalog"
           className="font-mono text-[11.5px] tracking-[0.08em] text-accent transition-colors hover:text-accent-hot"
         >
-          VIEW ALL 12 MODULES →
+          VIEW ALL {total} MODULE{total === 1 ? "" : "S"} →
         </Link>
       </div>
     </section>

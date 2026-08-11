@@ -28,12 +28,12 @@ export const dynamic = "force-dynamic";
  *   2. Active featured (admin-picked) — Featured strip at top
  *   3. Trending (computed) — Trending strip below Featured
  *
- * Each fetch is wrapped in try/catch so a DB outage on any one
- * doesn't blank the whole page. Missing data produces empty strip +
- * fixture fallback in the main grid.
+ * Featured/trending failures produce empty strips. A failure loading
+ * the main module list renders an explicit unavailable state — never
+ * the lib/data/modules.ts fixture.
  */
 export default async function CatalogPage() {
-  let modules: Module[] | undefined = undefined;
+  let modules: Module[] | null = null;
   let featured: FeaturedStripItem[] = [];
   let trending: TrendingStripItem[] = [];
 
@@ -53,10 +53,11 @@ export default async function CatalogPage() {
         ...shapeToModule(r),
         publisherUsername: r.publisher?.username ?? null,
       }));
-    } catch {
-      // DB unreachable → CatalogExplorer falls back to the MODULES
-      // fixture so the page still renders something useful.
+    } catch (err) {
+      console.error("[catalog] failed to load modules from database", err);
     }
+  } else {
+    console.error("[catalog] DATABASE_URL is not set; catalog unavailable");
   }
 
   try {
@@ -66,8 +67,8 @@ export default async function CatalogPage() {
       blurb: f.blurb,
       position: f.position,
     }));
-  } catch {
-    // empty strip; no-op
+  } catch (err) {
+    console.error("[catalog] failed to load featured strip", err);
   }
 
   try {
@@ -77,11 +78,46 @@ export default async function CatalogPage() {
       recentReviews: t.components.recentReviews,
       avgRating: t.components.avgRating,
     }));
-  } catch {
-    // empty strip; no-op
+  } catch (err) {
+    console.error("[catalog] failed to load trending strip", err);
   }
 
-  const count = modules?.length ?? 12; // 12 is the fixture count
+  if (modules === null) {
+    return (
+      <>
+        <PageHero
+          eyebrow="CATALOG / UNAVAILABLE"
+          prompt="flareo search --all"
+          promptComment="# catalog temporarily unreachable"
+          title={
+            <>
+              VERIFICATION LEDGER.
+              <br />
+              NOT GALLERY.
+            </>
+          }
+        >
+          Every module below has been built in a hermetic sandbox, scanned
+          for CVEs, signed with cosign, attested with SLSA L2 or L3, and had
+          its SBOM published. Click any row for the full receipts.
+        </PageHero>
+        <div className="px-8 py-16">
+          <div className="border border-dashed border-hairline bg-canvas-deep p-12 text-center">
+            <div className="mb-3 font-mono text-[10.5px] tracking-[0.14em] text-warn">
+              CATALOG UNAVAILABLE
+            </div>
+            <p className="mx-auto max-w-[480px] font-body text-[14px] leading-[1.55] text-ink-softer">
+              The module catalog could not be loaded from the database. This
+              is not an empty catalog — the data source is temporarily
+              unreachable. Try again shortly.
+            </p>
+          </div>
+        </div>
+      </>
+    );
+  }
+
+  const count = modules.length;
 
   return (
     <>

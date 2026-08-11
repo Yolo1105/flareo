@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import type { Metadata } from "next";
-import { MODULES, getModuleBySlug } from "@/lib/data/modules";
+import { MODULES } from "@/lib/data/modules";
+import { getModuleBySlug } from "@/lib/db/queries";
 import { ViewHeader } from "@/components/sections/app-dashboard/ViewHeader";
 import { SandboxCountdown } from "@/components/interactive/SandboxCountdown";
 
@@ -10,18 +11,29 @@ interface Props {
 }
 
 export async function generateStaticParams() {
+  // Build-time path discovery only — not live catalog state.
   return MODULES.filter((m) => m.previewable).map((m) => ({ slug: m.slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const m = getModuleBySlug(slug);
-  return { title: m ? `${m.name.toLowerCase()} preview` : "Preview" };
+  try {
+    const m = await getModuleBySlug(slug);
+    return { title: m ? `${m.name.toLowerCase()} preview` : "Preview" };
+  } catch (err) {
+    console.error(`[preview/${slug}] metadata: database unreachable`, err);
+    return { title: "Preview" };
+  }
 }
 
 export default async function ModulePreviewPage({ params }: Props) {
   const { slug } = await params;
-  const module = getModuleBySlug(slug);
+  let module = null;
+  try {
+    module = await getModuleBySlug(slug);
+  } catch (err) {
+    console.error(`[preview/${slug}] database unreachable`, err);
+  }
   if (!module) notFound();
   // After notFound() (return type `never`), capture narrowed module.
   const moduleSafe = module!;

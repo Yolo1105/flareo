@@ -3,12 +3,15 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAppShell } from "./AppShellProvider";
-import { MODULES } from "@/lib/data/modules";
 import { cn } from "@/lib/utils/cn";
 
 /**
  * Cmd+K palette — fuzzy search over pages, modules, and quick actions.
  * Keyboard-first: ↑↓ to move, Enter to execute, Esc to close.
+ *
+ * Module hits come from the live DB via the app layout. An empty list
+ * (DB down or no public modules) simply omits the Modules section —
+ * never the lib/data/modules.ts fixture.
  */
 
 type PaletteItem = {
@@ -17,6 +20,12 @@ type PaletteItem = {
   label: string;
   hint?: string;
   href: string;
+};
+
+export type CommandPaletteModule = {
+  slug: string;
+  name: string;
+  description: string;
 };
 
 const PAGES: PaletteItem[] = [
@@ -32,7 +41,11 @@ const PAGES: PaletteItem[] = [
   { id: "pg-docs", section: "Public", label: "CLI reference", hint: "/docs/cli", href: "/docs/cli" },
 ];
 
-export function CommandPalette() {
+export function CommandPalette({
+  modules = [],
+}: {
+  modules?: CommandPaletteModule[];
+}) {
   const { cmdOpen, setCmdOpen } = useAppShell();
   const [query, setQuery] = useState("");
   const [active, setActive] = useState(0);
@@ -51,7 +64,7 @@ export function CommandPalette() {
   const items = useMemo<PaletteItem[]>(() => {
     const all: PaletteItem[] = [
       ...PAGES,
-      ...MODULES.map((m) => ({
+      ...modules.map((m) => ({
         id: `mod-${m.slug}`,
         section: "Modules",
         label: m.name.toLowerCase() + " — " + m.description,
@@ -62,7 +75,7 @@ export function CommandPalette() {
     if (!query) return all;
     const q = query.toLowerCase();
     return all.filter((it) => it.label.toLowerCase().includes(q));
-  }, [query]);
+  }, [query, modules]);
 
   // Clamp active index when results change
   useEffect(() => {

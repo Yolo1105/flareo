@@ -2,7 +2,6 @@
 
 import { useState, useMemo } from "react";
 import type { Module } from "@/lib/types";
-import { MODULES, getCategoryCounts } from "@/lib/data/modules";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
@@ -34,12 +33,11 @@ export interface TrendingStripItem {
 
 export interface CatalogExplorerProps {
   /**
-   * DB-sourced module list. When provided, drives the main grid.
-   * When undefined (e.g. DB unreachable, or server fetch threw),
-   * falls back to the static MODULES fixture so the page still
-   * renders something useful.
+   * DB-sourced module list. Required — the parent page renders an
+   * explicit unavailable state when the database cannot be read.
+   * Never fall back to lib/data/modules.ts fixtures here.
    */
-  modules?: Module[];
+  modules: Module[];
   /**
    * Editorially-featured modules. Rendered as a strip above the
    * filter bar. Hidden entirely when empty — no zero-state clutter.
@@ -56,33 +54,27 @@ export function CatalogExplorer({
   modules,
   featured = [],
   trending = [],
-}: CatalogExplorerProps = {}) {
+}: CatalogExplorerProps) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<Module["category"] | "all">("all");
   const [sort, setSort] = useState<SortField>("trust");
 
-  // Source-of-truth: DB modules when available, fixture otherwise.
-  // The fallback exists so a DB outage doesn't make the whole
-  // catalog a blank page — users see the demo-set instead.
-  const source = modules && modules.length > 0 ? modules : MODULES;
+  const source = modules;
 
-  // Category counts reflect whatever data we're actually rendering.
+  // Category counts reflect the live DB list only.
   const counts = useMemo(() => {
-    if (modules && modules.length > 0) {
-      const out: Record<string, number> = {
-        all: source.length,
-        security: 0,
-        proxy: 0,
-        monitoring: 0,
-        auth: 0,
-        devops: 0,
-        media: 0,
-      };
-      for (const m of source) out[m.category] = (out[m.category] ?? 0) + 1;
-      return out;
-    }
-    return getCategoryCounts();
-  }, [modules, source]);
+    const out: Record<string, number> = {
+      all: source.length,
+      security: 0,
+      proxy: 0,
+      monitoring: 0,
+      auth: 0,
+      devops: 0,
+      media: 0,
+    };
+    for (const m of source) out[m.category] = (out[m.category] ?? 0) + 1;
+    return out;
+  }, [source]);
 
   const filtered = useMemo(() => {
     let result = [...source];
