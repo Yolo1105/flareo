@@ -24,7 +24,7 @@ All three policies ship with `validationFailureAction: Audit` so you can observe
 
 All three policies only apply to images matching `public.ecr.aws/flareo/*`. Images from other registries (Docker Hub, your company registry, GHCR, etc.) are unaffected. The policies add a gate for the Flareo namespace; they don't change how other images are handled.
 
-The Kyverno strict variant adds a live call to `flareo.app/api/v1/verify` at admission time. This ensures the module's current catalog status is `verified` (not `pending` or `failing`). Trade-off: adds ~200-500ms per pod creation and makes admission depend on `flareo.app` being reachable.
+The Kyverno strict variant adds a live call to a **verify API URL you configure** (the shipped manifest uses the placeholder `https://REPLACE-ME.example.com/api/v1/verify`) at admission time. Point it at an instance you trust. Trade-off: adds ~200-500ms per pod creation and makes admission depend on that endpoint being reachable. The base signature-only policy has no such external dependency.
 
 Most clusters should start with the basic policy.
 

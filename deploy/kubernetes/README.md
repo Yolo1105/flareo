@@ -44,12 +44,21 @@ kubectl patch clusterpolicy require-flareo-signature \
 
 ## Strict mode caveats
 
-`flareo-admission-strict.yaml` adds a live call to `flareo.app/api/v1/verify` at admission time. This ensures the module's current status in the Flareo catalog is `verified` (not `pending` or `failing`). Two tradeoffs:
+`flareo-admission-strict.yaml` adds a live call to a **verify API URL you
+must configure** (placeholder: `https://REPLACE-ME.example.com/api/v1/verify`)
+at admission time. Point it at an instance you trust — your own Flareo
+deployment, or another endpoint you have explicitly chosen. Do not leave
+the placeholder, and do not bake in a third-party URL you do not control.
+
+This ensures the module's current status is `verified` (not `pending` or
+`failing`). Two tradeoffs:
 
 1. **Latency.** Adds ~200-500ms per pod creation. Usually negligible for Deployments; may matter for Jobs that churn pods rapidly.
-2. **Availability.** If `flareo.app` is unreachable, admission fails closed. Configure `failurePolicy: Ignore` on the webhook if you prefer fail-open.
+2. **Availability.** If the configured endpoint is unreachable, admission fails closed. Configure `failurePolicy: Ignore` on the webhook if you prefer fail-open.
 
-Most clusters should start with the basic policy.
+The base policy (`flareo-admission.yaml`) verifies signatures only and has
+**no external HTTP dependency** in the admission path. Most clusters should
+start there.
 
 ## Scope
 
@@ -57,4 +66,4 @@ These policies ONLY apply to images matching `public.ecr.aws/flareo/*`. Other im
 
 ## License
 
-AGPL-3.0-or-later, same as the rest of Flareo.
+Apache-2.0, same as the rest of Flareo.

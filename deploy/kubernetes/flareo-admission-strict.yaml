@@ -1,13 +1,24 @@
 # Flareo admission policy — STRICTER variant.
 #
+# IMPORTANT: This variant introduces an external dependency in the
+# admission path. At pod-create time Kyverno POSTs to a verify API you
+# configure below. That means admission latency (~200-500ms) and
+# availability are coupled to that endpoint: if it is unreachable and
+# failurePolicy is Fail, pods matching public.ecr.aws/flareo/* will not
+# be admitted.
+#
+# The base policy in flareo-admission.yaml has no such dependency — it
+# verifies Sigstore signatures locally via Kyverno/cosign only. Prefer
+# the base policy unless you explicitly need a live catalog-status check.
+#
 # Requires, on top of the base policy:
 #   1. Image must be a Flareo-signed image
-#   2. Image must NOT be in 'failing' status per the Flareo catalog
-#      (this is enforced by querying /api/v1/verify at admission time)
+#   2. Image status from YOUR chosen verify endpoint must be acceptable
 #
-# The live catalog check adds latency (~200-500ms) and a dependency on
-# flareo.dev being reachable. Use only in clusters where you're willing
-# to trade freshness for availability.
+# Before applying: replace the url placeholder with an instance you
+# trust — your own Flareo deployment, or another endpoint you have
+# chosen. Do not point production clusters at a third-party URL you do
+# not control.
 #
 # Requires Kyverno 1.11+ with image attestation verification.
 
@@ -19,8 +30,8 @@ metadata:
     policies.kyverno.io/title: "Require Flareo signatures (strict)"
     policies.kyverno.io/description: >-
       Require a valid Flareo Sigstore signature AND require the module's
-      current status in the Flareo catalog to be 'verified' (not
-      'pending' or 'failing').
+      current status from a verify API the operator configures to be
+      'verified' (not 'pending' or 'failing').
 spec:
   validationFailureAction: Audit
   webhookTimeoutSeconds: 60
@@ -40,7 +51,7 @@ spec:
           attestors:
             - entries:
                 - keyless:
-                    subject: "https://github.com/flareo/*"
+                    subject: "https://github.com/Yolo1105/*"
                     issuer: "https://token.actions.githubusercontent.com"
                     rekor:
                       url: "https://rekor.sigstore.dev"
@@ -55,7 +66,9 @@ spec:
           apiCall:
             method: POST
             service:
-              url: https://flareo.dev/api/v1/verify
+              # OPERATOR: replace with a verify API instance you trust.
+              # Example: https://flareo.example.com/api/v1/verify
+              url: https://REPLACE-ME.example.com/api/v1/verify
             data:
               - key: imageRef
                 value: "{{request.object.spec.containers[0].image}}"
@@ -67,9 +80,10 @@ spec:
             value: ["public.ecr.aws/flareo/*"]
       validate:
         message: >-
-          Image status is '{{flareoCheck}}' per flareo.dev. Refusing to
-          admit anything other than 'verified' or 'signed'. To override,
-          pin to a specific digest that was verified at an earlier time.
+          Image status is '{{flareoCheck}}' per the configured verify
+          endpoint. Refusing to admit anything other than 'verified' or
+          'signed'. To override, pin to a specific digest that was
+          verified at an earlier time.
         deny:
           conditions:
             any:
