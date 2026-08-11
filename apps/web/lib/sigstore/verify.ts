@@ -21,87 +21,16 @@
 
 import { VerifyResult } from "@/lib/validation/schemas";
 import { prisma } from "@/lib/db/prisma";
+import {
+  fetchManifest,
+  obtainAnonToken,
+  parseImageRef,
+  registryApiBase,
+  resolveDigestFromTag,
+} from "@/lib/sigstore/registry";
 
-// ─── image reference parsing ──────────────────────────────────────
-
-interface ParsedRef {
-  registry: string;
-  repo: string;
-  tag: string | null;
-  digest: string | null;
-  /** Reconstructed canonical form without the tag/digest. */
-  canonicalBase: string;
-}
-
-/**
- * Parse an OCI image ref into its components. Handles:
- *   alpine:3.20                          → docker.io/library/alpine:3.20
- *   library/alpine:3.20                  → docker.io/library/alpine:3.20
- *   docker.io/library/alpine@sha256:...  → as-is
- *   ghcr.io/owner/name:tag               → as-is
- *   public.ecr.aws/alias/name:tag        → as-is
- *
- * If both tag and digest are given (e.g. `foo:1.0@sha256:...`), tag wins
- * for display but the digest is authoritative for resolution.
- */
-export function parseImageRef(ref: string): ParsedRef | null {
-  const trimmed = ref.trim();
-  if (!trimmed) return null;
-
-  // Split on @ first — everything after is a digest if it matches sha256:...
-  let digest: string | null = null;
-  let remainder = trimmed;
-  const atIdx = trimmed.lastIndexOf("@");
-  if (atIdx >= 0) {
-    const maybeDigest = trimmed.slice(atIdx + 1);
-    if (/^sha256:[a-f0-9]{64}$/i.test(maybeDigest)) {
-      digest = maybeDigest.toLowerCase();
-      remainder = trimmed.slice(0, atIdx);
-    }
-  }
-
-  // Then split on the last colon that's after any slash → tag
-  let tag: string | null = null;
-  const lastSlash = remainder.lastIndexOf("/");
-  const lastColon = remainder.lastIndexOf(":");
-  if (lastColon > lastSlash && lastColon !== -1) {
-    tag = remainder.slice(lastColon + 1);
-    remainder = remainder.slice(0, lastColon);
-  }
-
-  // Now `remainder` is <registry>/<repo>, or just <repo>, or <user>/<repo>.
-  // If the first segment before the first slash contains a dot or colon or
-  // equals "localhost", it's a registry. Otherwise default to docker.io.
-  let registry = "docker.io";
-  let repo = remainder;
-  const firstSlash = remainder.indexOf("/");
-  if (firstSlash > 0) {
-    const firstSeg = remainder.slice(0, firstSlash);
-    if (
-      firstSeg.includes(".") ||
-      firstSeg.includes(":") ||
-      firstSeg === "localhost"
-    ) {
-      registry = firstSeg;
-      repo = remainder.slice(firstSlash + 1);
-    }
-  }
-
-  // On Docker Hub, bare repos get the `library/` prefix.
-  if (registry === "docker.io" && !repo.includes("/")) {
-    repo = `library/${repo}`;
-  }
-
-  if (!repo) return null;
-
-  return {
-    registry,
-    repo,
-    tag: tag ?? (digest ? null : "latest"),
-    digest,
-    canonicalBase: `${registry}/${repo}`,
-  };
-}
+// Re-export parseImageRef so existing callers keep working.
+export { parseImageRef } from "@/lib/sigstore/registry";
 
 // ─── main verify entry point ──────────────────────────────────────
 
@@ -142,7 +71,7 @@ export async function verifyImage(imageRef: string): Promise<VerifyResult> {
       return errorResult(
         imageRef,
         "manifest_not_found",
-        `could not resolve digest for ${parsed.canonicalBase}:${parsed.tag}`
+        `could not resolve digest for ${parsed.canonicalBase}:${parsed.tag}`,
       );
     }
   }
@@ -249,38 +178,6 @@ function errorResult(imageRef: string, code: string, message: string): VerifyRes
 }
 
 /**
- * Resolve a (registry, repo, tag) to its pinned digest by HEAD-requesting
- * the image's manifest URL. Works for any registry that speaks the
- * standard OCI distribution API.
- */
-async function resolveDigestFromTag(parsed: ParsedRef): Promise<string | null> {
-  if (!parsed.tag) return null;
-
-  const registryUrl = registryApiBase(parsed.registry);
-  const manifestUrl = `${registryUrl}/v2/${parsed.repo}/manifests/${parsed.tag}`;
-
-  try {
-    // First try an anonymous request. Many public registries (GHCR,
-    // public.ecr.aws) return a WWW-Authenticate challenge; we follow
-    // the token flow if so.
-    let resp = await fetchManifest(manifestUrl);
-    if (resp.status === 401) {
-      const token = await obtainAnonToken(parsed, resp.headers.get("www-authenticate"));
-      if (token) {
-        resp = await fetchManifest(manifestUrl, token);
-      }
-    }
-    if (!resp.ok) return null;
-    // The digest is in the Docker-Content-Digest header.
-    const dig = resp.headers.get("docker-content-digest");
-    if (dig && /^sha256:[a-f0-9]{64}$/i.test(dig)) return dig.toLowerCase();
-    return null;
-  } catch {
-    return null;
-  }
-}
-
-/**
  * Check whether a Sigstore signature manifest exists for this image.
  * cosign stores sigs at <repo>:sha256-<digest-hex>.sig (the dash
  * separator is because colons aren't legal in OCI tags).
@@ -291,8 +188,8 @@ type SigCheckResult =
   | { kind: "error"; code: string; message: string };
 
 async function checkSignatureManifest(
-  parsed: ParsedRef,
-  digest: string
+  parsed: import("@/lib/sigstore/registry").ParsedRef,
+  digest: string,
 ): Promise<SigCheckResult> {
   const registryUrl = registryApiBase(parsed.registry);
   const sigTag = digest.replace(":", "-") + ".sig";
@@ -301,73 +198,25 @@ async function checkSignatureManifest(
   try {
     let resp = await fetchManifest(url);
     if (resp.status === 401) {
-      const token = await obtainAnonToken(parsed, resp.headers.get("www-authenticate"));
+      const token = await obtainAnonToken(
+        parsed,
+        resp.headers.get("www-authenticate"),
+      );
       if (token) resp = await fetchManifest(url, token);
     }
     if (resp.status === 404) return { kind: "unsigned" };
     if (resp.ok) return { kind: "signed" };
-    return { kind: "error", code: "registry_error", message: `registry returned ${resp.status}` };
+    return {
+      kind: "error",
+      code: "registry_error",
+      message: `registry returned ${resp.status}`,
+    };
   } catch (err) {
     return {
       kind: "error",
       code: "network_error",
       message: err instanceof Error ? err.message : "network failure",
     };
-  }
-}
-
-/**
- * Map the short registry name to the full HTTPS base for its v2 API.
- * Docker Hub uses a different hostname from its user-facing name.
- */
-function registryApiBase(registry: string): string {
-  if (registry === "docker.io") return "https://registry-1.docker.io";
-  return `https://${registry}`;
-}
-
-async function fetchManifest(url: string, token?: string): Promise<Response> {
-  const headers: Record<string, string> = {
-    Accept: [
-      "application/vnd.oci.image.manifest.v1+json",
-      "application/vnd.oci.image.index.v1+json",
-      "application/vnd.docker.distribution.manifest.v2+json",
-      "application/vnd.docker.distribution.manifest.list.v2+json",
-    ].join(", "),
-  };
-  if (token) headers.Authorization = `Bearer ${token}`;
-  return fetch(url, { method: "HEAD", headers, redirect: "follow" });
-}
-
-/**
- * Parse a WWW-Authenticate challenge and obtain an anonymous bearer
- * token for the specified scope. This is how Docker Hub, GHCR, and
- * ECR Public all gate their public manifests.
- */
-async function obtainAnonToken(
-  parsed: ParsedRef,
-  wwwAuth: string | null
-): Promise<string | null> {
-  if (!wwwAuth || !wwwAuth.toLowerCase().startsWith("bearer")) return null;
-  const params: Record<string, string> = {};
-  for (const m of wwwAuth.slice("bearer".length).matchAll(/(\w+)="([^"]+)"/g)) {
-    params[m[1]!] = m[2]!;
-  }
-  const realm = params.realm;
-  const service = params.service;
-  const scope = params.scope ?? `repository:${parsed.repo}:pull`;
-  if (!realm) return null;
-
-  const u = new URL(realm);
-  if (service) u.searchParams.set("service", service);
-  u.searchParams.set("scope", scope);
-
-  try {
-    const resp = await fetch(u.toString());
-    if (!resp.ok) return null;
-    const body = (await resp.json()) as { token?: string; access_token?: string };
-    return body.token ?? body.access_token ?? null;
-  } catch {
-    return null;
   }
 }
 
