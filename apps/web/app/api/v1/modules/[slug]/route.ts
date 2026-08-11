@@ -84,7 +84,8 @@ export async function GET(req: NextRequest, ctx: Ctx) {
       trust: m.trust,
       trustBreakdown: {
         vulns: m.trustVulns,
-        slsa: m.trustSlsa,
+        // trustSlsa column stores provenance (renamed signal; no migration)
+        provenance: m.trustSlsa,
         signature: m.trustSignature,
         sbom: m.trustSbom,
       },

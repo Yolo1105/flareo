@@ -90,7 +90,7 @@ const THREATS_IN = [
   {
     title: "Malicious build injection.",
     p: "An attacker compromises the build pipeline and injects payloads into the final image.",
-    mit: "hermetic builds · parameterless SLSA L3 provenance · visible in attestation",
+    mit: "hermetic builds · signed provenance, upstream digest recorded · visible in attestation",
   },
   {
     title: "Identity spoofing at signing time.",
@@ -142,7 +142,7 @@ const STACK = [
   { name: "Trivy", ver: "0.54.1", desc: "CVE scanner · NVD + GHSA + OS feeds", lic: "Apache 2.0" },
   { name: "Syft", ver: "1.5.0", desc: "SBOM generator · CycloneDX 1.4 output", lic: "Apache 2.0" },
   { name: "cosign", ver: "2.2.4", desc: "keyless image signing · Sigstore client", lic: "Apache 2.0" },
-  { name: "slsa-generator", ver: "2.0.0", desc: "SLSA L3 provenance · in-toto attestations", lic: "Apache 2.0" },
+  { name: "slsa-generator", ver: "2.0.0", desc: "signed provenance · upstream digest recorded", lic: "Apache 2.0" },
   { name: "AWS ECR Public", ver: "—", desc: "signed image registry · unlimited public pulls", lic: "commercial" },
   { name: "Cloudflare R2", ver: "—", desc: "source upload storage · zero egress cost", lic: "commercial" },
   { name: "Hetzner Cloud", ver: "—", desc: "2 VPSes · CAX11 control + CPX41 execution", lic: "commercial" },

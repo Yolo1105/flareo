@@ -46,7 +46,7 @@ export function PipelineHeader({
               {module.name}@{module.version}
             </span>
             <span className="text-ink-ghost">·</span>
-            <span className="text-good">SLSA {module.slsa}</span>
+            <span className="text-good">signed provenance</span>
             <span className="text-ink-ghost">·</span>
             <span className="text-ink-mute">trust {module.trust}</span>
           </span>

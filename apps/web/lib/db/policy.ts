@@ -404,8 +404,9 @@ export async function verdictCounts(): Promise<{
 
 // ─── helpers ─────────────────────────────────────────────────────
 
-function parseSlsaLevel(s: string): number {
-  // Module.slsa is "L0", "L1", "L2", "L3", or "L4". Strip the L.
+function parseSlsaLevel(s: string | null | undefined): number {
+  // Legacy Module.slsa was "L0"…"L4". New writes set null (no SLSA claim).
+  if (!s) return 0;
   const m = s.match(/^L(\d)$/);
   return m ? parseInt(m[1], 10) : 0;
 }

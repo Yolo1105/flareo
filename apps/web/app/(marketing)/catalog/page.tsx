@@ -98,7 +98,7 @@ export default async function CatalogPage() {
           }
         >
           Every module below has been built in a hermetic sandbox, scanned
-          for CVEs, signed with cosign, attested with SLSA L2 or L3, and had
+          for CVEs, signed with cosign, with signed provenance and upstream digest recorded, and had
           its SBOM published. Click any row for the full receipts.
         </PageHero>
         <div className="px-8 py-16">
@@ -134,7 +134,7 @@ export default async function CatalogPage() {
         }
       >
         Every module below has been built in a hermetic sandbox, scanned
-        for CVEs, signed with cosign, attested with SLSA L2 or L3, and had
+        for CVEs, signed with cosign, with signed provenance and upstream digest recorded, and had
         its SBOM published. Click any row for the full receipts.
       </PageHero>
       <CatalogExplorer

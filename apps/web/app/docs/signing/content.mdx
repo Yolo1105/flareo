@@ -49,27 +49,20 @@ The log is append-only and tamper-evident. If Rekor itself were compromised, the
 
 ## Trust score breakdown
 
-Every module has a 0-100 trust score computed from four signals:
+Every module has a 0-100 trust score computed as the equal-weight mean of four signals (each 0–100). Equal weights are a judgment call — see [/docs/trust-score](/docs/trust-score):
 
 | Signal               | Weight | What we measure                                            |
 |----------------------|--------|------------------------------------------------------------|
-| Vulnerability status | 50%    | CVE count by severity, scaled — criticals hurt more        |
-| SLSA provenance      | 20%    | Level 0-3 based on our build provenance maturity           |
-| Signature freshness  | 15%    | Hours since the last successful rebuild-and-sign           |
-| SBOM completeness    | 15%    | Percentage of packages with complete CycloneDX metadata    |
+| Vulnerability status | 25%    | CVE count by severity, scaled — criticals hurt more        |
+| Provenance           | 25%    | Rekor entry present and upstream digest recorded           |
+| Signature freshness  | 25%    | Cosign keyless identity + Rekor index                      |
+| SBOM completeness    | 25%    | CycloneDX package coverage                                 |
 
-A fresh build with zero CVEs and a valid SLSA L2 attestation scores around 92-95. A module with one high CVE drops to 75-80. A module with any critical CVE flips status to `failing` regardless of the raw score.
+A fresh republish with zero CVEs and signed provenance (upstream digest recorded) scores in the low-to-mid 90s. A module with one high CVE drops; a module with any critical CVE flips status to `failing` regardless of the raw score.
 
-## SLSA level
+## Provenance signal
 
-We are at **SLSA Level 2** today. That means:
-
-- ✔ Source is version-controlled (GitHub)
-- ✔ Build is fully scripted
-- ✔ Build service produces signed provenance
-- ✘ Build platform is not yet isolated per-job (requires L3)
-
-SLSA L3 requires builds to run in an environment where one job cannot influence another. Moving GitHub Actions to an ephemeral, hermetic runner (or switching builders to something like Chainguard's L3-certified infrastructure) is how we'd get there. We don't target L3 today; the operational cost is real and no customer has asked for it. If your admission policy needs L3, file an issue — that's the trigger.
+We record **signed provenance, upstream digest recorded** — a Rekor transparency-log entry for the signed image plus the upstream digest we re-published from. We do **not** claim an SLSA build level: the pipeline re-publishes upstream images rather than producing hermetic build provenance of its own.
 
 ## VEX — telling your scanner what's actually exploitable
 

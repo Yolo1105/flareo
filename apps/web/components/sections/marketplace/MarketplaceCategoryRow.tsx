@@ -112,7 +112,7 @@ function ModuleCard({ item }: { item: CategoryRowItem }) {
         <div className="mt-auto grid grid-cols-[1fr_auto] items-end gap-3 border-t border-hairline pt-3">
             <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 font-mono text-[10px] text-ink-ghost">
-              <span className="text-good">SLSA {m.slsa}</span>
+              <span className="text-good">signed provenance</span>
               {m.cves.critical + m.cves.high === 0 ? (
                 <span className="text-good">· 0 CVE</span>
               ) : (

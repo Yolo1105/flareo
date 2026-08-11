@@ -115,8 +115,8 @@ const BUILD_CONCEPTS: Concept[] = [
         <span className="text-ink">directed acyclic graph</span> of build
         steps and runs each step inside its own isolated sandbox. Flareo uses
         BuildKit in rootless mode, without --privileged, inside a
-        Docker-in-Docker worker. This is what makes Flareo&apos;s builds
-        qualify for SLSA L3.
+        Docker-in-Docker worker. Builds run isolated; Flareo records
+        signed provenance and the upstream digest for every republish.
       </>
     ),
     spec: "github.com/moby/buildkit",

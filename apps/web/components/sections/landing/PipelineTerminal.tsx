@@ -16,7 +16,7 @@ const LINES = [
   { ts: "14:05:03.144", ev: "SCAN", evClass: "text-accent", text: "trivy image · severity ALL · 210 packages indexed" },
   { ts: "14:05:06.267", ev: "SCAN ✓", evClass: "text-good", text: "0 critical · 0 high · 0 medium · 0 low · 3.12s" },
   { ts: "14:05:06.389", ev: "ATTEST", evClass: "text-accent", text: "slsa-generator · in-toto v1 · predicate hashed" },
-  { ts: "14:05:08.241", ev: "ATTEST ✓", evClass: "text-good", text: "SLSA L3 · builder: github.com/flareo/build @ 8fa2b19" },
+  { ts: "14:05:08.241", ev: "ATTEST ✓", evClass: "text-good", text: "signed provenance · upstream digest recorded · @ 8fa2b19" },
   { ts: "14:05:08.466", ev: "SIGN", evClass: "text-accent", text: "cosign keyless · OIDC identity → fulcio cert" },
   { ts: "14:05:09.391", ev: "SIGN ✓", evClass: "text-good", text: "rekor entry: 108e9186e8c5cdc6a44ce62 · verified" },
   { ts: "14:05:09.520", ev: "PUBLISH", evClass: "text-accent", text: "push to ghcr.io/flareo/vaultwarden@sha256:9a8b7c6d5e4f" },

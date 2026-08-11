@@ -46,7 +46,7 @@ export function MarketplaceSpotlight({ module, blurb, aggregate }: Props) {
                 </span>
                 <span className="text-ink-ghost">/</span>
                 <span className="font-mono text-[10.5px] tracking-[0.06em] text-good">
-                  SLSA {module.slsa}
+                  signed provenance
                 </span>
               </div>
               <h2 className="font-display text-[44px] font-black leading-[0.98] tracking-[-0.03em] text-ink">

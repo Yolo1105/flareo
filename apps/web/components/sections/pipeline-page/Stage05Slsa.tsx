@@ -16,8 +16,8 @@ export function Stage05Slsa({ module, provenance }: Props) {
     <StageShell
       number="05"
       anchorId="stage-slsa"
-      title="SLSA L1 · in-toto provenance attestation"
-      subtitle="A signed JSON document recording exactly what was built, from what source, by which builder, when, and with what dependencies. Bound to the image digest. SLSA L3 is achievable today; the canary chain promotes verified modules to L3 over their first 30 days."
+      title="Provenance · signed + upstream digest"
+      subtitle="Signed provenance with the upstream digest recorded. Bound to the image digest via the Rekor transparency log. We do not claim an SLSA build level — the pipeline re-publishes upstream images."
       status="built"
       durationLabel="≈ 1.5-2s emit time"
     >
@@ -35,7 +35,7 @@ export function Stage05Slsa({ module, provenance }: Props) {
               …
             </dd>
             <dt className="text-ink-faint">level</dt>
-            <dd className="text-good">SLSA {module.slsa}</dd>
+            <dd className="text-good">signed provenance</dd>
           </dl>
         </div>
 

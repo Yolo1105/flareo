@@ -44,7 +44,7 @@ const STEPS = [
     num: "04",
     title: "Pass the automated gate",
     headline: "0 criticals, or the pipeline halts.",
-    body: "Automated checks run before any human sees your submission. Any CRITICAL CVE fails the scan stage. Any network access during build kicks you down to SLSA L2. Any unsigned upstream source fails the signature check. You'll see the exact blocker, fix it, and re-publish.",
+    body: "Automated checks run before any human sees your submission. Any CRITICAL CVE fails the scan stage. Any unsigned upstream source fails the signature check. Provenance requires a Rekor entry and a recorded upstream digest. You'll see the exact blocker, fix it, and re-publish.",
     code: null,
   },
   {

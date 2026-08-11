@@ -252,7 +252,7 @@ function PickerCard({
           {m.name}
         </div>
         <div className="mt-0.5 truncate font-mono text-[10.5px] text-ink-faint">
-          v{m.version} · SLSA {m.slsa}
+          v{m.version} · signed provenance
         </div>
       </div>
       <div className={`shrink-0 font-mono text-[10px] tracking-[0.12em] ${labelClass}`}>
@@ -342,12 +342,12 @@ async function CompareView({
             higherIsBetter
           />
           <CompareRow
-            label="SLSA level"
-            sub="provenance attestation tier"
-            aValue={parseInt(a.slsa.replace("L", ""), 10)}
-            bValue={parseInt(b.slsa.replace("L", ""), 10)}
-            aFormatted={a.slsa}
-            bFormatted={b.slsa}
+            label="Provenance"
+            sub="signed provenance · upstream digest recorded"
+            aValue={a.trustBreakdown.provenance}
+            bValue={b.trustBreakdown.provenance}
+            aFormatted={String(a.trustBreakdown.provenance)}
+            bFormatted={String(b.trustBreakdown.provenance)}
             higherIsBetter
           />
           <CompareRow

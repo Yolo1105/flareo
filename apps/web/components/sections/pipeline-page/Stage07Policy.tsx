@@ -124,7 +124,7 @@ export function Stage07Policy({ module, decision }: Props) {
     "max_high_cves": 5,
     "require_sbom": true,
     "require_signature": "cosign-keyless",
-    "require_slsa_level": "L2",
+    "require_provenance": "signed provenance, upstream digest recorded",
     "minimal_base_image_required": false,
     "allowed_licenses": ["MIT", "Apache-2.0", "BSD-*", "ISC", "MPL-*", "GPL-*", "LGPL-*"],
     "block_packages": []

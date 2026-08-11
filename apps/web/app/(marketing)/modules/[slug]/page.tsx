@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     if (module) {
       return {
         title: `${module.name.toLowerCase()}@${module.version}`,
-        description: `${module.description}. SLSA ${module.slsa}, trust score ${module.trust}, verified by Flareo.`,
+        description: `${module.description}. Signed provenance, upstream digest recorded. Trust score ${module.trust}, verified by Flareo.`,
       };
     }
   } catch (err) {

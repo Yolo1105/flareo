@@ -51,7 +51,7 @@ const COMPETITORS: readonly Competitor[] = [
     verdictTone: "warn",
     good: [
       "Industry-leading hardening. Distroless images, minimal attack surface, FIPS-validated builds.",
-      "Full supply-chain coverage: SBOM, SLSA L3, signatures, continuous CVE patching by a dedicated team.",
+      "Full supply-chain coverage: SBOM, signed provenance, upstream digest recorded, signatures, continuous CVE patching by a dedicated team.",
       "Enterprise-grade support, compliance attestations, audit-ready documentation.",
     ],
     bad: [

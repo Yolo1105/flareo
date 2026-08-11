@@ -56,7 +56,7 @@ The [Sigstore project](https://sigstore.dev/): a collection of open-source tools
 
 ## SLSA
 
-Supply-chain Levels for Software Artifacts. A framework for describing how trustworthy a build is, ranging from L0 (nothing guaranteed) to L4 (hermetic, two-party reviewed, reproducible builds). Flareo is at SLSA L2 today: automated builds with signed provenance. L3 requires job isolation we haven't invested in yet.
+Supply-chain Levels for Software Artifacts. A framework for describing how trustworthy a build is, ranging from L0 (nothing guaranteed) to L4 (hermetic, two-party reviewed, reproducible builds). Flareo does not claim an SLSA build level for catalog modules: the republish pipeline re-signs upstream images and records **signed provenance, upstream digest recorded** rather than asserting SLSA L1–L4.
 
 ## Slug
 

@@ -238,10 +238,10 @@ export interface ModuleShape {
   tags: string[];
   category: string;
   status: string;
-  slsa: string;
+  slsa: string | null;
   trust: number;
   trustVulns: number;
-  trustSlsa: number;
+  trustSlsa: number; // provenance score (column name retained)
   trustSignature: number;
   trustSbom: number;
   cveCritical: number;
@@ -270,11 +270,12 @@ export function shapeToModule(r: ModuleShape): Module {
     tags: r.tags,
     category: r.category as Module["category"],
     status: r.status as Module["status"],
-    slsa: r.slsa as Module["slsa"],
+    slsa: (r.slsa as Module["slsa"]) ?? null,
     trust: r.trust,
     trustBreakdown: {
       vulns: r.trustVulns,
-      slsa: r.trustSlsa,
+      // trustSlsa column stores the provenance signal (renamed; no migration)
+      provenance: r.trustSlsa,
       signature: r.trustSignature,
       sbom: r.trustSbom,
     },

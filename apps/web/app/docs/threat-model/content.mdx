@@ -26,7 +26,7 @@ What Flareo protects against, what it doesn't, and what we'd like to protect aga
 
 ## What we'd like to protect against but don't yet
 
-**SLSA level 3.** We're at level 2 today: the build is automated and provenance-attested, but the builder isn't isolated per-job (jobs share the GitHub Actions runner fleet). SLSA L3 requires hermetic builds on isolated infrastructure. The operational cost is real and no customer has asked us to prioritize it; if your admission posture requires L3, file an issue and we'll reconsider.
+**Hermetic, isolated builders.** Today's republish pipeline re-signs upstream images and records signed provenance with the upstream digest. It does not run each job on an isolated build platform that would support stronger build-provenance claims. If your admission posture requires that bar, file an issue and we'll reconsider.
 
 **Reproducible builds.** We don't currently verify that two independent builds of the same upstream source produce bit-identical images. Rebuilds are deterministic in intent (pinned base images, locked dependencies) but we haven't invested in the tooling to *prove* bit-for-bit reproducibility. Diffoscope-based CI is on the medium-term list.
 
@@ -38,8 +38,8 @@ To save you reading the rest of the docs to find out what threats Flareo's catal
 
 - **Image tampering between build and pull.** Cosign keyless signature on every module, verified by `flareo verify` or `cosign verify` directly against the Rekor transparency log. If an attacker substitutes the image, the signature breaks.
 - **CVEs in the image, with reviewer-judged context.** Trivy scan results plus a per-module OpenVEX 0.2.0 document (`/api/v1/modules/<slug>/vex`) where the reviewer team annotates which findings are actually exploitable. See [/docs/vex](/docs/vex) for the four statuses, scanner integration, and how `not_affected` is policed.
-- **Build provenance you can audit.** SLSA L2 in-toto attestation on every module — what was built, from what source ref, by what builder. Verifiable independent of Flareo.
-- **Catalog-level admission verdict.** The active admission policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, SLSA level, composite trust score) is evaluated against every module. Verdict at `/api/v1/modules/<slug>/policy` with the per-rule breakdown. Higher-level signal than "a signature exists" — it's "a known set of rules cleared, including the ones VEX-suppressed."
+- **Build provenance you can audit.** Signed provenance with the upstream digest recorded on every module — what was re-published, from what upstream digest, with a Rekor log entry. Verifiable independent of Flareo.
+- **Catalog-level admission verdict.** The active admission policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, provenance signals, composite trust score) is evaluated against every module. Verdict at `/api/v1/modules/<slug>/policy` with the per-rule breakdown. Higher-level signal than "a signature exists" — it's "a known set of rules cleared, including the ones VEX-suppressed."
 
 ## Trust we ask you to extend
 

@@ -10,14 +10,15 @@ interface Props {
  * each contribution to the headline trust number — the proposal's
  * "as a breakdown showing each signal's contribution" element.
  *
- * The values come from Module.trustBreakdown (vulns/slsa/signature/sbom).
- * Score weights and rationale live at /docs/trust-score; this panel
- * links there for the visitor who wants the methodology.
+ * The values come from Module.trustBreakdown (vulns/provenance/
+ * signature/sbom). Each signal is scored 0–100 with equal weight;
+ * the headline trust is their mean. Score rationale lives at
+ * /docs/trust-score; this panel links there for the methodology.
  *
  * Why this exists at all: trust scores are useless without their
- * decomposition. A 96 means little until the visitor sees it's
- * 24/25 from SLSA + 24/25 from signature + 25/40 from vulns + 23/15
- * from SBOM (etc). The breakdown is the proof that the score is real.
+ * decomposition. A 96 means little until the visitor sees each
+ * signal's contribution. The breakdown is the proof that the score
+ * is real.
  */
 export function TrustBreakdown({ module }: Props) {
   const segments = [
@@ -25,7 +26,7 @@ export function TrustBreakdown({ module }: Props) {
       key: "vulns" as const,
       label: "VULNERABILITY POSTURE",
       value: module.trustBreakdown.vulns,
-      max: 40,
+      max: 100,
       sub: ((): string => {
         const totalActionable =
           module.cves.critical + module.cves.high;
@@ -35,24 +36,24 @@ export function TrustBreakdown({ module }: Props) {
       })(),
     },
     {
-      key: "slsa" as const,
-      label: "SLSA ATTESTATION",
-      value: module.trustBreakdown.slsa,
-      max: 25,
-      sub: `${module.slsa} provenance level`,
+      key: "provenance" as const,
+      label: "PROVENANCE",
+      value: module.trustBreakdown.provenance,
+      max: 100,
+      sub: "signed provenance, upstream digest recorded",
     },
     {
       key: "signature" as const,
       label: "SIGNATURE CHAIN",
       value: module.trustBreakdown.signature,
-      max: 20,
+      max: 100,
       sub: "cosign keyless · Rekor logged",
     },
     {
       key: "sbom" as const,
       label: "SBOM COMPLETENESS",
       value: module.trustBreakdown.sbom,
-      max: 15,
+      max: 100,
       sub: "CycloneDX 1.5 · all components",
     },
   ];

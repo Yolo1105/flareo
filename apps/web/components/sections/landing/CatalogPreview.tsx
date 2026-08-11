@@ -28,9 +28,9 @@ export function CatalogPreview({ modules }: { modules: Module[] }) {
             : `${total} modules in the public catalog.`
         }
       >
-        Every module has a verified signature, a current SBOM, a SLSA L2+
-        attestation, and a one-line pull command. Click any row to see the
-        full receipts.
+        Every module has a verified signature, a current SBOM, signed
+        provenance with the upstream digest recorded, and a one-line pull
+        command. Click any row to see the full receipts.
       </SectionHeader>
 
       <div className="border border-hairline bg-canvas-deep">

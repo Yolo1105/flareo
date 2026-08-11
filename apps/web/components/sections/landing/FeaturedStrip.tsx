@@ -54,7 +54,7 @@ export function FeaturedStrip({ items }: Props) {
                   {it.module.name}
                 </div>
                 <div className="mt-0.5 font-mono text-[10.5px] text-ink-ghost">
-                  v{it.module.version} · SLSA {it.module.slsa}
+                  v{it.module.version} · signed provenance
                 </div>
               </div>
               <div

@@ -19,7 +19,6 @@ export function ReceiptsSection({ module }: Props) {
   const startHH = String(startDate.getUTCHours()).padStart(2, "0");
   const startMM = String(startDate.getUTCMinutes()).padStart(2, "0");
   const startIso = `${startDate.getUTCFullYear()}-${String(startDate.getUTCMonth() + 1).padStart(2, "0")}-${String(startDate.getUTCDate()).padStart(2, "0")}T${startHH}:${startMM}:22Z`;
-  const startHuman = `${startDate.toISOString().slice(0, 10)} ${startHH}:${startMM} UTC`;
   return (
     <section className="border-b border-hairline px-8 py-14">
       <SectionHeader
@@ -118,37 +117,30 @@ export function ReceiptsSection({ module }: Props) {
           )}
         </TerminalBlock>
 
-        {/* SLSA */}
+        {/* Provenance */}
         <TerminalBlock
-          title="slsa-verifier · provenance attestation"
-          status={{ tone: module.slsa === "L3" ? "ok" : "warn", label: `${module.slsa} VERIFIED` }}
+          title="provenance · signed + upstream digest"
+          status={{
+            tone: module.trustBreakdown.provenance >= 100 ? "ok" : module.trustBreakdown.provenance > 0 ? "warn" : "bad",
+            label:
+              module.trustBreakdown.provenance >= 100
+                ? "RECORDED"
+                : module.trustBreakdown.provenance > 0
+                  ? "PARTIAL"
+                  : "MISSING",
+          }}
         >
-          <span className="text-accent">$</span> slsa-verifier verify-image{" "}
+          <span className="text-accent">$</span> cosign verify{" "}
           ghcr.io/flareo/{module.slug}
           <span className="text-ink-ghost">@</span>
-          <span className="text-blue">{module.digest}</span> \{"\n"}
-          {"    "}
-          <span className="text-accent">--source-uri</span>{" "}
-          github.com/{module.author}/{module.slug}{" "}
-          <span className="text-accent">--source-tag</span> {module.version}
+          <span className="text-blue">{module.digest}</span>
           {"\n\n"}
-          <span className="text-good">Verified SLSA provenance</span>{" "}
-          <span className="text-ink-ghost">with level {module.slsa.toLowerCase()}</span>
+          <span className="text-good">Signed provenance, upstream digest recorded</span>
           {"\n"}
           <span className="text-ink-ghost">
-            {"  "}predicateType: https://slsa.dev/provenance/v1{"\n"}
-            {"  "}builder.id:{"    "}github.com/flareo/build/.github/workflows/build.yml{"\n"}
-            {"  "}invocation:{"    "}flareo/build {build.id} ({startHuman})
+            {"  "}rekor entry + upstream digest are the provenance signal{"\n"}
+            {"  "}(no SLSA build level claimed — image is republished, not rebuilt)
           </span>
-          {"\n"}
-          <span className="text-good">✓</span>{" "}
-          <span className="text-ink-ghost">Hermetic build · no network access during compilation</span>
-          {"\n"}
-          <span className="text-good">✓</span>{" "}
-          <span className="text-ink-ghost">Isolated BuildKit sandbox</span>
-          {"\n"}
-          <span className="text-good">✓</span>{" "}
-          <span className="text-ink-ghost">Parameterless build · no injection surface</span>
         </TerminalBlock>
       </div>
 

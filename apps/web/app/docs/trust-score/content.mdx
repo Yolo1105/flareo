@@ -2,79 +2,68 @@
 
 Every module on Flareo carries a single 0-100 number called the **Trust Score**. This page documents exactly how that number is computed, why each weight is what it is, and the open questions about whether the weights should eventually be user-tunable.
 
-The score's purpose is consolidation. A module's underlying signals — provenance level, SBOM coverage, signature chain, vulnerability posture — each have to be parsed before they're useful. The Trust Score collapses them to one comparable number so a visitor can scan a marketplace card and decide whether to click in.
+The score's purpose is consolidation. A module's underlying signals — vulnerability posture, provenance, signature chain, SBOM completeness — each have to be parsed before they're useful. The Trust Score collapses them to one comparable number so a visitor can scan a marketplace card and decide whether to click in.
 
 The score is **not** a guarantee. It's a rendering of the cryptographic and policy facts that already exist in the module's receipts. Every contribution is auditable on the module's detail page.
 
 ## The formula
 
-The Trust Score is a sum of four weighted contributions, capped at 100:
+The Trust Score is the integer mean of four equal-weight signals, each scored 0–100:
 
 ```
-trust_score = vulns + slsa + signature + sbom
+trust_score = round(mean(vulns, provenance, signature, sbom))
 
-  vulns      ∈ [0, 40]
-  slsa       ∈ [0, 25]
-  signature  ∈ [0, 20]
-  sbom       ∈ [0, 15]
+  vulns       ∈ [0, 100]
+  provenance  ∈ [0, 100]
+  signature   ∈ [0, 100]
+  sbom        ∈ [0, 100]
 ```
 
-The total weight allocation reflects an opinionated ordering of what matters most for a "do I run this in production" decision: **vulnerability posture above all else**, then provenance, then signature, then SBOM completeness. A module with critical CVEs cannot earn back enough points elsewhere to look safe; that's the design.
+Equal weights are a **judgment call**, not an empirical result. We chose them because each signal answers a different question a production operator asks (is it patched? can I prove where it came from? is the signature fresh? do I know what's inside?), and we do not yet have evidence that one should dominate the others. If your threat model disagrees, see the open questions below.
 
-## Vulnerability posture (max 40)
+## Vulnerability posture (0–100)
 
-| Condition | Contribution |
-|---|---|
-| 0 critical, 0 high CVEs | 40 |
-| 0 critical, 1-3 high | 30 |
-| 0 critical, 4-10 high | 20 |
-| 0 critical, 11+ high | 10 |
-| ≥ 1 critical | 0 |
+Derived from the most recent Trivy scan. Every critical finding deducts ~20 points, every high ~8, every medium ~2, clamped to [0, 100]. A clean scan scores 100.
 
-The double weighting of "critical" reflects the operational reality: critical CVEs frequently mean remote code execution or auth bypass. A module with a critical CVE shouldn't be running in production, period — and the Trust Score reflects that by zeroing the vulns component regardless of how clean the other signals are.
+Counts are taken from the scan against the module's published image. Scans happen on every republish.
 
-Counts are taken from the most recent Trivy scan against the module's image. Scans happen on every rebuild.
-
-## SLSA attestation (max 25)
-
-| Level | Contribution |
-|---|---|
-| L4 (hermetic + reproducible + two-party reviewed) | 25 |
-| L3 (non-falsifiable build platform) | 23 |
-| L2 (versioned source + hosted build) | 18 |
-| L1 (provenance present, builder identified) | 12 |
-| no provenance | 0 |
-
-Today, every module Flareo publishes is at least L1; the canary chain promotes verified modules to L3 over their first 30 days. L4 requires manual review and is reserved for modules where reproducibility has been verified — currently a small subset.
-
-## Signature chain (max 20)
+## Provenance (0–100)
 
 | Condition | Contribution |
 |---|---|
-| cosign keyless + Rekor logged + Fulcio cert valid | 20 |
-| cosign signed but Rekor entry stale (> 30 days) | 15 |
-| signed with long-lived key (no Sigstore) | 10 |
-| unsigned | 0 |
+| Rekor entry present **and** upstream digest recorded | 100 |
+| Only one of the two present | 50 |
+| Neither present | 0 |
 
-Flareo uses cosign keyless exclusively, so the working signal here is "is the Rekor entry recent and verifiable." Modules that have not been re-signed within the last 30 days drop into the 15-point bucket, which prompts the canary chain to schedule a refresh.
+This is what the republish pipeline actually produces: a Sigstore / Rekor transparency-log entry for the signed image, and the upstream digest we re-published from. We do **not** claim an SLSA build level — the pipeline re-tags and re-signs an upstream image rather than building one, so build provenance is not ours to assert.
 
-## SBOM completeness (max 15)
+In short: **signed provenance, upstream digest recorded.**
+
+## Signature chain (0–100)
 
 | Condition | Contribution |
 |---|---|
-| CycloneDX 1.5 with all components hashed | 15 |
-| CycloneDX present but components partial | 10 |
-| SPDX-only (no CycloneDX) | 7 |
+| Rekor index and signer identity both present | 100 |
+| Otherwise | 0 |
+
+Flareo uses cosign keyless exclusively. A real Sigstore entry (Rekor index + Fulcio identity) is full credit; missing either is zero.
+
+## SBOM completeness (0–100)
+
+| Condition | Contribution |
+|---|---|
+| CycloneDX SBOM with ≥ 5 packages | 100 |
+| SBOM present with 1–4 packages | 60–92 (scales with count) |
 | no SBOM | 0 |
 
-CycloneDX is the format Flareo standardized on for downstream consumption — security teams have CycloneDX importers, regulators have CycloneDX guidance, and the format is permissive enough to accommodate every kind of dependency we encounter. SPDX is a partial-credit fallback because it's what some upstream maintainers ship.
+CycloneDX is the format Flareo standardized on for downstream consumption — security teams have CycloneDX importers, and the format accommodates the dependency kinds we encounter.
 
 ## Score interpretation
 
 The score's color in the UI is graded:
 
-- **≥ 90 (good, green)** — production-suitable across all four signals. No critical CVEs, modern provenance, fresh signature, complete SBOM.
-- **70-89 (warn, amber)** — usable but with one weak signal. Often a stale Rekor entry or partial SBOM coverage.
+- **≥ 90 (good, green)** — production-suitable across all four signals.
+- **70-89 (warn, amber)** — usable but with one weak signal.
 - **< 70 (bad, red)** — flagged for the visitor to look closer. Either critical CVEs are present, provenance is missing, or multiple signals are weak.
 
 The thresholds are deliberately conservative: 89 isn't a low score, it's a "look at the breakdown before deploying" score.
@@ -87,10 +76,11 @@ The Trust Score is not:
 - **A reflection of operational quality.** Whether a module restarts cleanly, handles backpressure, or has good logging is not measurable from cryptographic receipts. The score answers "is this verified" not "is this well-engineered."
 - **A reflection of upstream maintainer reputation.** A well-maintained upstream with poor security hygiene scores worse than a niche project with a clean recent scan. That's correct: Flareo is signing the version of the image you'd actually run, not the project's track record.
 - **A guarantee.** Trust Scores are computed from Flareo's own pipeline outputs. If our pipeline misses something, the score will reflect that miss. Bug reports for missed signals are welcome — they appear on `/incidents` after triage.
+- **An SLSA level.** We record signed provenance and the upstream digest; we do not claim SLSA L1/L2/L3/L4 for republished images.
 
 ## Open questions about the weights
 
-We have not yet decided whether the weights should be user-tunable. Three positions, none yet committed:
+Equal weights are a judgment call. We have not yet decided whether the weights should be user-tunable. Three positions, none yet committed:
 
 **Position A — keep weights fixed.** A single canonical Trust Score makes scanning the marketplace fast. Multiple per-user weightings means a "your score" of 96 might be a "my score" of 72 — and a number that means different things to different people stops being a useful summary.
 

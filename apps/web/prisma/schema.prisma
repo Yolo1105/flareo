@@ -157,10 +157,10 @@ model Module {
   tags           String[]
   category       String
   status         String                       // "verified" | "pending" | "failing"
-  slsa           String                       // "L1" | "L2" | "L3" | "L4"
+  slsa           String?                      // deprecated; no longer claimed (was "L1"|"L2"|"L3"|"L4")
   trust          Int
   trustVulns     Int
-  trustSlsa      Int
+  trustSlsa      Int                          // stores provenance score (signal renamed; column kept)
   trustSignature Int
   trustSbom      Int
   cveCritical    Int

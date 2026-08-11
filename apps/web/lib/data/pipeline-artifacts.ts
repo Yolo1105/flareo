@@ -499,10 +499,10 @@ function buildPolicyDecision(m: Module): PolicyDecisionShape {
       required: "cosign-keyless",
     },
     {
-      rule: "require_slsa_level",
-      pass: parseInt(m.slsa.replace("L", ""), 10) >= 2,
-      observed: m.slsa,
-      required: "≥ L2",
+      rule: "require_provenance",
+      pass: m.trustBreakdown.provenance >= 50,
+      observed: `provenance=${m.trustBreakdown.provenance}`,
+      required: "signed provenance, upstream digest recorded",
     },
   ];
   return {

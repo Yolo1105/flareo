@@ -93,7 +93,7 @@ async function main(): Promise<void> {
         slsa: m.slsa,
         trust: m.trust,
         trustVulns: m.trustBreakdown.vulns,
-        trustSlsa: m.trustBreakdown.slsa,
+        trustSlsa: m.trustBreakdown.provenance, // column stores provenance score
         trustSignature: m.trustBreakdown.signature,
         trustSbom: m.trustBreakdown.sbom,
         cveCritical: m.cves.critical,

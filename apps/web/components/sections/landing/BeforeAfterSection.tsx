@@ -146,7 +146,7 @@ function FlareoPane() {
       </header>
       <pre className="overflow-x-auto p-5 font-mono text-[11.5px] leading-[1.75] text-ink-mute">
 {`19:42  # open flareo.app/marketplace, search "uptime kuma"
-       # see: trust 94 · SLSA L3 · 0 critical · 8 reviews · 4.6★
+       # see: trust 94 · signed provenance · 0 critical · 8 reviews · 4.6★
        # click "try shared demo" — see real instance on flareo subdomain
 19:43  # works. exactly the dashboard i wanted. close tab.
 

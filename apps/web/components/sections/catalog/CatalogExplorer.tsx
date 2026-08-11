@@ -227,7 +227,7 @@ export function CatalogExplorer({
                       {m.status.toUpperCase()}
                     </StatusBadge>
                     <span className="font-mono text-[9.5px] tracking-[0.1em] text-ink-faint">
-                      SLSA {m.slsa}
+                      signed provenance
                     </span>
                   </div>
                   <div className="mb-1 flex items-baseline gap-3">
@@ -378,7 +378,7 @@ function FeaturedStrip({ items }: { items: FeaturedStripItem[] }) {
                     {it.module.status.toUpperCase()}
                   </StatusBadge>
                   <span className="font-mono text-[9.5px] tracking-[0.1em] text-ink-ghost">
-                    SLSA {it.module.slsa}
+                    signed provenance
                   </span>
                 </div>
                 <div className="font-display text-[17px] font-black leading-[1.1] tracking-[-0.02em] text-ink group-hover:text-accent">

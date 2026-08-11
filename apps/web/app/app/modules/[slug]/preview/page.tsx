@@ -223,7 +223,7 @@ export default async function ModulePreviewPage({ params }: Props) {
                 {moduleSafe.name.toLowerCase()}
               </div>
               <div className="mb-3 font-mono text-[10.5px] text-ink-faint">
-                v{moduleSafe.version} · {moduleSafe.slsa} · trust {moduleSafe.trust}
+                v{moduleSafe.version} · trust {moduleSafe.trust}
               </div>
               <p className="font-body text-[12px] leading-[1.55] text-ink-softer">
                 {moduleSafe.description}

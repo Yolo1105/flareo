@@ -34,19 +34,23 @@ export interface Module {
   category: ModuleCategory;
   /** Verification stamp state */
   status: VerificationStatus;
-  /** SLSA attestation level */
-  slsa: SlsaLevel;
+  /**
+   * Deprecated SLSA level field. Always null for new writes — the
+   * pipeline does not claim an SLSA build level. Kept optional for
+   * rows that still carry a legacy value.
+   */
+  slsa: SlsaLevel | null;
   /** Trust score 0-100 */
   trust: number;
-  /** Trust breakdown — must sum to trust score */
+  /** Trust breakdown — equal-weight 0–100 signals; trust is their mean */
   trustBreakdown: {
-    /** Vulnerability weighting — up to 40 */
+    /** Vulnerability posture — 0–100 */
     vulns: number;
-    /** SLSA attestation — up to 25 */
-    slsa: number;
-    /** Signature chain — up to 20 */
+    /** Provenance (Rekor + upstream digest) — 0–100; DB column trustSlsa */
+    provenance: number;
+    /** Signature chain — 0–100 */
     signature: number;
-    /** SBOM completeness — up to 15 */
+    /** SBOM completeness — 0–100 */
     sbom: number;
   };
   /** CVE counts at scan time */

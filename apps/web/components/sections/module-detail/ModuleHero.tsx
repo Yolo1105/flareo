@@ -48,10 +48,6 @@ export function ModuleHero({ module, userSignedIn = false }: Props) {
                 PRIVATE
               </span>
             )}
-            <span className="font-mono text-[11px] tracking-[0.08em] text-ink-faint">
-              SLSA {module.slsa}
-            </span>
-            <span className="font-mono text-[11px] text-ink-faint">·</span>
             <span className="font-mono text-[11px] text-ink-faint">
               {module.id}
             </span>
@@ -128,10 +124,10 @@ export function ModuleHero({ module, userSignedIn = false }: Props) {
         </div>
         <div className="border-b border-hairline px-6 py-5 md:border-b-0 md:border-r">
           <div className="mb-1.5 font-mono text-[10px] tracking-[0.14em] text-ink-faint">
-            SLSA LEVEL
+            PROVENANCE
           </div>
           <div className="font-display text-[36px] font-black leading-[1] tracking-[-0.03em] text-ink">
-            {module.slsa}
+            {module.trustBreakdown.provenance}
           </div>
         </div>
         <div className="border-r border-hairline px-6 py-5">

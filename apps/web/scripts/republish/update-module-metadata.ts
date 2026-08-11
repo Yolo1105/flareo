@@ -72,15 +72,15 @@ function scoreFromSignature(rekorIndex: string, signerIdentity: string): number 
   return rekorIndex && signerIdentity ? 100 : 0;
 }
 
-function slsaLevelForCurrentPipeline(): "L1" | "L2" | "L3" {
-  // Horizon 1 ships with cosign keyless from GHA with Fulcio. That's SLSA L2
-  // in practice (hosted builder, signed provenance via cosign, public Rekor).
-  // We'll flip this to L3 in Horizon 2 when slsa-github-generator is wired.
-  return "L2";
-}
-
-function scoreFromSlsa(level: "L1" | "L2" | "L3"): number {
-  return { L1: 40, L2: 70, L3: 100 }[level];
+function scoreFromProvenance(rekorIndex: string, upstreamDigest: string): number {
+  // Provenance signal from what the republish pipeline actually produces:
+  // a Rekor transparency-log entry and a recorded upstream digest. Full
+  // marks when both are present, partial when only one, zero when neither.
+  const hasRekor = Boolean(rekorIndex);
+  const hasUpstream = Boolean(upstreamDigest);
+  if (hasRekor && hasUpstream) return 100;
+  if (hasRekor || hasUpstream) return 50;
+  return 0;
 }
 
 // ─── Main ─────────────────────────────────────────────────────────
@@ -116,13 +116,16 @@ async function main(): Promise<void> {
   const signerIssuer = reqEnv("FLAREO_SIGNER_ISSUER");
 
   // Compute trust sub-scores from real pipeline outputs.
+  // Four equal-weight dimensions (mean of 0–100). The fourth used to be
+  // called "slsa"; it is now "provenance" but still stored in trustSlsa
+  // to avoid a schema migration.
   const trustVulns = scoreFromCVEs(cveCritical, cveHigh, cveMedium);
   const trustSbom = scoreFromSbom(sbomPackages);
   const trustSignature = scoreFromSignature(rekorIndex, signerIdentity);
-  const slsaLevel = slsaLevelForCurrentPipeline();
-  const trustSlsa = scoreFromSlsa(slsaLevel);
+  const trustProvenance = scoreFromProvenance(rekorIndex, upstreamDigest);
+  const trustSlsa = trustProvenance; // column name retained; signal is provenance
   const trust = Math.round(
-    (trustVulns + trustSbom + trustSignature + trustSlsa) / 4,
+    (trustVulns + trustSbom + trustSignature + trustProvenance) / 4,
   );
 
   // Status: verified only when every sub-score is positive.
@@ -145,10 +148,12 @@ async function main(): Promise<void> {
     tags,
     category,
     status,
-    slsa: slsaLevel,
+    // SLSA level is no longer claimed — the pipeline re-publishes an
+    // upstream image and does not produce build provenance of its own.
+    slsa: null,
     trust,
     trustVulns,
-    trustSlsa,
+    trustSlsa, // stores provenance score (renamed signal; column unchanged)
     trustSignature,
     trustSbom,
     cveCritical,
@@ -177,7 +182,8 @@ async function main(): Promise<void> {
   await prisma.module.upsert({
     where: { slug },
     update: data,
-    create: data,
+    // deploys required on create; never invent a count on update (T-301).
+    create: { ...data, deploys: 0 },
   });
 
   // Append to the audit log so the per-module rebuild history and

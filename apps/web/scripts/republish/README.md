@@ -94,10 +94,10 @@ Workflow: `.github/workflows/republish.yml`.
 
 ## Trust score
 
-The `trust` field is the integer mean of four sub-scores derived from
-pipeline output (`trustVulns`, `trustSbom`, `trustSignature`, and the
-fourth dimension currently stored in `trustSlsa` — see the product docs
-for the live signal names). Formula lives in `update-module-metadata.ts`.
+The `trust` field is the integer mean of four equal-weight sub-scores
+derived from pipeline output (`trustVulns`, `trustSbom`, `trustSignature`,
+and provenance stored in `trustSlsa`). Formula lives in
+`update-module-metadata.ts`.
 
 ## Failure behavior
 

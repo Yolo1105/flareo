@@ -82,7 +82,7 @@ export function ReceiptsDrawer({ module, size = "compact" }: Props) {
               ATTESTATION CHAIN
             </span>
             <span className="tracking-[0.04em] text-good">
-              ✓ {module.slsa}
+              ✓ provenance
             </span>
           </div>
 
