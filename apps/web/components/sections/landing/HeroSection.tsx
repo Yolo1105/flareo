@@ -1,4 +1,5 @@
 import { Eyebrow } from "@/components/ui/Eyebrow";
+import { FLAREO_VERSION } from "@/lib/version";
 
 /**
  * Landing hero — only place on the site with an orange flood.
@@ -18,7 +19,7 @@ export function HeroSection() {
       <div className="relative z-10">
         <div className="mb-6 inline-flex items-center gap-2 border border-canvas px-[11px] py-[5px] font-mono text-[11px] font-medium tracking-[0.12em]">
           <span className="block h-1 w-1 bg-canvas" />
-          V0.4.2 / PUBLIC BETA
+          V{FLAREO_VERSION} / FROZEN
         </div>
         <h1 className="mb-7 max-w-[1100px] font-display text-[88px] font-black leading-[0.92] tracking-[-0.04em]">
           VERIFIED SIGNATURES.
