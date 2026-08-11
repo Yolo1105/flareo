@@ -58,7 +58,10 @@ export async function claimNextApprovedSubmission(
   prisma: WorkerPrisma,
   workerId: string
 ): Promise<ApprovedRow | null> {
-  return await prisma.$transaction(async (tx: WorkerPrisma) => {
+  // Interactive $transaction receives Prisma.TransactionClient (not the
+  // full PrismaClient), so leave `tx` inferred rather than annotating
+  // it as WorkerPrisma.
+  return await prisma.$transaction(async (tx) => {
     // Skip rows whose backoff window hasn't elapsed yet. NULL
     // availableAfter means "available immediately" — which is the
     // correct behavior for both never-retried rows and rows from before
