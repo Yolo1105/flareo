@@ -122,13 +122,13 @@ Leaving the happy-path walkthrough: here's the security story. You:
 - Verified that the image was built by Flareo's public pipeline, signed with the public Fulcio CA, and logged to the public Rekor transparency log
 - Reviewed the SBOM and scan status before the image touched your infrastructure
 
-If Flareo is ever compromised and starts signing malicious images, you'll notice immediately — the signer identity on `flareo verify` would show an unexpected workflow identity. If the image is ever tampered with in transit or at rest, the digest pin catches it. If a new CVE lands in Vaultwarden upstream, the daily Flareo rebuild picks it up and our module page will flip to `status: failing` — your own monitoring can watch that API and alert.
+If Flareo is ever compromised and starts signing malicious images, you'll notice immediately — the signer identity on `flareo verify` would show an unexpected workflow identity. If the image is ever tampered with in transit or at rest, the digest pin catches it. If a new CVE lands in Vaultwarden upstream, the next Flareo republish picks it up and our module page will flip to `status: failing` — your own monitoring can watch that API and alert. Check `lastRebuiltAt` on the module page for when the image last went through the pipeline.
 
 ## Backup, updates, and maintenance
 
 **Backup:** the whole state is in the Docker volume mounted at `/data` inside the container. `docker run --rm -v vault_data:/src -v $PWD:/dst alpine tar -czf /dst/vault-backup.tar.gz -C /src .` pulls a snapshot. Do this on a cron; the Vaultwarden project itself recommends daily.
 
-**Updates:** when upstream ships a new Vaultwarden release, Flareo rebuilds typically within 24-48 hours. Check `flareo show vaultwarden` periodically (or subscribe to release notifications on the module page). Update by editing the digest in your compose file and running `docker compose pull && docker compose up -d`.
+**Updates:** when upstream ships a new Vaultwarden release, check `lastRebuiltAt` (and `flareo show vaultwarden`) for when Flareo's republish picked it up. Update by editing the digest in your compose file and running `docker compose pull && docker compose up -d`.
 
 **Rotation:** best practice for long-running deploys is pinning to a fresh digest every few months, not chasing updates more often. A hot monthly churn just means more opportunities to pull in a fresh bug.
 

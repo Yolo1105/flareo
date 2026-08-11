@@ -6,6 +6,7 @@ import { MODULES, getCategoryCounts } from "@/lib/data/modules";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 type SortField = "trust" | "updated" | "name";
 
@@ -98,9 +99,21 @@ export function CatalogExplorer({
       );
     }
     if (sort === "trust") result.sort((a, b) => b.trust - a.trust);
-    else if (sort === "updated")
-      result.sort((a, b) => a.updatedHours - b.updatedHours);
-    else result.sort((a, b) => a.name.localeCompare(b.name));
+    else if (sort === "updated") {
+      // Prefer lastRebuiltAt (nulls last); fall back to updatedHours.
+      result.sort((a, b) => {
+        const aTs = a.lastRebuiltAt
+          ? new Date(a.lastRebuiltAt).getTime()
+          : null;
+        const bTs = b.lastRebuiltAt
+          ? new Date(b.lastRebuiltAt).getTime()
+          : null;
+        if (aTs !== null && bTs !== null) return bTs - aTs;
+        if (aTs !== null) return -1;
+        if (bTs !== null) return 1;
+        return a.updatedHours - b.updatedHours;
+      });
+    } else result.sort((a, b) => a.name.localeCompare(b.name));
     return result;
   }, [query, category, sort, source]);
 
@@ -292,8 +305,14 @@ export function CatalogExplorer({
                       {m.cves.critical}/{m.cves.high}/{m.cves.medium}/
                       {m.cves.low}
                     </span>
-                    <span className="text-ink-ghost">UPDATED</span>
-                    <span className="text-ink-mute">{m.updatedHours}h ago</span>
+                    <span className="text-ink-ghost">REBUILT</span>
+                    <span
+                      className={
+                        m.lastRebuiltAt ? "text-ink-mute" : "text-ink-ghost"
+                      }
+                    >
+                      {formatLastRebuiltAt(m.lastRebuiltAt)}
+                    </span>
                     <span className="text-ink-ghost">SIZE</span>
                     <span className="text-ink-mute">{m.size}</span>
                   </div>

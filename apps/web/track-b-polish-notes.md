@@ -24,7 +24,7 @@ New `RebuildSlaBadge` subcomponent in `components/sections/module-detail/ModuleH
 - `≥ 168h` — BAD, "REBUILD OVERDUE"
 - null — muted, "NEVER REBUILT"
 
-Each badge gets a tooltip explaining what the window means. The badge directly reinforces the trust pitch — the daily canary rebuild is a marquee feature but was invisible at the hero level until now.
+Each badge gets a tooltip explaining what the window means. Superseded: the hero now shows lastRebuiltAt (absolute + relative) rather than an SLA badge that asserted a rebuild cadence.
 
 ### `demo-walkthrough.md`
 

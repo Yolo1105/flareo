@@ -80,7 +80,7 @@ INSERT INTO "ModuleReview" (id, "moduleSlug", "authorId", rating, title, body, m
 VALUES
   ('rev_seed_1', 'vaultwarden', '<some-user-id>', 5,
    'Running this in production for 6 months, zero issues',
-   'Replaced the upstream vaultwarden image with this one after a CVE forced us to patch in a hurry. The SLSA L3 provenance and daily rebuilds mean we no longer need to maintain our own fork. The SBOM caught a transitive dependency we didn''t know we had.',
+   'Replaced the upstream vaultwarden image with this one after a CVE forced us to patch in a hurry. The SLSA L3 provenance and republish receipts mean we no longer need to maintain our own fork. The SBOM caught a transitive dependency we didn''t know we had.',
    'visible', NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days'),
   ('rev_seed_2', 'vaultwarden', '<another-user-id>', 4,
    'Solid but the size is larger than upstream',

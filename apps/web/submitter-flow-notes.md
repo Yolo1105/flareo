@@ -76,7 +76,7 @@ Every step has a visible UI surface. Nothing disappears into the void.
 
 ## What about reviews / ratings?
 
-Not built, not recommended as an add. The trust signal here is cryptographic (signatures, SBOMs, CVE scans, daily rebuilds) — adding social stars would muddle the pitch. If a future pivot calls for community/social signals, that's a dedicated session with its own schema (`ModuleReview` table), moderation story, and UI design. Don't bundle it with "track my submission."
+Not built, not recommended as an add. The trust signal here is cryptographic (signatures, SBOMs, CVE scans, republish receipts) — adding social stars would muddle the pitch. If a future pivot calls for community/social signals, that's a dedicated session with its own schema (`ModuleReview` table), moderation story, and UI design. Don't bundle it with "track my submission."
 
 ## Track A + bug fix + submitter flow state
 

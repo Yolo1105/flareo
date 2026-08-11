@@ -275,7 +275,7 @@ function categoryBlurb(c: string): string {
     case "auth":
       return "Identity providers, SSO gateways, and access tooling — verified end-to-end so security review is short.";
     case "monitoring":
-      return "Uptime, metrics, and alerting modules. Daily rebuilds catch upstream regressions before they reach your dashboards.";
+      return "Uptime, metrics, and alerting modules. Republish receipts catch upstream regressions before they reach your dashboards.";
     case "media":
       return "Self-hosted media servers and photo libraries. GPU acceleration intact, codec support preserved.";
     case "networking":

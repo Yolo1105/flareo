@@ -20,7 +20,7 @@ Most of the time, it's fine. The community is mostly decent; the maintainers are
 
 Flareo is a container supply chain platform. For a curated set of popular self-hosted apps:
 
-1. We run a **canary pipeline** that rebuilds every module from upstream source, daily, on GitHub Actions.
+1. We run a **republish pipeline** that rebuilds modules from upstream source on GitHub Actions. The site shows `lastRebuiltAt` rather than promising a fixed cadence.
 2. Every build is **scanned** with Trivy for known CVEs, and we generate a **CycloneDX SBOM**.
 3. Every build is **signed** with [Sigstore's cosign](https://docs.sigstore.dev/cosign/) using keyless signing tied to our GitHub Actions OIDC identity. The signature goes into the public Rekor transparency log.
 4. Images are published to **ECR Public**, pinned by digest, so you can pull them exactly as we built them.

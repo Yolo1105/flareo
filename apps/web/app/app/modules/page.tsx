@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth/config";
 import { ViewHeader } from "@/components/sections/app-dashboard/ViewHeader";
 import { listMyModules } from "@/lib/db/queries";
 import { StatusBadge } from "@/components/ui/StatusBadge";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 export const metadata: Metadata = {
   title: "My modules",
@@ -137,7 +138,7 @@ export default async function MyModulesPage() {
                   {m.pulls30d.toLocaleString()}
                 </div>
                 <div className="text-right font-mono text-[11px] text-ink-softer">
-                  {m.updatedHours}h ago
+                  {formatLastRebuiltAt(m.lastRebuiltAt)}
                 </div>
                 <div className="text-right">
                   {m.building ? (

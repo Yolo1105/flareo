@@ -121,7 +121,7 @@ Nothing cryptographically. You could do exactly this yourself. The value is that
 
 **Seven of the twelve** have click-to-try demos at preview.flareo.dev/*, resets every 24h.
 
-Happy to answer questions. Open to requests for additional modules but honestly the bar is high — we maintain these, and "maintaining" means promising a daily rebuild and scan until we drop them.
+Happy to answer questions. Open to requests for additional modules but honestly the bar is high — we maintain these, and "maintaining" means republishing and scanning them until we drop them. The site shows `lastRebuiltAt` rather than promising a fixed cadence.
 
 Source is AGPL'd at github.com/flareo.
 

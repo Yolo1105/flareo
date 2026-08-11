@@ -118,7 +118,7 @@ apps/web/
 ├── e2e/                       # Playwright tests (conversion-flow.spec.ts)
 ├── public/
 └── scripts/
-    ├── canary/                # Daily rebuild of seed modules
+    ├── canary/                # Legacy canary scripts (prefer scripts/republish/)
     └── cleanup/                # One-shot maintenance scripts (e.g. as-never cleanup)
 ```
 
@@ -160,7 +160,7 @@ npm run db:seed          # Seed demo data (requires SEED=1 env var)
 npm run db:studio        # Open Prisma Studio
 ```
 
-Bash scripts in `scripts/canary/` handle daily rebuilds of the seed modules in production.
+Bash scripts in `scripts/republish/` (and legacy `scripts/canary/`) republish seed modules. The site surfaces `lastRebuiltAt` instead of asserting a rebuild cadence.
 
 ---
 

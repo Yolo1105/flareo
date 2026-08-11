@@ -1,6 +1,6 @@
 # Flareo — demo walkthrough
 
-**Trust-first container registry.** Every module in the catalog has been built in a hermetic sandbox, scanned for CVEs, signed with cosign, attested with SLSA L2 or L3 provenance, and has its full SBOM published. Daily canary rebuilds re-verify every module and surface upstream compromises within 24 hours.
+**Trust-first container registry.** Every module in the catalog has been built in a hermetic sandbox, scanned for CVEs, signed with cosign, attested with SLSA L2 or L3 provenance, and has its full SBOM published. Republish runs re-verify modules; each page shows `lastRebuiltAt` instead of asserting a cadence.
 
 This document is the orientation. If you're landing here cold, read the whole thing in order — by the end you'll know what the product claims, what's wired end-to-end, what's scaffolded, and what you can click through to see it working.
 
@@ -65,7 +65,7 @@ Everything in this section actually works in the running app. Seed data exists f
 
 - `/app/admin` — review queue (pending submissions), decision panel (approve / reject / request changes)
 - `/app/admin/worker` — worker health: active jobs, in-flight submissions, DLQ
-- `/app/admin/rebuilds` — daily canary rebuild log
+- `/app/admin/rebuilds` — republish rebuild log
 - `/app/admin/reviews` — flagged/hidden review moderation
 - `/app/admin/featured` — editorial curator UI for the Featured strip
 - `/app/admin/reports` — user-filed module reports, triage queue (open / investigating / resolved / dismissed)
@@ -88,7 +88,7 @@ Retries are exponential with a dead-letter queue. Unhandled crashes page Sentry 
 ### 2.5. Billing (Stripe)
 
 - Plans: Free, Pro
-- Gating: private module visibility, rate limits (Pro gets 5x), weekly rebuild SLA vs. daily
+- Gating: private module visibility, rate limits (Pro gets 5x), lastRebuiltAt freshness (no fixed cadence SLA)
 - Webhook handler at `/api/v1/billing/webhook` (signed, idempotent)
 - Self-serve portal at `/app/settings/billing`
 

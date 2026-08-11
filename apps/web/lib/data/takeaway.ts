@@ -1,4 +1,5 @@
 import type { Module } from "@/lib/types";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 /**
  * Per-module deployment artifact generators ("takeaway").
@@ -219,7 +220,11 @@ SLSA level:     ${m.slsa}
 Critical CVEs:  ${m.cves.critical}
 High CVEs:      ${m.cves.high}
 Image size:     ${m.size}
-Last rebuild:   ${m.updatedHours} hours ago
+Last rebuild:   ${
+  m.lastRebuiltAt
+    ? formatLastRebuiltAt(m.lastRebuiltAt)
+    : "not yet republished"
+}
 
 ## No lock-in by design
 

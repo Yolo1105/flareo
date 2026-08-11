@@ -10,7 +10,7 @@ What Flareo protects against, what it doesn't, and what we'd like to protect aga
 
 **Unauthorized rebuilds.** Only CI jobs running from the `flareo` organization's protected branches produce signatures. An attacker who forks the repo and runs their own CI produces a different signer identity, which `cosign verify --certificate-identity-regexp 'https://github.com/flareo/.+'` rejects.
 
-**Silent upstream compromise (partial).** If upstream ships a backdoored release, our Trivy scan won't catch it (scanners look for known CVEs, not zero-days). The SBOM we generate does document every package that went in, so a retroactive audit is possible. We'll often be the first to notice because our daily rebuild exposes the compromise to more eyes.
+**Silent upstream compromise (partial).** If upstream ships a backdoored release, our Trivy scan won't catch it (scanners look for known CVEs, not zero-days). The SBOM we generate does document every package that went in, so a retroactive audit is possible. We'll often be the first to notice because a republish run exposes the compromise to more eyes — and `lastRebuiltAt` makes gaps visible when the pipeline stalls.
 
 ## Out of scope
 

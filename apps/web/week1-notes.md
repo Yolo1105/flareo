@@ -13,7 +13,7 @@ Everything in this note is new vs the Week 0 baseline zip. Nothing else in the p
 
 **Workflow:**
 
-- `.github/workflows/canary-rebuild.yml` — scheduled for 02:00 UTC every Sunday. Also runs on manual workflow_dispatch. One matrix job per module runs in parallel. All actions pinned by full commit SHA. Harden-runner blocks egress by default, allowlist of only the hosts the pipeline needs.
+- `.github/workflows/canary-rebuild.yml` — historically scheduled; now superseded by manual-dispatch republish. One matrix job per module runs in parallel. All actions pinned by full commit SHA. Harden-runner blocks egress by default, allowlist of only the hosts the pipeline needs.
 
 **Schema:**
 

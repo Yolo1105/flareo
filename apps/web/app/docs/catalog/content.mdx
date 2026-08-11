@@ -57,6 +57,6 @@ We rebuild only the 12 modules above for the closed beta. Adding a module costs 
 
 ## Catalog freshness
 
-Every module is rebuilt daily. The "Last rebuild" metric on each module page tells you how stale the current image is. If upstream has released a new version in the last 24 hours, our pipeline will pick it up and rebuild. If upstream is the same but we've pushed a fix to the recipe, you'll see the rebuild timestamp update with the same upstream version.
+Each module page shows **Last rebuilt** as an absolute date plus a relative hint (or "not yet republished"). That timestamp comes from the last successful republish — we do not assert a fixed rebuild cadence. If upstream released a new version or we fixed a recipe, the next republish updates the timestamp (and may keep the same upstream version).
 
-Subscribe to a module for rebuild notifications from the module page (coming v0.2.0; for now, watch [github.com/flareo/flareo-canary](https://github.com/flareo/flareo-canary) for the pipeline).
+Subscribe to a module for rebuild notifications from the module page (coming v0.2.0; for now, watch the republish workflow runs for pipeline activity).

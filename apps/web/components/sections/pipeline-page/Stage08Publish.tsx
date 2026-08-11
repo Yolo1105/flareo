@@ -15,7 +15,7 @@ export function Stage08Publish({ module, receipt }: Props) {
       number="08"
       anchorId="stage-publish"
       title="Admin review → publish"
-      subtitle="Once the cryptographic checks pass and the policy gate (or, today, the human reviewer using the policy gate's signals) clears the module, the image is pushed to the public registry, listed on the marketplace, and added to the daily canary rebuild chain. Submitter and any subscribers get the published-with-receipt email."
+      subtitle="Once the cryptographic checks pass and the policy gate (or, today, the human reviewer using the policy gate's signals) clears the module, the image is pushed to the public registry, listed on the marketplace, and enrolled for republish. Submitter and any subscribers get the published-with-receipt email."
       status="built"
       durationLabel="≈ 4-7s push time"
     >
@@ -53,7 +53,7 @@ export function Stage08Publish({ module, receipt }: Props) {
             </li>
             <li className="flex items-start gap-2">
               <span className="text-good">✓</span>
-              Added to the daily canary rebuild chain
+              Enrolled for republish
             </li>
             <li className="flex items-start gap-2">
               <span className="text-good">✓</span>
@@ -85,7 +85,7 @@ ${module.digest.slice(55, 64)}: Pushed
 ${module.version}: digest: ${module.digest} size: 1638
 
 [catalog] flareo/${module.slug}@${module.version} → public
-[canary]  added to rebuild chain · next run in 23h
+[republish] enrolled · lastRebuiltAt will update on next run
 [email]   sent to ${module.author} <…> · receipt at ${receipt.marketplaceUrl}`}
         </pre>
       </TerminalBlock>

@@ -1,6 +1,6 @@
 # Canary rebuild observability — Track A #3
 
-Makes the daily canary-rebuild chain visible in the UI. Two surfaces: a per-module rebuild history section on module detail pages (public-facing — proves the daily-rebuild value proposition), and an admin-only log across all modules with a failures filter (operational).
+Makes the republish evidence chain visible in the UI. Two surfaces: a per-module rebuild history section on module detail pages (public-facing — surfaces lastRebuiltAt), and an admin-only log across all modules with a failures filter (operational).
 
 ## What shipped
 
@@ -68,7 +68,7 @@ One file centralizes all reads and the one write:
 ## Deliberately NOT touched
 
 - **`rebuild-canary.sh` — upstream_unchanged + build_failed log rows.** The TypeScript side handles the two outcomes it can attest to directly (success and scan_failed). The shell wrapper should write log rows for the two outcomes it owns (upstream_unchanged and build_failed), ideally via a small helper that calls a `record-rebuild-outcome.ts` script. Worth doing but scoped for a follow-up to keep this session tight. Without it, the admin log shows gaps in those two cases.
-- **Backfill migration for pre-existing modules.** The migration creates an empty ModuleRebuild table. Pre-existing `lastRebuiltAt` timestamps on Module rows remain authoritative for "when was the last rebuild" but have no corresponding log rows. The history section's empty-state copy handles this gracefully ("The first daily canary run will appear here within 24 hours"). A one-shot seeder that synthesizes a `success` row per currently-verified module from `lastRebuiltAt` would make the UI less empty on day 1 — not critical; skipped.
+- **Backfill migration for pre-existing modules.** The migration creates an empty ModuleRebuild table. Pre-existing `lastRebuiltAt` timestamps on Module rows remain authoritative for "when was the last rebuild" but have no corresponding log rows. The history section's empty-state copy handles this gracefully ("The first republish run will appear here once this module has been through the pipeline"). A one-shot seeder that synthesizes a `success` row per currently-verified module from `lastRebuiltAt` would make the UI less empty on day 1 — not critical; skipped.
 - **Retry-from-admin for failed rebuilds.** The admin log shows failures but doesn't have a "retry this rebuild" button. Rebuilds are triggered by cron on the shell wrapper's schedule; retry means re-running that wrapper. A future admin action could POST to a `/api/v1/admin/modules/[slug]/rebuild` endpoint that shells out, but that's a bigger session.
 - **Per-module rebuild SLA badge.** Could compute "this module has had 3 consecutive failures" and render a warn badge on the module detail hero. Useful for trust signaling; skipped to keep scope tight.
 

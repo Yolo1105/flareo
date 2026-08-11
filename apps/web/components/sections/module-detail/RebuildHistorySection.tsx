@@ -1,5 +1,6 @@
 import type { Module } from "@/lib/types";
 import type { RebuildAttempt } from "@/lib/db/module-rebuilds";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 interface Props {
   module: Module;
@@ -12,24 +13,19 @@ interface Props {
 }
 
 /**
- * Canary-rebuild history for one module. Surfaces the daily
- * re-verification chain so viewers can see the pipeline is alive:
+ * Republish history for one module. Surfaces the evidence chain so
+ * viewers can see when the pipeline last ran successfully:
  *
- *   - Big number: hours since last successful rebuild (or "never")
+ *   - Last successful rebuild timestamp (absolute + relative)
  *   - Counts: last-7-day success / unchanged / failed
  *   - Table: last ~10 attempts with outcome badges
  *
- * Critical for the supply-chain trust narrative — a module that
- * claims "rebuilt daily" is worthless without the evidence chain
- * visible in the UI.
+ * Critical for the supply-chain trust narrative — a freshness claim
+ * is worthless without the evidence chain visible in the UI.
  */
 export function RebuildHistorySection({ module, rebuilds }: Props) {
-  const lastRebuildAt = module.lastRebuiltAt
-    ? new Date(module.lastRebuiltAt)
-    : null;
-  const hoursAgo = lastRebuildAt
-    ? Math.max(0, Math.floor((Date.now() - lastRebuildAt.getTime()) / 3_600_000))
-    : null;
+  const lastRebuildLabel = formatLastRebuiltAt(module.lastRebuiltAt);
+  const hasRebuild = Boolean(module.lastRebuiltAt);
 
   // Bucket the last 7 days of attempts (within the fetched set).
   const sevenDaysAgo = Date.now() - 7 * 24 * 3_600_000;
@@ -45,11 +41,6 @@ export function RebuildHistorySection({ module, rebuilds }: Props) {
     ).length,
   };
 
-  // "Fresh" threshold: under 48h is healthy for a daily cadence
-  // (some slack for weekend quiet periods).
-  const freshness: "fresh" | "stale" | "never" =
-    hoursAgo === null ? "never" : hoursAgo <= 48 ? "fresh" : "stale";
-
   return (
     <section className="border-b border-hairline px-8 py-12">
       <div className="mb-6 flex items-baseline justify-between">
@@ -57,7 +48,7 @@ export function RebuildHistorySection({ module, rebuilds }: Props) {
           Rebuild history
         </h2>
         <div className="font-mono text-[10.5px] tracking-[0.12em] text-ink-faint">
-          DAILY CANARY CHAIN
+          REPUBLISH LOG
         </div>
       </div>
 
@@ -68,26 +59,16 @@ export function RebuildHistorySection({ module, rebuilds }: Props) {
             LAST REBUILT
           </div>
           <div
-            className={`font-display text-[28px] font-black leading-none tracking-[-0.02em] ${
-              freshness === "fresh"
-                ? "text-good"
-                : freshness === "stale"
-                  ? "text-warn"
-                  : "text-ink-ghost"
+            className={`font-mono text-[13px] font-medium leading-[1.35] tracking-[0.01em] ${
+              hasRebuild ? "text-ink" : "text-ink-ghost"
             }`}
           >
-            {freshness === "never"
-              ? "never"
-              : hoursAgo === 0
-                ? "just now"
-                : `${hoursAgo}h ago`}
+            {lastRebuildLabel}
           </div>
           <div className="mt-2 font-mono text-[10.5px] text-ink-ghost">
-            {freshness === "fresh"
-              ? "within daily cadence"
-              : freshness === "stale"
-                ? "past daily cadence — investigate"
-                : "awaiting first rebuild"}
+            {hasRebuild
+              ? "most recent successful republish"
+              : "awaiting first republish"}
           </div>
         </div>
 
@@ -117,8 +98,8 @@ export function RebuildHistorySection({ module, rebuilds }: Props) {
       {/* Attempt table */}
       {rebuilds.length === 0 ? (
         <div className="border border-dashed border-hairline bg-canvas-deep px-6 py-8 text-center font-body text-[13px] text-ink-ghost">
-          No rebuild attempts yet. The first daily canary run will appear
-          here within 24 hours of this module being published.
+          No rebuild attempts yet. The first republish run will appear
+          here once this module has been through the pipeline.
         </div>
       ) : (
         <div className="border border-hairline">
@@ -162,12 +143,13 @@ export function RebuildHistorySection({ module, rebuilds }: Props) {
       )}
 
       <p className="mt-5 font-body text-[12.5px] leading-[1.65] text-ink-softer">
-        Every module in the Flareo catalog is rebuilt daily from upstream
-        source, rescanned for CVEs, and re-signed with cosign. If upstream
-        hasn&apos;t changed, the existing signature stays valid. If a
-        new critical CVE lands, the module flips to{" "}
+        When a module is republished, Flareo rescans for CVEs and re-signs
+        with cosign. If upstream hasn&apos;t changed, the existing signature
+        stays valid. If a new critical CVE lands, the module flips to{" "}
         <code className="bg-canvas-deep px-1.5 text-ink">status: failing</code>{" "}
         and the deploy panel surfaces the CVE list until upstream ships a fix.
+        Check <span className="text-ink">last rebuilt</span> above for when
+        this module was last through the pipeline.
       </p>
 
       {/* Silence module to avoid lint when module is unused */}

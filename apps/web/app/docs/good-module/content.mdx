@@ -60,7 +60,7 @@ The Flareo build pipeline adds several things your base recipe doesn't have to c
 - **Rekor transparency log** entry, so the signature is public and immutable
 - **SLSA provenance attestation** at level 2. We don't currently target L3 — the gap is "build platform isolated per-job," which our shared GitHub Actions runner doesn't satisfy. Whether L3 is worth the operational cost is open; we'll revisit if a customer asks for it
 - **Admission policy verdict** — the catalog's active policy (CVE thresholds after VEX, signature/SBOM/Rekor presence, SLSA level) is evaluated against your module's signals, with the result at `/api/v1/modules/<slug>/policy`
-- **Daily rebuild** against the same upstream tag, in case dependencies have patched CVEs since the last build
+- **Republish** against the same upstream tag, in case dependencies have patched CVEs since the last build. The module page surfaces `lastRebuiltAt` rather than promising a fixed cadence.
 
 None of that is your job. Write a clean Dockerfile; we do the rest.
 

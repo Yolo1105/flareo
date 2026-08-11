@@ -4,6 +4,7 @@ import type { ReviewAggregate } from "@/lib/db/reviews";
 import { TrustScore } from "./TrustScore";
 import { Stars } from "./Stars";
 import { ReceiptsDrawer } from "./ReceiptsDrawer";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 export interface CategoryRowItem {
   module: Module;
@@ -109,7 +110,7 @@ function ModuleCard({ item }: { item: CategoryRowItem }) {
         )}
 
         <div className="mt-auto grid grid-cols-[1fr_auto] items-end gap-3 border-t border-hairline pt-3">
-          <div className="flex flex-col gap-1">
+            <div className="flex flex-col gap-1">
             <div className="flex items-center gap-2 font-mono text-[10px] text-ink-ghost">
               <span className="text-good">SLSA {m.slsa}</span>
               {m.cves.critical + m.cves.high === 0 ? (
@@ -120,6 +121,15 @@ function ModuleCard({ item }: { item: CategoryRowItem }) {
                 </span>
               )}
               <span>· {m.size}</span>
+            </div>
+            <div
+              className={`font-mono text-[10px] ${
+                m.lastRebuiltAt ? "text-ink-mute" : "text-ink-ghost"
+              }`}
+            >
+              {m.lastRebuiltAt
+                ? `Rebuilt ${formatLastRebuiltAt(m.lastRebuiltAt)}`
+                : formatLastRebuiltAt(null)}
             </div>
             {aggregate && aggregate.count > 0 ? (
               <div className="flex items-center gap-1.5">

@@ -7,6 +7,7 @@ import { getAggregatesForSlugs, type ReviewAggregate } from "@/lib/db/reviews";
 import type { Module } from "@/lib/types";
 import { PageHero } from "@/components/ui/PageHero";
 import { TrustScore } from "@/components/sections/marketplace/TrustScore";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 export const metadata: Metadata = {
   title: "Compare modules",
@@ -381,11 +382,15 @@ async function CompareView({
           />
           <CompareRow
             label="Last rebuild"
-            sub="canary chain freshness"
-            aValue={-a.updatedHours}
-            bValue={-b.updatedHours}
-            aFormatted={`${a.updatedHours}h ago`}
-            bFormatted={`${b.updatedHours}h ago`}
+            sub="most recent successful republish"
+            aValue={
+              a.lastRebuiltAt ? new Date(a.lastRebuiltAt).getTime() : 0
+            }
+            bValue={
+              b.lastRebuiltAt ? new Date(b.lastRebuiltAt).getTime() : 0
+            }
+            aFormatted={formatLastRebuiltAt(a.lastRebuiltAt)}
+            bFormatted={formatLastRebuiltAt(b.lastRebuiltAt)}
             higherIsBetter
           />
           <CompareRow

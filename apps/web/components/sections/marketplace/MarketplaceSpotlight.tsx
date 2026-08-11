@@ -3,6 +3,7 @@ import type { Module } from "@/lib/types";
 import type { ReviewAggregate } from "@/lib/db/reviews";
 import { TrustScore } from "./TrustScore";
 import { Stars } from "./Stars";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 interface Props {
   module: Module;
@@ -113,6 +114,11 @@ export function MarketplaceSpotlight({ module, blurb, aggregate }: Props) {
             tone={
               module.cves.critical + module.cves.high === 0 ? "good" : "warn"
             }
+          />
+          <SpecimenTile
+            label="LAST REBUILT"
+            value={formatLastRebuiltAt(module.lastRebuiltAt)}
+            mono
           />
           <div className="border border-dashed border-hairline bg-canvas-deep p-4">
             <div className="mb-2 font-mono text-[9.5px] tracking-[0.14em] text-ink-ghost">

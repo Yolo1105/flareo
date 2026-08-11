@@ -105,7 +105,7 @@ export default async function StatusPage() {
             label="SIGNING PIPELINE"
             title="Canary"
             tone="ok"
-            detail="daily rebuild job last ran within 24h"
+            detail="last republish timestamp is recent across the catalog"
           />
         </div>
       </section>

@@ -16,7 +16,7 @@ The new page covers:
 - What the reviewer is actually looking for — four criteria in priority order, phrased as operational decisions not marketing copy
 - What the build pipeline does post-approval (seven steps, 5-12 min)
 - Three failure modes with their retry behavior: user error (no auto-retry), scan rejection (no auto-retry), system error (three retries with exponential backoff, then DLQ)
-- Post-publish CVE handling (status flip, daily rebuild, user-side pin invalidation)
+- Post-publish CVE handling (status flip, republish, user-side pin invalidation)
 - Plan limits (3 public for free, unlimited for pro)
 - Review timeline SLAs (5 business days free, 2 business days pro)
 

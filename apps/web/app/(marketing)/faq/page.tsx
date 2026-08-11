@@ -139,9 +139,10 @@ const SECTIONS: Section[] = [
               when something is found</em>. Because every module has an SBOM,
               the moment a CVE drops we know which modules are affected and
               can rebuild them. Because every signature is logged to Rekor,
-              you can prove what version you ran. Because the canary chain
-              rebuilds daily, your image is never more than 24h stale on
-              upstream patches.
+              you can prove what version you ran. And because each module
+              page surfaces <code>lastRebuiltAt</code>, you can see when the
+              image was last through the republish pipeline — without us
+              asserting a cadence we cannot guarantee.
             </p>
             <p>
               The honest framing: Flareo replaces "trust the publisher" with

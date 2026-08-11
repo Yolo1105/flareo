@@ -147,7 +147,7 @@ Now a compose-file change that pins to an unverified digest fails at commit time
 Three things can make `flareo verify` fail:
 
 - **Signature missing or invalid** — the image either wasn't signed by our pipeline, or the signature on Sigstore is gone (e.g. the image was tampered with after publication). Never deploy. Investigate.
-- **Scan outdated or failing** — the image's CVE scan is stale (Flareo re-scans daily; "stale" means >48h old) or the most recent scan flagged critical/high CVEs. Decide based on risk tolerance; the CLI surfaces the CVE list so you can look at them.
+- **Scan outdated or failing** — the image's CVE scan is stale (check `lastRebuiltAt` on the module page; "stale" is whatever your risk tolerance allows) or the most recent scan flagged critical/high CVEs. Decide based on risk tolerance; the CLI surfaces the CVE list so you can look at them.
 - **Network error** — `flareo verify` couldn't reach Sigstore or the Flareo API. Retry once; if it happens twice, something's wrong with your CI's outbound connectivity.
 
 We intentionally don't let "image not recognized" fail silently or pass. An unknown image reference exits non-zero with an explanatory error.

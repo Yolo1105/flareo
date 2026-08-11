@@ -33,7 +33,7 @@ The total weight allocation reflects an opinionated ordering of what matters mos
 
 The double weighting of "critical" reflects the operational reality: critical CVEs frequently mean remote code execution or auth bypass. A module with a critical CVE shouldn't be running in production, period — and the Trust Score reflects that by zeroing the vulns component regardless of how clean the other signals are.
 
-Counts are taken from the most recent Trivy scan against the module's image. Scans happen on every rebuild (daily for canary chains).
+Counts are taken from the most recent Trivy scan against the module's image. Scans happen on every rebuild.
 
 ## SLSA attestation (max 25)
 

@@ -79,7 +79,7 @@ A critical CVE in a published Flareo module:
 
 1. Pulls the module from the public catalog's default filter immediately. Status flips from `verified` to `failing` and the deploy panel shows the CVE details.
 2. We track the upstream fix.
-3. Once upstream ships, our daily rebuild picks it up and the module is restored, usually within 24 hours of the upstream patch.
+3. Once upstream ships, the next republish picks it up and the module is restored. Check `lastRebuiltAt` on the module page for when that landed.
 
 Users with pinned digests are still running the vulnerable image — we can't unpublish something that's already been pulled. What we can do is surface the status via the API and the verify tool so your own runbook can gate on it.
 

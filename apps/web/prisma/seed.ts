@@ -124,7 +124,7 @@ const DEMO_REVIEWS: SeedReview[] = [
     authorId: "user_demo_priya",
     rating: 5,
     title: "Running in production for 6 months, zero issues",
-    body: "Replaced the upstream vaultwarden image with this one after a CVE forced us to patch in a hurry. The SLSA L3 provenance and daily rebuilds mean we no longer need to maintain our own fork. The SBOM caught a transitive dependency we didn't know we had. The rebuild cadence is the real unlock — we see a fresh image within 24h of upstream cutting a release.",
+    body: "Replaced the upstream vaultwarden image with this one after a CVE forced us to patch in a hurry. The SLSA L3 provenance and republish receipts mean we no longer need to maintain our own fork. The SBOM caught a transitive dependency we didn't know we had. Seeing lastRebuiltAt move after upstream cuts a release is the real unlock.",
     daysAgo: 5,
   },
   {
@@ -152,8 +152,8 @@ const DEMO_REVIEWS: SeedReview[] = [
     moduleSlug: "uptime-kuma",
     authorId: "user_demo_mai",
     rating: 5,
-    title: "Daily canary is the killer feature",
-    body: "Our monitoring stack depends on this running reliably. The daily rebuild with upstream-unchanged short-circuit means we're never more than 24h from a patched image but also not wastefully churning deployments. Perfect balance.",
+    title: "Republish receipts are the killer feature",
+    body: "Our monitoring stack depends on this running reliably. The republish short-circuit on upstream-unchanged means we get a fresh image when something moves without wastefully churning deployments. Perfect balance.",
     daysAgo: 8,
   },
   {
@@ -255,7 +255,7 @@ const DEMO_FEATURED: SeedFeatured[] = [
     moduleSlug: "vaultwarden",
     position: 1,
     blurb:
-      "Every self-hoster's password manager, now with a full provenance trail and daily rebuilds.",
+      "Every self-hoster's password manager, now with a full provenance trail and republish receipts.",
     expiresInDays: null,
   },
   {

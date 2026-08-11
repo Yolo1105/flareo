@@ -49,7 +49,7 @@ const ITEMS: RoadmapItem[] = [
     title: "Public catalog of 12 verified modules",
     phase: "shipped",
     eta: "2025 Q4",
-    body: "First launch cohort: vaultwarden, uptime-kuma, authentik, nginx-proxy-manager, gitea, immich, caddy, grafana, crowdsec, keycloak, forgejo, jellyfin. Each with daily canary rebuild and full receipt chain.",
+    body: "First launch cohort: vaultwarden, uptime-kuma, authentik, nginx-proxy-manager, gitea, immich, caddy, grafana, crowdsec, keycloak, forgejo, jellyfin. Each with republish receipts and a visible lastRebuiltAt timestamp.",
   },
   {
     title: "Audit-any-image — verify any registry",

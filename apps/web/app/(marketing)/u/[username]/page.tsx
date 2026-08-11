@@ -6,6 +6,7 @@ import {
   getPublicModulesForUser,
   getReviewsByUser,
 } from "@/lib/db/profiles";
+import { formatLastRebuiltAt } from "@/lib/utils/time";
 
 interface Props {
   params: Promise<{ username: string }>;
@@ -170,7 +171,7 @@ export default async function ProfilePage({ params }: Props) {
                   {m.pulls30d.toLocaleString()}
                 </div>
                 <div className="text-right font-mono text-[11px] text-ink-faint">
-                  {m.updatedHours}h ago
+                  {formatLastRebuiltAt(m.lastRebuiltAt)}
                 </div>
               </Link>
             ))}

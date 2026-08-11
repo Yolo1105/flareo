@@ -4,7 +4,7 @@ Plain-English definitions for the acronyms and jargon that show up across Flareo
 
 ## Canary rebuild
 
-Flareo's daily CI job that rebuilds every module from upstream source, regardless of whether upstream shipped a new version. Catches silent dependency breakage, lets us pick up upstream bug fixes within a day, and ensures every module in the catalog has a recent signature.
+Historical name for Flareo's republish job: rebuild a module from upstream source, rescanning and re-signing even when the upstream tag has not moved. The pipeline is manual-dispatch rather than a fixed schedule; each module page shows `lastRebuiltAt` so freshness is observable without asserting a cadence.
 
 ## Content-addressable
 
@@ -40,7 +40,7 @@ OpenID Connect. A standard for identity providers (GitHub, Google, etc.) to mint
 
 ## Rebuild
 
-A new build of an existing module, usually triggered by an upstream version bump or by our daily canary schedule. Each rebuild gets a fresh signature and a new Rekor log entry.
+A new build of an existing module, usually triggered by an upstream version bump or a manual republish. Each rebuild gets a fresh signature and a new Rekor log entry. The module page shows `lastRebuiltAt` instead of asserting a fixed cadence.
 
 ## Rekor
 
