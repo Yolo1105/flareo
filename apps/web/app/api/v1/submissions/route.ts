@@ -7,6 +7,7 @@ import { checkLimit, keyForRequest, rateLimitHeaders } from "@/lib/ratelimit";
 import { canSubmit, PLAN_LIMITS } from "@/lib/billing/quota";
 import { detectCnbLanguage } from "@/lib/cnb/detect";
 import { appBaseUrl } from "@/lib/config/env";
+import { requireFeature } from "@/lib/speculative/flags";
 import { z } from "zod";
 import { randomBytes } from "node:crypto";
 
@@ -160,6 +161,16 @@ const SubmitSchema = z.object({
 );
 
 export async function POST(req: NextRequest) {
+  if (!requireFeature("dockerfileSubmissions")) {
+    return NextResponse.json(
+      apiError(
+        "gone",
+        "Dockerfile submissions have been retired. Flareo no longer accepts arbitrary Dockerfiles for execution. See /docs/threat-model for why.",
+      ),
+      { status: 410 },
+    );
+  }
+
   // Auth required: session cookie OR API key. Unauthenticated submissions
   // aren't accepted — we need a user to contact about review decisions.
   const session = await auth();

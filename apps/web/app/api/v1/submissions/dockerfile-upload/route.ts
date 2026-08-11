@@ -7,6 +7,7 @@ import { apiError } from "@/lib/validation/schemas";
 import { checkLimit, keyForRequest, rateLimitHeaders } from "@/lib/ratelimit";
 import { uploadDockerfile, R2ConfigError, DockerfileChecksumMismatch } from "@/lib/storage/r2";
 import { prisma } from "@/lib/db/prisma";
+import { requireFeature } from "@/lib/speculative/flags";
 
 /**
  * POST /api/v1/submissions/dockerfile-upload
@@ -69,6 +70,16 @@ const UploadSchema = z.object({
 });
 
 export async function POST(req: NextRequest) {
+  if (!requireFeature("dockerfileSubmissions")) {
+    return NextResponse.json(
+      apiError(
+        "gone",
+        "Dockerfile submissions have been retired. Flareo no longer accepts arbitrary Dockerfiles for execution. See /docs/threat-model for why.",
+      ),
+      { status: 410 },
+    );
+  }
+
   // ─── auth ─────────────────────────────────────────────────────────
   const session = await auth();
   let userId: string | null = session?.user?.id ?? null;

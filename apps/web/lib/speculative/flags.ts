@@ -28,6 +28,12 @@ export interface SpeculativeFlags {
   reproducibleBuilds: boolean;
   /** G-5: self-host Enterprise bundle features. Off until enterprise asks. */
   selfHost: boolean;
+  /**
+   * Dockerfile / CNB submission POSTs. Off by default — the public
+   * build path was retired (ADR-012). Flip only to temporarily re-open
+   * the historical submission API for internal debugging.
+   */
+  dockerfileSubmissions: boolean;
 }
 
 /**
@@ -47,6 +53,8 @@ export function readSpeculativeFlags(): SpeculativeFlags {
     reproducibleBuilds:
       process.env.FLAREO_FEATURE_REPRODUCIBLE_BUILDS === "true",
     selfHost: process.env.FLAREO_FEATURE_SELF_HOST === "true",
+    dockerfileSubmissions:
+      process.env.FLAREO_FEATURE_DOCKERFILE_SUBMISSIONS === "true",
   };
 }
 
