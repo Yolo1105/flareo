@@ -2,7 +2,7 @@
 name = "flareo"
 version = "0.3.0"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.88"
 authors = ["Flareo maintainers"]
 description = "CLI for the Flareo container supply chain platform. Verify any signed container image against Sigstore and browse the Flareo catalog from your terminal."
 license = "Apache-2.0"

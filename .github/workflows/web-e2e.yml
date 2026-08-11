@@ -85,9 +85,12 @@ jobs:
 
       - name: Run Playwright tests
         env:
+          CI: "1"
           DATABASE_URL: postgresql://flareo:flareo@localhost:5432/flareo_test
+          AUTH_SECRET: e2e-test-secret-not-real
           NEXTAUTH_SECRET: e2e-test-secret-not-real
           NEXTAUTH_URL: http://localhost:3000
+          AUTH_URL: http://localhost:3000
         run: npm run test:e2e
 
       - name: Upload trace + report on failure

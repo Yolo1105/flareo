@@ -4,6 +4,10 @@
 //! `commands::*`. The top-level `Cli` struct also holds global flags
 //! (`--api-url`, `--verbose`) that apply to every subcommand.
 
+// Prefer readability of existing `format!("{}", x)` call sites over
+// mass-rewriting for clippy's `uninlined_format_args` style lint.
+#![allow(clippy::uninlined_format_args)]
+
 use clap::{Parser, Subcommand};
 
 mod api;

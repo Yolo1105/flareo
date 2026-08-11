@@ -38,11 +38,11 @@ test("landing page loads and shows the primary CTAs", async ({ page }) => {
   // Hero copy — the load-bearing one-liner. If this fails the whole
   // marketing surface is broken.
   await expect(page).toHaveTitle(/Flareo/i);
-  // Verify the "browse the catalog" and "verify any image" CTAs both
-  // exist as links. Use `getByRole` rather than text-content to be
-  // resilient to copy edits.
-  await expect(page.getByRole("link", { name: /marketplace/i }).first()).toBeVisible();
+  // Primary CTAs after the verify-first pivot: verify + catalog, plus
+  // marketplace remains in primary nav.
   await expect(page.getByRole("link", { name: /verify/i }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /catalog/i }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /marketplace/i }).first()).toBeVisible();
 });
 
 test("marketplace renders and module cards are clickable", async ({ page }) => {
@@ -108,13 +108,15 @@ test("verify tool form accepts input and shows an error envelope shape", async (
   // default.
 });
 
-test("docs install page renders and shows the curl-pipe block", async ({ page }) => {
+test("docs install page renders and shows the source build path", async ({ page }) => {
   await page.goto("/docs/install");
   await expect(page.getByRole("heading", { level: 1 })).toContainText(/install/i);
-  // Curl-pipe install string — the load-bearing snippet. If this
-  // breaks (e.g. the script URL changes), users hit 404s.
-  const installerSnippet = page.locator("text=/curl.*install\\.sh/");
-  await expect(installerSnippet.first()).toBeVisible();
+  // Curl|bash install was retired; from-source cargo build is the
+  // supported path until signed release archives ship.
+  await expect(page.getByText(/cargo build --release/i).first()).toBeVisible();
+  await expect(
+    page.getByText(/do not pipe a remote install script/i).first(),
+  ).toBeVisible();
 });
 
 test("pricing page renders three tiers", async ({ page }) => {
