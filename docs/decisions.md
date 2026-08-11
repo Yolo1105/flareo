@@ -77,7 +77,9 @@ When this table reaches 3 entries within a 90-day rolling window, trigger #2 fir
 
 ### G-3 — SLSA L3
 
-**Status:** waiting for trigger. Currently SLSA L2.
+**Status:** waiting for trigger. Premise superseded — no SLSA build level is claimed.
+
+The republish pipeline re-publishes upstream images rather than building them, so no SLSA build level is claimed at any level. The fourth trust signal is now provenance (Rekor entry present, upstream digest recorded), not SLSA. This gate's premise was superseded by ADR-012 and is retained as a record.
 
 **Trigger criteria (any one is sufficient):**
 

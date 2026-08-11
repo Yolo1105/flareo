@@ -22,7 +22,12 @@ export interface SpeculativeFlags {
   previewsPerUser: boolean;
   /** G-2: per-org admission policy. Off until first paying org asks. */
   perOrgPolicy: boolean;
-  /** G-3: SLSA L3 attestation + admin surfaces. Off until customer asks. */
+  /**
+   * G-3: SLSA L3 attestation + admin surfaces. Off until a gate
+   * trigger fires. The project does not claim any SLSA build level
+   * today (republish, not build — see ADR-012); this flag only
+   * unlocks speculative L3 surfaces if that gate is ever revived.
+   */
   slsaL3: boolean;
   /** G-4: reproducible-build verification. Off until G-3 in motion. */
   reproducibleBuilds: boolean;
