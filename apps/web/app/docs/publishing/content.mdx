@@ -1,5 +1,23 @@
 # Publishing a module
 
+<aside className="mb-6 border border-warn/50 bg-warn/[0.04] p-4">
+  <div className="mb-1.5 font-mono text-[10.5px] font-medium tracking-[0.14em] text-warn">
+    HISTORICAL
+  </div>
+  <p className="m-0 font-body text-[13.5px] leading-[1.65] text-ink-softer">
+    Third-party Dockerfile submissions are closed. This page documents how the
+    retired submission pipeline worked. See the{" "}
+    <a href="/docs/threat-model" className="text-accent hover:text-accent-hot">
+      threat model
+    </a>{" "}
+    for why, or{" "}
+    <a href="/verify" className="text-accent hover:text-accent-hot">
+      verify an image you already have
+    </a>
+    .
+  </p>
+</aside>
+
 Flareo's catalog is open for third-party submissions. You write a Dockerfile, submit it through the web wizard or CLI, a human reviewer looks at it, and if it clears the bar an automated pipeline builds, scans, signs, and publishes the result. This page walks through what you need, what happens, and how to think about the review.
 
 ## What you need before you start
