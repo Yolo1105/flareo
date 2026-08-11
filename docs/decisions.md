@@ -1,5 +1,12 @@
 # Flareo decision log
 
+These gates were written while the project was being built as a product.
+ADR-011 records the reframing to an engineering artifact. Triggers that
+reference prospects, customers, and sales conversations are therefore no
+longer reachable. The gates are retained unaltered because their value is
+as a record of deciding in advance what would justify speculative work,
+not as a live roadmap.
+
 This file is the canonical record for **gated decisions** — work that's deliberately deferred behind an evidence trigger. Each entry has:
 
 - A **trigger criterion** (what must be true before the decision happens)
@@ -17,7 +24,7 @@ The point of this file: prevent motivated reasoning at decision time. The criter
 
 ### G-1 — F0 conversion-rate decision
 
-**Status:** clock running. Day 0 = the date the analytics-wired Caddy reloads in production with the `(inject_analytics)` snippet active. Decision date = day 30 from then.
+**Status:** clock never started. **Unmeasurable** — the metric depends on a Plausible site for `preview.flareo.dev`, which was retired and whose domain has lapsed (ADR-013).
 
 **What we're measuring:**
 - Plausible site `preview.flareo.dev` — pageview count and unique visitors
