@@ -389,15 +389,6 @@ async function CompareView({
             higherIsBetter
           />
           <CompareRow
-            label="Lifetime deploys"
-            sub="reported pulls from registry"
-            aValue={a.deploys}
-            bValue={b.deploys}
-            aFormatted={a.deploys.toLocaleString()}
-            bFormatted={b.deploys.toLocaleString()}
-            higherIsBetter
-          />
-          <CompareRow
             label="Pulls last 30 days"
             sub="recent traction signal"
             aValue={a.pulls30d}

@@ -7,7 +7,7 @@ import { StatusBadge } from "@/components/ui/StatusBadge";
 import Link from "next/link";
 import { cn } from "@/lib/utils/cn";
 
-type SortField = "trust" | "deploys" | "updated" | "name";
+type SortField = "trust" | "updated" | "name";
 
 const CATEGORY_LABELS: Record<Module["category"] | "all", string> = {
   all: "All",
@@ -98,7 +98,6 @@ export function CatalogExplorer({
       );
     }
     if (sort === "trust") result.sort((a, b) => b.trust - a.trust);
-    else if (sort === "deploys") result.sort((a, b) => b.deploys - a.deploys);
     else if (sort === "updated")
       result.sort((a, b) => a.updatedHours - b.updatedHours);
     else result.sort((a, b) => a.name.localeCompare(b.name));
@@ -147,7 +146,6 @@ export function CatalogExplorer({
               className="border border-hairline bg-canvas-deep px-2 py-2 font-mono text-[12px] text-ink focus:border-accent focus:outline-none"
             >
               <option value="trust">trust score</option>
-              <option value="deploys">deploys</option>
               <option value="updated">recently updated</option>
               <option value="name">name</option>
             </select>
@@ -293,10 +291,6 @@ export function CatalogExplorer({
                     >
                       {m.cves.critical}/{m.cves.high}/{m.cves.medium}/
                       {m.cves.low}
-                    </span>
-                    <span className="text-ink-ghost">DEPLOYS</span>
-                    <span className="text-ink-mute">
-                      {m.deploys.toLocaleString()}
                     </span>
                     <span className="text-ink-ghost">UPDATED</span>
                     <span className="text-ink-mute">{m.updatedHours}h ago</span>

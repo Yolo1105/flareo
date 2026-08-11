@@ -18,4 +18,3 @@ TAGS="password-manager,self-hosted,rust,sqlite"
 
 # Visible on the catalog card. Keep honest. These are rounded upstream signals
 # (GitHub stars, real Docker pull estimates) not made-up numbers.
-DEPLOYS="47000"

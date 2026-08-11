@@ -114,11 +114,6 @@ export function MarketplaceSpotlight({ module, blurb, aggregate }: Props) {
               module.cves.critical + module.cves.high === 0 ? "good" : "warn"
             }
           />
-          <SpecimenTile
-            label="DEPLOYS"
-            value={module.deploys.toLocaleString()}
-            sub="lifetime pulls reported"
-          />
           <div className="border border-dashed border-hairline bg-canvas-deep p-4">
             <div className="mb-2 font-mono text-[9.5px] tracking-[0.14em] text-ink-ghost">
               ONE-LINE DEPLOY

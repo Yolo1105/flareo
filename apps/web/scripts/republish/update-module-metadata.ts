@@ -96,7 +96,6 @@ async function main(): Promise<void> {
     .split(",")
     .map((t) => t.trim())
     .filter((t) => t.length > 0);
-  const deploys = optInt("FLAREO_DEPLOYS", 0);
 
   const imageRef = reqEnv("FLAREO_IMAGE_REF");
   const digest = reqEnv("FLAREO_DIGEST");
@@ -156,7 +155,8 @@ async function main(): Promise<void> {
     cveHigh,
     cveMedium,
     cveLow,
-    deploys,
+    // deploys intentionally omitted — invented counts must not be
+    // written. Column remains for a real figure later.
     updatedHours: 0,
     size: `${sizeMb} MB`,
     digest,

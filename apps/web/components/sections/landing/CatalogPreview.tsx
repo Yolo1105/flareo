@@ -4,12 +4,12 @@ import { MODULES } from "@/lib/data/modules";
 import { StatusBadge } from "@/components/ui/StatusBadge";
 
 /**
- * Landing's catalog preview — shows the 4 most-deployed modules.
+ * Landing's catalog preview — shows 4 high-trust modules.
  * Full catalog view lives at /catalog.
  */
 export function CatalogPreview() {
   const featured = [...MODULES]
-    .sort((a, b) => b.deploys - a.deploys)
+    .sort((a, b) => b.trust - a.trust)
     .slice(0, 4);
 
   return (
