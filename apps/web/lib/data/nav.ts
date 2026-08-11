@@ -18,7 +18,7 @@ export const NAV_LINKS: readonly NavLink[] = [
 ] as const;
 
 export const FOOTER_LINKS = [
-  { label: "Status", href: "https://status.flareo.dev", external: true },
+  { label: "Status", href: "/status" },
   { label: "Changelog", href: "/changelog" },
   { label: "Roadmap", href: "/roadmap" },
   { label: "FAQ", href: "/faq" },

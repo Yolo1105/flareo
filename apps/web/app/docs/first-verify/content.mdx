@@ -10,7 +10,7 @@ Goal: from a fresh laptop, get a cryptographic proof that a specific Vaultwarden
 
 ## Step 1: look up the Flareo-signed Vaultwarden
 
-Open the Vaultwarden module page at [flareo.dev/modules/vaultwarden](https://flareo.dev/modules/vaultwarden). Scroll to the deploy panel. Copy the pinned digest — it looks like:
+Open the Vaultwarden module page at [flareo.app/modules/vaultwarden](https://flareo.app/modules/vaultwarden). Scroll to the deploy panel. Copy the pinned digest — it looks like:
 
 ```
 public.ecr.aws/flareo/vaultwarden@sha256:abc123...
@@ -20,7 +20,7 @@ The digest is what we're going to verify. A digest is content-addressable: you c
 
 ## Step 2: verify via the web
 
-Paste that reference into the box at [flareo.dev/verify](https://flareo.dev/verify) and hit Verify. You should see three green checks:
+Paste that reference into the box at [flareo.app/verify](https://flareo.app/verify) and hit Verify. You should see three green checks:
 
 - **Signature**: the image was signed by Flareo's GitHub Actions build identity
 - **Vulnerabilities**: the current CVE status from our latest scan

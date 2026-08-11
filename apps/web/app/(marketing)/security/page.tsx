@@ -8,13 +8,16 @@ export const metadata: Metadata = {
     "How to report a vulnerability in Flareo or in any module we've published. Our response commitments.",
 };
 
+const SECURITY_ADVISORIES_URL =
+  "https://github.com/Yolo1105/flareo/security/advisories/new";
+
 export default function SecurityPage() {
   return (
     <>
       <PageHero
         eyebrow="SECURITY / RESPONSIBLE DISCLOSURE"
-        prompt="curl https://flareo.dev/.well-known/security.txt"
-        promptComment="# also published as security.txt for automated discovery"
+        prompt="open GitHub Security Advisories"
+        promptComment="# private report — coordinated disclosure"
         title={
           <>
             Found something?
@@ -24,8 +27,8 @@ export default function SecurityPage() {
         }
       >
         <p className="max-w-[680px] font-body text-[15px] leading-[1.55] text-ink-softer">
-          If you've found a security issue in Flareo's platform — or in a
-          module we've published — we want to hear from you before anyone
+          If you&apos;ve found a security issue in Flareo&apos;s platform — or in a
+          module we&apos;ve published — we want to hear from you before anyone
           else does. This page documents the channel, our response timeline,
           and what you should expect.
         </p>
@@ -44,50 +47,31 @@ export default function SecurityPage() {
               </h2>
             </header>
 
-            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div className="border border-hairline bg-canvas-deep p-5">
-                <div className="mb-2 font-mono text-[9.5px] tracking-[0.14em] text-ink-ghost">
-                  EMAIL
-                </div>
-                <a
-                  href="mailto:security@flareo.dev"
-                  className="font-mono text-[16px] text-accent hover:text-accent-hot"
-                >
-                  security@flareo.dev
-                </a>
-                <p className="mt-3 font-body text-[12.5px] leading-[1.55] text-ink-softer">
-                  Encrypt with our PGP key (below) if the report contains
-                  sensitive details. Plain email is fine for a heads-up;
-                  follow up with details over the encrypted channel.
-                </p>
+            <div className="border border-hairline bg-canvas-deep p-5">
+              <div className="mb-2 font-mono text-[9.5px] tracking-[0.14em] text-ink-ghost">
+                GITHUB SECURITY ADVISORIES
               </div>
-
-              <div className="border border-hairline bg-canvas-deep p-5">
-                <div className="mb-2 font-mono text-[9.5px] tracking-[0.14em] text-ink-ghost">
-                  PGP KEY FINGERPRINT
-                </div>
-                <code className="block break-all font-mono text-[11.5px] text-ink">
-                  4F3A 2C1B 9E7D 8C5A 6F2D 3B1A 7C9D 8E2F 4A6B 1C3D
-                </code>
-                <p className="mt-3 font-body text-[12.5px] leading-[1.55] text-ink-softer">
-                  Full key at{" "}
-                  <a
-                    href="https://flareo.dev/.well-known/pgp-key.asc"
-                    className="text-accent hover:text-accent-hot"
-                  >
-                    flareo.dev/.well-known/pgp-key.asc
-                  </a>
-                  .
-                </p>
-              </div>
+              <a
+                href={SECURITY_ADVISORIES_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-mono text-[16px] text-accent hover:text-accent-hot"
+              >
+                GitHub Security Advisories
+              </a>
+              <p className="mt-3 font-body text-[12.5px] leading-[1.55] text-ink-softer">
+                File a private advisory against the Flareo repository. Reports
+                stay confidential until coordinated disclosure. Include steps
+                to reproduce, affected components, and impact when you can.
+              </p>
             </div>
 
             <div className="mt-3 border border-dashed border-hairline bg-canvas-panel p-4">
               <p className="font-body text-[12.5px] leading-[1.6] text-ink-softer">
                 <strong className="text-ink">For active exploitation:</strong>{" "}
                 if you believe a vulnerability is being actively exploited
-                against Flareo or against deployed modules, mark the email
-                subject{" "}
+                against Flareo or against deployed modules, mark the advisory
+                title with{" "}
                 <code className="font-mono text-[12px] text-accent">
                   [URGENT-EXPLOIT]
                 </code>{" "}
@@ -120,20 +104,20 @@ export default function SecurityPage() {
                     Sandbox escapes from any preview environment
                   </li>
                   <li>
-                    Authentication or session bugs in flareo.dev or the API
+                    Authentication or session bugs in flareo.app or the API
                   </li>
                   <li>
                     Privilege escalation between user / publisher / admin
                   </li>
                   <li>
-                    Trust Score forgery: making a module's score appear
+                    Trust Score forgery: making a module&apos;s score appear
                     higher than the formula computes
                   </li>
                   <li>
                     SSRF, RCE, SQLi, XSS, CSRF in the platform code
                   </li>
                   <li>
-                    Bugs in any module we've published: malicious upstream,
+                    Bugs in any module we&apos;ve published: malicious upstream,
                     backdoored dependency, vulnerable build step
                   </li>
                 </ul>
@@ -145,7 +129,7 @@ export default function SecurityPage() {
                 <ul className="space-y-2 font-body text-[12.5px] leading-[1.6] text-ink-softer">
                   <li>
                     Vulnerabilities in upstream projects we package — report
-                    those to the upstream project; we'll coordinate the
+                    those to the upstream project; we&apos;ll coordinate the
                     rebuild after they patch
                   </li>
                   <li>
@@ -156,7 +140,7 @@ export default function SecurityPage() {
                     SPF / DMARC / DKIM tuning on email infrastructure
                   </li>
                   <li>
-                    Self-XSS where the only path is the user's own browser
+                    Self-XSS where the only path is the user&apos;s own browser
                     extension or DevTools
                   </li>
                   <li>
@@ -258,8 +242,17 @@ export default function SecurityPage() {
               </ul>
               <p>
                 If your testing activities raise concerns about
-                authorization, contact us first. We'd rather talk through it
-                than discover the testing in our logs without context.
+                authorization, contact us first via{" "}
+                <a
+                  href={SECURITY_ADVISORIES_URL}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-accent hover:text-accent-hot"
+                >
+                  GitHub Security Advisories
+                </a>
+                . We&apos;d rather talk through it than discover the testing in
+                our logs without context.
               </p>
             </div>
           </section>
@@ -276,15 +269,15 @@ export default function SecurityPage() {
             </header>
             <div className="border border-dashed border-warn/50 bg-warn/[0.04] p-5 font-body text-[13px] leading-[1.65] text-ink-softer">
               <p className="mb-2">
-                <strong className="text-ink">Honest answer: we don't run a paid bounty program yet.</strong>
+                <strong className="text-ink">Honest answer: we don&apos;t run a paid bounty program yet.</strong>
               </p>
               <p>
                 For high-impact reports we offer a public credit on the
                 /incidents page, swag, and a thank-you that we mean. When
-                Flareo has revenue to support a structured bounty, we'll
+                Flareo has revenue to support a structured bounty, we&apos;ll
                 publish the program in detail rather than running an
                 informal one. Until then, we ask researchers to report for
-                the same reason we'd report bugs we find ourselves: because
+                the same reason we&apos;d report bugs we find ourselves: because
                 fixing them makes the platform safer for everyone running
                 it.
               </p>

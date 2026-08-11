@@ -361,12 +361,12 @@ export function buildOpenVexDocument(
   // Stable @id derived from the module slug + digest. If a module
   // rebuilds (digest changes), the @id changes, which is correct
   // OpenVEX semantics — the document refers to a specific version.
-  const docId = `https://flareo.dev/vex/${moduleSlug}/${moduleDigest.replace("sha256:", "").slice(0, 12)}`;
+  const docId = `https://flareo.app/vex/${moduleSlug}/${moduleDigest.replace("sha256:", "").slice(0, 12)}`;
 
   return {
     "@context": "https://openvex.dev/ns/v0.2.0",
     "@id": docId,
-    author: "Flareo Reviewer Team <reviewers@flareo.dev>",
+    author: "Flareo Reviewer Team",
     timestamp: new Date().toISOString(),
     version: 1,
     statements: statements.map((s) => {

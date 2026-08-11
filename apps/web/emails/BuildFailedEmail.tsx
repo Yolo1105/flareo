@@ -140,9 +140,9 @@ BuildFailedEmail.PreviewProps = {
   errorKind: "user",
   errorMessage:
     "Build failed: network disabled — connection refused to registry.npmjs.org during `RUN npm install`. See docs/submitting-dockerfiles for the no-network rule.",
-  buildLogUrl: "https://r2.flareo.dev/logs/sub_abc123.txt",
+  buildLogUrl: "https://r2.flareo.app/logs/sub_abc123.txt",
   cveList: [],
-  docsUrl: "https://flareo.dev/docs/submitting-dockerfiles",
+  docsUrl: "https://flareo.app/docs/submitting-dockerfiles",
 } satisfies BuildFailedEmailProps;
 
 const headingStyle = {

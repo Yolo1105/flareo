@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(
       apiError(
         "unauthenticated",
-        "Dockerfile upload requires an account. Sign in via `flareo login` or at flareo.dev/signin.",
+        "Dockerfile upload requires an account. Sign in via `flareo login` or at flareo.app/signin.",
       ),
       { status: 401 },
     );

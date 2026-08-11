@@ -20,7 +20,7 @@ import { trackEvent, type PlausibleEventProps } from "@/lib/analytics/plausible"
  * Edge cases handled:
  *   - referrer empty (direct navigation, signup link from email,
  *     CLI install instructions copy-pasted) → fire nothing
- *   - referrer is the main flareo.dev site → fire nothing (this
+ *   - referrer is the main flareo.app site → fire nothing (this
  *     event is specifically for preview→main conversion)
  *   - referrer is a non-flareo external site → fire nothing
  *   - referrer matches the catch-all `s-*-demo` pattern but the slug

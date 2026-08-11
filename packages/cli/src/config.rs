@@ -11,7 +11,7 @@
 //! # Flareo CLI config. Do not edit by hand.
 //! [auth]
 //! token = "fla_abcdef..."
-//! api_url = "https://flareo.dev"
+//! api_url = "https://flareo.app"
 //! user_handle = "octocat"
 //! signed_in_at = "2026-04-23T14:32:00Z"
 //! ```

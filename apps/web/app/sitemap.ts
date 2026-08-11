@@ -10,10 +10,10 @@ import { appBaseUrl, hasDatabaseUrl } from "@/lib/config/env";
  *   2. Every public module, dynamically from Postgres
  *   3. Legal pages (/legal/terms, /legal/privacy)
  *
- * Docs live on docs.flareo.dev and have their own sitemap (static, in
- * the flareo-docs repo). Intentionally separate because the two hosts
- * have different deploy cadences and we don't want a docs rebuild to
- * invalidate the main-site sitemap.
+ * Docs live under /docs on the main app and are included in this
+ * sitemap via the static pages list (or a future docs crawl). They
+ * used to ship on a separate host with its own sitemap; that split
+ * is gone — one deploy cadence, one sitemap.
  *
  * Base URL comes from `appBaseUrl()` — production must set
  * NEXT_PUBLIC_APP_URL or this throws. Prevents staging from emitting

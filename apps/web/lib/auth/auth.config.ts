@@ -42,7 +42,7 @@ if (process.env.AUTH_RESEND_KEY) {
   providers.push(
     Resend({
       apiKey: process.env.AUTH_RESEND_KEY,
-      from: process.env.AUTH_RESEND_FROM ?? "hello@flareo.dev",
+      from: process.env.AUTH_RESEND_FROM ?? "noreply@flareo.app",
     }),
   );
 }

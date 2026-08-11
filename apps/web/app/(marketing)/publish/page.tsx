@@ -424,12 +424,14 @@ export default function PublishPage() {
               <strong className="text-ink">Notice and appeal:</strong> in
               every case except the malicious-code one, you get 7 days of
               notice before public delisting and a written explanation of the
-              specific reason. Appeals go to{" "}
+              specific reason. Appeals go via{" "}
               <a
-                href="mailto:appeals@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent hover:text-accent-hot"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                appeals@flareo.dev
+                GitHub Issues
               </a>{" "}
               and reach a different reviewer than the one who made the original
               call. Malicious code skips the 7-day notice — we delist

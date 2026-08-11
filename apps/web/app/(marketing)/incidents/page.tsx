@@ -83,7 +83,7 @@ export default function IncidentsPage() {
             <KindCard
               code={KIND_LABELS["platform"]}
               title="Platform vulnerabilities"
-              body="Security issues found in flareo.dev itself or our API. Reported through /security, fixed, then disclosed here."
+              body="Security issues found in flareo.app itself or our API. Reported through /security, fixed, then disclosed here."
             />
             <KindCard
               code={KIND_LABELS["module-cve"]}

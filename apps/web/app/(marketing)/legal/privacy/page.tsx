@@ -149,11 +149,10 @@ export default function PrivacyPage() {
                 </thead>
                 <tbody className="font-mono text-[12.5px]">
                   {[
-                    ["Vercel", "App hosting", "Global edge"],
+                    ["Vercel", "App hosting + docs (/docs)", "Global edge"],
                     ["Neon", "Postgres database", "EU (Frankfurt)"],
                     ["Upstash", "Redis (rate-limit state)", "EU (Frankfurt)"],
                     ["Cloudflare R2", "SBOM + scan storage", "EU"],
-                    ["Cloudflare Pages", "docs.flareo.dev", "Global edge"],
                     ["AWS ECR Public", "Container registry", "Global"],
                     ["Resend", "Transactional email", "EU"],
                     ["GitHub", "OAuth + source", "US"],
@@ -178,12 +177,14 @@ export default function PrivacyPage() {
           <Section n="5" title="Your rights">
             <p>
               You can request a copy of your data, ask us to delete it,
-              or correct something we&apos;ve got wrong by emailing{" "}
+              or correct something we&apos;ve got wrong by opening an issue on{" "}
               <a
-                href="mailto:privacy@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                privacy@flareo.dev
+                GitHub
               </a>
               . We respond within 14 days and complete the action within
               30 days.
@@ -252,10 +253,12 @@ export default function PrivacyPage() {
             <p>
               Privacy questions:{" "}
               <a
-                href="mailto:privacy@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                privacy@flareo.dev
+                GitHub Issues
               </a>
               .
             </p>

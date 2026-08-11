@@ -31,7 +31,7 @@ struct Cli {
     #[command(subcommand)]
     command: Commands,
 
-    /// Override the Flareo API base URL. Defaults to https://flareo.dev.
+    /// Override the Flareo API base URL. Defaults to https://flareo.app.
     /// Useful for pointing at a local dev server (http://localhost:3000).
     #[arg(long, env = "FLAREO_API_URL", global = true)]
     api_url: Option<String>,
@@ -218,7 +218,7 @@ async fn main() {
     let api_url = cli
         .api_url
         .clone()
-        .unwrap_or_else(|| "https://flareo.dev".to_string());
+        .unwrap_or_else(|| "https://flareo.app".to_string());
 
     let result: Result<(), CliError> = match cli.command {
         Commands::Login => commands::login::run(&api_url).await,

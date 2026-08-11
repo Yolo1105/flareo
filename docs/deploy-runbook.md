@@ -15,7 +15,7 @@ If a step fails, **stop**. Don't continue. Paste the error in the next session a
 - A Plausible account at https://plausible.io
 - The Hetzner box for the shared preview demos (already exists per `deploy/preview/`)
 - A worker host — a small VPS (Hetzner CX21, DigitalOcean droplet, or similar) with Docker + cosign + Trivy installed
-- Anthropic-compatible domain DNS (the project assumes you control `flareo.dev` and `*.preview.flareo.dev`)
+- Anthropic-compatible domain DNS (the project assumes you control `flareo.app` and, for shared demos, preview subdomains documented under `deploy/preview/`)
 
 ---
 
@@ -103,7 +103,7 @@ Set all of these in Project Settings → Environment Variables. Mark them for Pr
 | Var | Purpose |
 |-----|---------|
 | `DATABASE_URL` | Postgres connection string. Must be reachable from Vercel's build environment (use a managed Postgres service like Neon, Supabase, or Railway). |
-| `NEXT_PUBLIC_APP_URL` | Public URL of the deployed app (e.g. `https://flareo.dev`). `lib/config/env.ts` throws if unset in production. Used by sitemap, robots, and Stripe redirect URLs. |
+| `NEXT_PUBLIC_APP_URL` | Public URL of the deployed app (e.g. `https://flareo.app`). `lib/config/env.ts` throws if unset in production. Used by sitemap, robots, and Stripe redirect URLs. |
 | `AUTH_SECRET` | Generate with `openssl rand -base64 32`. Required by NextAuth. |
 
 **Required for sign-in to work:**
@@ -195,12 +195,12 @@ FLAREO_WORKER_SECRET=<value from worker-secret.txt>
 
 # On the worker host:
 FLAREO_WORKER_SECRET=<same value>
-MAIN_APP_URL=https://flareo.dev   # or whatever your deployed URL is
+MAIN_APP_URL=https://flareo.app   # or whatever your deployed URL is
 ```
 
 Restart the main app (Vercel redeploys automatically). Restart the worker process.
 
-**Success check:** `curl -X POST https://flareo.dev/api/v1/worker/heartbeat -H "x-worker-secret: <value>"` returns 200.
+**Success check:** `curl -X POST https://flareo.app/api/v1/worker/heartbeat -H "x-worker-secret: <value>"` returns 200.
 
 ---
 
@@ -257,7 +257,7 @@ Should show heartbeat lines every 30 seconds, no errors.
 ```
 - Create Stripe products: free tier (free, just for billing dashboard) + Pro tier (€12/mo)
 - Note the price ID for Pro
-- Add webhook endpoint: https://flareo.dev/api/v1/billing/webhook
+- Add webhook endpoint: https://flareo.app/api/v1/billing/webhook
 - Subscribe to events: customer.subscription.created, .updated, .deleted, invoice.paid
 - Copy webhook signing secret → STRIPE_WEBHOOK_SECRET in env
 - Copy Pro price ID → STRIPE_PRICE_ID_PRO in env
@@ -269,7 +269,7 @@ Should show heartbeat lines every 30 seconds, no errors.
 
 ## 10. Configure remaining external services
 
-- **GitHub OAuth app** at https://github.com/settings/developers — set callback URL to `https://flareo.dev/api/auth/callback/github`. Copy ClientID/Secret to env.
+- **GitHub OAuth app** at https://github.com/settings/developers — set callback URL to `https://flareo.app/api/auth/callback/github`. Copy ClientID/Secret to env.
 - **Resend** — verify your sending domain. Set `RESEND_API_KEY`.
 - **ECR** — create the public repo `public.ecr.aws/flareo/<your-org>` and grant push role to the worker's IAM identity.
 - **Sigstore** — no setup; the worker uses keyless OIDC via GitHub Actions identity tokens.
@@ -281,10 +281,10 @@ Should show heartbeat lines every 30 seconds, no errors.
 
 ```sh
 # From any machine
-curl -s https://flareo.dev/api/v1/health
+curl -s https://flareo.app/api/v1/health
 # Expected: {"status":"ok",...}
 
-curl -s https://flareo.dev/api/v1/stats
+curl -s https://flareo.app/api/v1/stats
 # Expected: JSON with module counts, build counts, etc.
 ```
 

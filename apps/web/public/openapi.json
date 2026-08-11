@@ -6,7 +6,7 @@
     "description": "Public API for the Flareo container supply chain platform. Covers image verification against Sigstore, module catalog reads, health checks, and identity lookups. The CLI consumes the same endpoints described here.\n\nAuthentication is optional for read endpoints and `/verify`, and either a NextAuth session cookie or an `Authorization: Bearer fla_<token>` header is accepted where required.\n\nRate limits: 60/hour/IP for anonymous verify calls, 600/hour/user for authenticated, 300/hour/key on catalog reads. Exceeded limits return 429 with `Retry-After` set."
   },
   "servers": [
-    { "url": "https://flareo.dev", "description": "Production" },
+    { "url": "https://flareo.app", "description": "Production" },
     { "url": "http://localhost:3000", "description": "Local development" }
   ],
   "paths": {

@@ -14,7 +14,7 @@ Optional but nice: a **module slug** you've already checked. Slugs are unique ac
 
 ## The happy path: web wizard
 
-Sign in at [flareo.dev/signin](/signin) and open the [publish wizard](/app/publish). Four steps:
+Sign in at [flareo.app/signin](/signin) and open the [publish wizard](/app/publish). Four steps:
 
 1. **Source** — the repo URL. We clone it at build time and check out the commit you specify.
 2. **Manifest** — module name, version, category, whether it's previewable.
@@ -59,7 +59,7 @@ When a reviewer clicks Approve, the build worker picks up the submission within 
 4. Generates an SBOM with Syft
 5. Pushes to `public.ecr.aws/flareo/<your-slug>`
 6. Signs with cosign using the Flareo GitHub Actions OIDC identity, which writes the signature to the public Sigstore transparency log
-7. Creates the public catalog entry at `flareo.dev/modules/<your-slug>`
+7. Creates the public catalog entry at `flareo.app/modules/<your-slug>`
 
 The whole sequence usually takes 5-12 minutes end-to-end. You get an email when it completes — either "Your module is live" with links, or "Build failed" with the reason and a retry path.
 

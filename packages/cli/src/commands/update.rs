@@ -198,7 +198,7 @@ pub async fn run(
     eprintln!(
         "  {}",
         format!(
-            "Read the full module page: https://flareo.dev/modules/{}",
+            "Read the full module page: https://flareo.app/modules/{}",
             slug
         )
         .bright_black()

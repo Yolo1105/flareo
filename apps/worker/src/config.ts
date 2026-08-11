@@ -76,7 +76,7 @@ export function loadConfig(): Config {
     buildRoot: envOrDefault("BUILD_ROOT", "/var/lib/flareo-worker/builds"),
     docsUrl: envOrDefault(
       "DOCS_URL",
-      "https://flareo.dev/docs/submitting-dockerfiles"
+      "https://flareo.app/docs/submitting-dockerfiles"
     ),
     sentryDsn: process.env.SENTRY_DSN ?? null,
     workerId: envOrDefault("WORKER_ID", `worker-${process.pid}`),

@@ -12,7 +12,7 @@ import Script from "next/script";
  *   - Local dev: unset → no script, no network calls to plausible.io
  *   - Preview deploys: unset → no tracking; don't pollute the real
  *     stats with Vercel preview-URL traffic
- *   - Production: set to "flareo.dev" (or whatever the live domain
+ *   - Production: set to "flareo.app" (or whatever the live domain
  *     is) → script loads, page views ticked
  *
  * The "tagged-events" extension lets us fire custom events from

@@ -63,7 +63,7 @@ ApprovalEmail.PreviewProps = {
   slug: "my-cool-app",
   version: "1.2.3",
   submissionId: "sub_abc123",
-  dashboardUrl: "https://flareo.dev/app/modules",
+  dashboardUrl: "https://flareo.app/app/modules",
 } satisfies ApprovalEmailProps;
 
 const headingStyle = {

@@ -81,12 +81,14 @@ export default async function SettingsPage() {
               email-verify round-trip — that flow is tracked on the
               roadmap. If you need a different email right now, sign in
               on the other email via GitHub and we&apos;ll merge the
-              accounts manually; email{" "}
+              accounts manually; open an issue on{" "}
               <a
-                href="mailto:hello@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                hello@flareo.dev
+                GitHub
               </a>
               .
             </p>
@@ -104,12 +106,14 @@ export default async function SettingsPage() {
                     profileSafe.deletedAt.getTime() + SOFT_DELETE_GRACE_MS
                   ).toLocaleDateString()}
                 </strong>
-                . You can cancel anytime by emailing{" "}
+                . You can cancel anytime by opening an issue on{" "}
                 <a
-                  href="mailto:privacy@flareo.dev"
+                  href="https://github.com/Yolo1105/flareo/issues"
                   className="text-accent underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  privacy@flareo.dev
+                  GitHub
                 </a>
                 .
               </p>

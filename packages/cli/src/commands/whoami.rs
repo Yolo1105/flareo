@@ -28,7 +28,7 @@ pub async fn run(api_url: &str) -> Result<(), CliError> {
 
     // Use the API URL recorded in config if present, else the flag value.
     // If they differ, prefer the flag (the user is explicitly redirecting).
-    let base = if api_url != "https://flareo.dev" {
+    let base = if api_url != "https://flareo.app" {
         api_url
     } else {
         &auth.api_url

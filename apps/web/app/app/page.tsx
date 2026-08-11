@@ -281,9 +281,7 @@ export default async function DashboardPage() {
               § SYSTEM HEALTH
             </div>
             <a
-              href="https://status.flareo.dev"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/status"
               className="block border border-hairline bg-canvas-deep p-4 transition-colors hover:border-accent"
             >
               <div className="mb-2 flex items-center gap-2 font-mono text-[11px] text-good">
@@ -292,7 +290,7 @@ export default async function DashboardPage() {
               </div>
               <div className="font-body text-[12px] text-ink-softer">
                 Live status at{" "}
-                <span className="text-ink">status.flareo.dev</span>.
+                <span className="text-ink">flareo.app/status</span>.
               </div>
             </a>
           </div>

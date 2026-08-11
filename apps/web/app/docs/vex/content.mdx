@@ -22,7 +22,7 @@ The reviewer team writes statements as the catalog evolves. Most modules have mo
 ## Where to find a module's VEX document
 
 ```
-GET https://flareo.dev/api/v1/modules/<slug>/vex
+GET https://flareo.app/api/v1/modules/<slug>/vex
 ```
 
 The response is OpenVEX 0.2.0 JSON. `Cache-Control: public, max-age=300`. ETag invalidates when the document changes — typically when a reviewer adds, edits, or re-statuses a CVE.
@@ -32,7 +32,7 @@ A minimal example response:
 ```json
 {
   "@context": "https://openvex.dev/ns/v0.2.0",
-  "@id": "https://flareo.dev/api/v1/modules/vaultwarden/vex",
+  "@id": "https://flareo.app/api/v1/modules/vaultwarden/vex",
   "author": "Flareo Reviewer Team",
   "timestamp": "2026-04-25T14:32:00Z",
   "version": 7,
@@ -56,13 +56,13 @@ The major scanners all consume OpenVEX directly:
 
 **Trivy:**
 ```sh
-trivy image --vex https://flareo.dev/api/v1/modules/vaultwarden/vex \
+trivy image --vex https://flareo.app/api/v1/modules/vaultwarden/vex \
   public.ecr.aws/flareo/vaultwarden@sha256:...
 ```
 
 **Grype:**
 ```sh
-grype --vex https://flareo.dev/api/v1/modules/vaultwarden/vex \
+grype --vex https://flareo.app/api/v1/modules/vaultwarden/vex \
   public.ecr.aws/flareo/vaultwarden@sha256:...
 ```
 

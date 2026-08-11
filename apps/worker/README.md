@@ -95,7 +95,7 @@ journalctl -u flareo-worker -f
 | `POLL_INTERVAL_MS`        | no       | `30000`                          | How often to poll for new work        |
 | `BUILD_TIMEOUT_MS`        | no       | `600000`                         | Max build duration (10 min)           |
 | `BUILD_ROOT`              | no       | `/var/lib/flareo-worker/builds`  | Build staging                         |
-| `DOCS_URL`                | no       | flareo.dev docs URL              | Included in failure messages          |
+| `DOCS_URL`                | no       | flareo.app docs URL              | Included in failure messages          |
 | `SENTRY_DSN`              | no       | —                                | Reports worker crashes                |
 | `WORKER_ID`               | no       | `worker-<pid>`                   | Identifies self in audit logs         |
 | `LOG_LEVEL`               | no       | `info`                           | `debug` or `info`                     |
@@ -153,4 +153,4 @@ System failures show a "Retry build" button in the admin detail view. User / sca
 
 Read `docs/red-team-playbook.md` in the main repo before enabling public submissions. The 14 documented attacks test every meaningful threat. Rerun after any change to `build.ts`.
 
-If you find a sandbox escape, file a private security report to `security@flareo.dev` — do not open a public GitHub issue.
+If you find a sandbox escape, file a private security report via [GitHub Security Advisories](https://github.com/Yolo1105/flareo/security/advisories/new) — do not open a public GitHub issue.

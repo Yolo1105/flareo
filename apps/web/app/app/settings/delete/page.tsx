@@ -43,14 +43,16 @@ export default async function DeleteAccountPage() {
               <p className="font-body text-[13px] leading-[1.55] text-ink-softer">
                 Your account doesn&apos;t have an email address, which
                 our self-service deletion flow requires to confirm
-                intent. Please email{" "}
+                intent. Please open an issue on{" "}
                 <a
-                  href="mailto:privacy@flareo.dev"
+                  href="https://github.com/Yolo1105/flareo/issues"
                   className="text-accent underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  privacy@flareo.dev
+                  GitHub
                 </a>{" "}
-                from any address you control and mention your GitHub
+                from any account you control and mention your GitHub
                 username. We&apos;ll delete the account within one
                 business day.
               </p>

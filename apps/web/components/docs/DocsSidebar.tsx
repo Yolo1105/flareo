@@ -60,10 +60,10 @@ export function DocsSidebar({ currentSlug }: SidebarProps) {
 
       <div className="mt-10 border-t border-hairline pt-6">
         <a
-          href="https://flareo.dev"
+          href="https://flareo.app"
           className="block font-mono text-[11px] tracking-[0.08em] text-ink-faint hover:text-accent"
         >
-          ← flareo.dev
+          ← flareo.app
         </a>
         <a
           href="https://github.com/flareo"

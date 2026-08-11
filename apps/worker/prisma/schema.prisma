@@ -30,8 +30,8 @@ model User {
 
   // Account lifecycle. When `deletedAt` is set, the account is in its
   // 30-day soft-delete grace window. A nightly job hard-deletes rows
-  // past `deletedAt + 30d`. During the grace window the user can email
-  // privacy@flareo.dev to restore the account.
+  // past `deletedAt + 30d`. During the grace window the user can open
+  // a GitHub issue to restore the account.
   deletedAt     DateTime?
   // When the user last changed their display name / email, for audit
   // and rate-limit purposes. NULL means "never changed since signup."

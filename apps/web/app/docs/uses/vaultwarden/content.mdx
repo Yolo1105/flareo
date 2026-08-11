@@ -46,7 +46,7 @@ flareo verify public.ecr.aws/flareo/vaultwarden@sha256:7f2a...
 
 You should see three green lines — signature present and valid, SBOM exists, scan status current. Internally this hits Sigstore's public transparency log; no Flareo server sits in the verification path. You can verify from a different machine, a different network, a different decade — the guarantee holds as long as Sigstore does.
 
-If verify fails, stop. Either the digest is wrong (typo?) or something genuinely weird is going on — email hello@flareo.dev before deploying.
+If verify fails, stop. Either the digest is wrong (typo?) or something genuinely weird is going on — open an issue on [GitHub](https://github.com/Yolo1105/flareo/issues) before deploying.
 
 ## Step 3: generate a pinned compose file
 

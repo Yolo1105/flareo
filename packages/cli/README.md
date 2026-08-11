@@ -1,6 +1,6 @@
 # flareo CLI
 
-Command-line client for the [Flareo](https://flareo.dev) container supply chain platform.
+Command-line client for the [Flareo](https://flareo.app) container supply chain platform.
 
 Browse the Flareo catalog, verify signed images, and sign in to your account from your terminal.
 
@@ -48,7 +48,7 @@ flareo logout         # remove the stored token
 
 Credentials are stored at `~/.flareo/config.toml` (or the platform equivalent) with mode `0600`. The file is not intended to be edited by hand; use `flareo login` / `flareo logout` to manage it.
 
-The default API base URL is `https://flareo.dev`. To point the CLI at a local dev server, use either:
+The default API base URL is `https://flareo.app`. To point the CLI at a local dev server, use either:
 
 ```sh
 flareo --api-url http://localhost:3000 login

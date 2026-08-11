@@ -168,12 +168,14 @@ export default function AboutPage() {
             <p className="mb-4 font-body text-[14px] leading-[1.65] text-ink-cream">
               I&apos;m the only person who reads every reviewer
               decision, every takedown request, every report filed
-              against a module. If you write to{" "}
+              against a module. If you write via{" "}
               <a
-                href="mailto:hello@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent hover:text-accent-hot"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                hello@flareo.dev
+                GitHub Issues
               </a>
               , I read it. If you find a bug at{" "}
               <Link

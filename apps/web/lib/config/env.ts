@@ -31,7 +31,7 @@ export function hasDatabaseUrl(): boolean {
  *
  * In development, falls back to localhost. In any other NODE_ENV,
  * an unset value throws at first access — which is what we want:
- * a silent fallback to "https://flareo.dev" would cause Stripe
+ * a silent fallback to "https://flareo.app" would cause Stripe
  * success redirects from staging to bounce to production.
  *
  * @throws Error if NODE_ENV !== "development" and the env var is unset
@@ -72,7 +72,7 @@ export function appBaseUrlOr(requestOrigin: string): string {
   if (v && v.length > 0) return v;
   if (process.env.NODE_ENV === "development") return requestOrigin;
   // In production this is still better than silently returning
-  // flareo.dev, because it uses the host the request actually came
+  // flareo.app, because it uses the host the request actually came
   // in on — matching the user's session.
   return requestOrigin;
 }

@@ -27,7 +27,7 @@ interface SendArgs {
 
 async function send({ to, subject, react, text }: SendArgs): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY ?? process.env.AUTH_RESEND_KEY;
-  const from = process.env.AUTH_RESEND_FROM ?? "hello@flareo.dev";
+  const from = process.env.AUTH_RESEND_FROM ?? "noreply@flareo.app";
 
   if (!apiKey) {
     console.warn("[email] RESEND_API_KEY not set; skipping send", {

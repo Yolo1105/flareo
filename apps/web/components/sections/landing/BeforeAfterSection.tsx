@@ -145,13 +145,13 @@ function FlareoPane() {
         </span>
       </header>
       <pre className="overflow-x-auto p-5 font-mono text-[11.5px] leading-[1.75] text-ink-mute">
-{`19:42  # open flareo.dev/marketplace, search "uptime kuma"
+{`19:42  # open flareo.app/marketplace, search "uptime kuma"
        # see: trust 94 · SLSA L3 · 0 critical · 8 reviews · 4.6★
        # click "try shared demo" — see real instance on flareo subdomain
 19:43  # works. exactly the dashboard i wanted. close tab.
 
 19:44  # back to the module page. click "DOWNLOAD .md BUNDLE"
-19:44  $ curl -O https://flareo.dev/api/v1/modules/uptime-kuma/takeaway
+19:44  $ curl -O https://flareo.app/api/v1/modules/uptime-kuma/takeaway
 19:44  $ ls
        uptime-kuma-1.23.4-takeaway.md
 

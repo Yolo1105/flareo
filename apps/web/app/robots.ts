@@ -10,7 +10,7 @@ import { appBaseUrl } from "@/lib/config/env";
  *
  * Base URL comes from `appBaseUrl()` which throws in production if
  * NEXT_PUBLIC_APP_URL isn't set. That's intentional — a silent
- * fallback to flareo.dev would mean staging environments tell Google
+ * fallback to flareo.app would mean staging environments tell Google
  * the production sitemap is canonical, which is wrong.
  */
 export default function robots(): MetadataRoute.Robots {

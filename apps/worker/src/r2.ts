@@ -115,6 +115,6 @@ export async function writeSbom(
     })
   );
   // Public URL format for R2. In production the bucket should have a
-  // custom domain like sboms.flareo.dev; the raw r2.dev URL works too.
+  // custom domain like sboms.flareo.app; the raw r2.dev URL works too.
   return `https://${bucket}.r2.dev/${key}`;
 }

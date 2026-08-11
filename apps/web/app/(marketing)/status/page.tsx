@@ -45,7 +45,7 @@ export default async function StatusPage() {
     <>
       <PageHero
         eyebrow="STATUS / LIVE"
-        prompt="curl flareo.dev/api/v1/health"
+        prompt="curl https://flareo.app/api/v1/health"
         promptComment="# real-time, no cache"
         title={
           <>
@@ -56,16 +56,11 @@ export default async function StatusPage() {
         }
       >
         Live status for every Flareo component. This page re-fetches on every
-        load and is never cached. For historical uptime and incident history,{" "}
-        <a
-          className="text-accent underline"
-          href="https://status.flareo.dev"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          status.flareo.dev
-        </a>{" "}
-        (Instatus-hosted) is the source of truth.
+        load and is never cached. For past incidents and post-mortems, see{" "}
+        <a className="text-accent underline" href="/incidents">
+          /incidents
+        </a>
+        .
       </PageHero>
 
       {/* Live checks */}
@@ -88,7 +83,7 @@ export default async function StatusPage() {
         <div className="grid gap-4 md:grid-cols-3">
           <SystemCard
             label="WEB APP"
-            title="flareo.dev"
+            title="flareo.app"
             tone="ok"
             detail={
               health
@@ -115,39 +110,10 @@ export default async function StatusPage() {
         </div>
       </section>
 
-      {/* Reference links */}
-      <section className="border-b border-hairline bg-canvas-panel px-8 py-12">
-        <div className="mb-6 flex items-center gap-2.5 font-mono text-[11px] font-medium tracking-[0.14em] text-accent">
-          <span className="font-normal text-ink-ghost">02</span>
-          UPTIME HISTORY & INCIDENTS
-        </div>
-        <div className="max-w-[640px] space-y-4 font-body text-[14px] leading-[1.65] text-ink-softer">
-          <p>
-            Historical uptime, per-component incident timelines, and
-            post-mortems live on our Instatus page. It polls our public
-            endpoints every 5 minutes from multiple regions and stores the
-            results indefinitely.
-          </p>
-          <p>
-            <a
-              className="text-accent underline"
-              href="https://status.flareo.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              status.flareo.dev →
-            </a>
-          </p>
-          <p className="font-mono text-[12px] text-ink-faint">
-            Subscribe to incident updates via email or RSS from that page.
-          </p>
-        </div>
-      </section>
-
       {/* Health endpoint reference */}
       <section className="px-8 py-12">
         <div className="mb-5 flex items-center gap-2.5 font-mono text-[11px] font-medium tracking-[0.14em] text-accent">
-          <span className="font-normal text-ink-ghost">03</span>
+          <span className="font-normal text-ink-ghost">02</span>
           PROGRAMMATIC HEALTH CHECK
         </div>
         <div className="max-w-[640px] space-y-4 font-body text-[14px] leading-[1.65] text-ink-softer">
@@ -157,7 +123,7 @@ export default async function StatusPage() {
           </p>
           <pre className="overflow-x-auto border border-hairline bg-canvas-deep p-5 font-mono text-[12.5px] leading-[1.6] text-ink">
             <span className="text-accent">$</span> curl
-            https://flareo.dev/api/v1/health
+            https://flareo.app/api/v1/health
             {"\n"}
             {"{\n"}
             {"  "}&quot;status&quot;: &quot;ok&quot;,{"\n"}

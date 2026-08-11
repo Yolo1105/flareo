@@ -34,7 +34,7 @@ When a customer self-hosts:
 - **OAuth providers** — their internal SSO, not GitHub
 - **ECR / registry** — their own registry credentials
 
-The main-app code path detects self-host mode via `FLAREO_SELFHOST=true` env and skips all flareo.dev-specific behavior (no canary upload to our R2, no remote canary trigger, no Stripe webhook routing to flareo.dev).
+The main-app code path detects self-host mode via `FLAREO_SELFHOST=true` env and skips all flareo.app-specific behavior (no canary upload to our R2, no remote canary trigger, no Stripe webhook routing to flareo.app).
 
 ## Why this is speculative
 

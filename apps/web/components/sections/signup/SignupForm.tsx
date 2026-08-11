@@ -86,20 +86,15 @@ export function SignupForm() {
           <p className="font-mono text-[12px] leading-[1.7] text-ink-faint">
             In the meantime, you can verify any signed container at{" "}
             <a href="/verify" className="text-accent underline">
-              flareo.dev/verify
+              flareo.app/verify
             </a>
             , browse the catalog at{" "}
             <a href="/catalog" className="text-accent underline">
-              flareo.dev/catalog
+              flareo.app/catalog
             </a>
             , or read the docs at{" "}
-            <a
-              href="https://docs.flareo.dev"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-accent underline"
-            >
-              docs.flareo.dev
+            <a href="/docs" className="text-accent underline">
+              flareo.app/docs
             </a>
             . All of that works today, no signup required.
           </p>

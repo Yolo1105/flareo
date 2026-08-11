@@ -1,6 +1,6 @@
 # flareo-admission
 
-Kubernetes admission policies that require valid [Flareo](https://flareo.dev) Sigstore signatures on any image pulled from `public.ecr.aws/flareo/*`.
+Kubernetes admission policies that require valid [Flareo](https://flareo.app) Sigstore signatures on any image pulled from `public.ecr.aws/flareo/*`.
 
 Three policies, for different controllers and strictness levels:
 
@@ -44,10 +44,10 @@ kubectl patch clusterpolicy require-flareo-signature \
 
 ## Strict mode caveats
 
-`flareo-admission-strict.yaml` adds a live call to `flareo.dev/api/v1/verify` at admission time. This ensures the module's current status in the Flareo catalog is `verified` (not `pending` or `failing`). Two tradeoffs:
+`flareo-admission-strict.yaml` adds a live call to `flareo.app/api/v1/verify` at admission time. This ensures the module's current status in the Flareo catalog is `verified` (not `pending` or `failing`). Two tradeoffs:
 
 1. **Latency.** Adds ~200-500ms per pod creation. Usually negligible for Deployments; may matter for Jobs that churn pods rapidly.
-2. **Availability.** If `flareo.dev` is unreachable, admission fails closed. Configure `failurePolicy: Ignore` on the webhook if you prefer fail-open.
+2. **Availability.** If `flareo.app` is unreachable, admission fails closed. Configure `failurePolicy: Ignore` on the webhook if you prefer fail-open.
 
 Most clusters should start with the basic policy.
 

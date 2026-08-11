@@ -10,7 +10,7 @@ import { z } from "zod";
  */
 export const RESERVED_USERNAMES: ReadonlySet<string> = new Set([
   // Route namespace — anything that appears as a top-level path on
-  // flareo.dev. Keep in sync with app/ directory's top-level routes.
+  // flareo.app. Keep in sync with app/ directory's top-level routes.
   "admin",
   "api",
   "app",

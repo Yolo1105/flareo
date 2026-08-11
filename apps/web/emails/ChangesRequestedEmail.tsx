@@ -65,7 +65,7 @@ ChangesRequestedEmail.PreviewProps = {
   submissionId: "sub_abc123",
   message:
     "The Dockerfile pins FROM alpine (no version). Please pin to a specific version like alpine:3.19 so builds are reproducible.",
-  dashboardUrl: "https://flareo.dev/app/modules",
+  dashboardUrl: "https://flareo.app/app/modules",
 } satisfies ChangesRequestedEmailProps;
 
 const headingStyle = {

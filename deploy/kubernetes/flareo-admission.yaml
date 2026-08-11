@@ -22,8 +22,8 @@
 #     affected.
 #
 # Related docs:
-#   - https://docs.flareo.dev/docs/admission
-#   - https://docs.flareo.dev/docs/signing
+#   - https://flareo.app/docs/admission
+#   - https://flareo.app/docs/signing
 
 apiVersion: kyverno.io/v2beta1
 kind: ClusterPolicy

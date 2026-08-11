@@ -53,7 +53,7 @@ export function getStripeClient(): Stripe {
     // tickets are easier to triage.
     appInfo: {
       name: "Flareo",
-      url: "https://flareo.dev",
+      url: "https://flareo.app",
     },
     // Don't buffer telemetry; we call Stripe rarely enough that the
     // bundled-metrics overhead isn't worth it.

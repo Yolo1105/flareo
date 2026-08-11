@@ -58,7 +58,7 @@ trivy image public.ecr.aws/flareo/vaultwarden@sha256:abc123...
 Or pull Flareo's report:
 
 ```sh
-curl -s https://flareo.dev/api/v1/modules/vaultwarden | jq -r .scanUrl | xargs curl -s | jq .Results
+curl -s https://flareo.app/api/v1/modules/vaultwarden | jq -r .scanUrl | xargs curl -s | jq .Results
 ```
 
 The two reports should agree on what's installed; they may disagree on severity if one has a fresher vulnerability database.

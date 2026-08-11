@@ -117,7 +117,7 @@ export function Stage07Policy({ module, decision }: Props) {
       >
         <pre className="overflow-x-auto p-5 font-mono text-[10.5px] leading-[1.65] text-ink-mute">
 {`{
-  "$schema": "https://flareo.dev/schemas/admission-policy/0.1.0.json",
+  "$schema": "https://flareo.app/schemas/admission-policy/0.1.0.json",
   "version": "${decision.policyVersion}",
   "rules": {
     "max_critical_cves": 0,

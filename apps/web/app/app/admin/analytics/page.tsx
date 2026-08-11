@@ -242,7 +242,7 @@ export default async function AdminAnalyticsPage() {
             SubmissionQuotaBlocked / UpgradeClicked custom events live
             in{" "}
             <a
-              href="https://plausible.io/flareo.dev"
+              href="https://plausible.io/flareo.app"
               className="text-accent underline decoration-accent/40 underline-offset-2 hover:decoration-accent"
               target="_blank"
               rel="noopener"

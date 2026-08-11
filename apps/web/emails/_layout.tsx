@@ -38,8 +38,8 @@ export function EmailLayout({ preview, children }: LayoutProps) {
             <Text style={footerStyle}>
               Flareo · Container supply chain for self-hosters
               <br />
-              You received this because you have an account at flareo.dev.
-              Manage email preferences at flareo.dev/app/settings/notifications.
+              You received this because you have an account at flareo.app.
+              Manage email preferences at flareo.app/app/settings/notifications.
             </Text>
           </Section>
         </Container>

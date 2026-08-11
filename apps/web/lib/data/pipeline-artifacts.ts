@@ -390,7 +390,7 @@ function buildSlsaProvenance(m: Module): SlsaShape {
       predicate: {
         buildDefinition: {
           buildType:
-            "https://flareo.dev/buildkit-hermetic@v0.4.2",
+            "https://flareo.app/buildkit-hermetic@v0.4.2",
           externalParameters: {
             source: `r2://submissions/${m.slug}-${m.version}.tar.zst`,
             sourceSha256: hexFrom(m.digest, 4, 64),
@@ -521,7 +521,7 @@ function buildPublishReceipt(m: Module): PublishReceiptShape {
     digest: m.digest,
     tag: m.version,
     pushedAt: deterministicTimestamp(m.slug, 0),
-    marketplaceUrl: `https://flareo.dev/modules/${m.slug}`,
+    marketplaceUrl: `https://flareo.app/modules/${m.slug}`,
   };
 }
 

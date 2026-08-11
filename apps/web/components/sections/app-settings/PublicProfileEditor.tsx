@@ -86,7 +86,7 @@ export function PublicProfileEditor({
         <p className="mb-5 font-body text-[12.5px] leading-[1.55] text-ink-softer">
           Visible on{" "}
           <code className="bg-canvas px-1.5 text-ink">
-            flareo.dev/@{saved.username || "yourname"}
+            flareo.app/@{saved.username || "yourname"}
           </code>
           . Anyone can see this page, signed in or not.
         </p>

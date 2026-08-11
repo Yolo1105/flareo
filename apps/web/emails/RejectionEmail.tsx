@@ -71,7 +71,7 @@ RejectionEmail.PreviewProps = {
   submissionId: "sub_abc123",
   reason:
     "The upstream URL points to a private repository, so we can't verify the source. Please resubmit with a public git URL.",
-  docsUrl: "https://flareo.dev/docs/submitting-dockerfiles",
+  docsUrl: "https://flareo.app/docs/submitting-dockerfiles",
 } satisfies RejectionEmailProps;
 
 const headingStyle = {

@@ -35,9 +35,14 @@ export default function TermsPage() {
         }
       >
         The plain-language version. If you find something confusing or
-        disagreeable, email{" "}
-        <a href="mailto:legal@flareo.dev" className="text-accent underline">
-          legal@flareo.dev
+        disagreeable, open an issue on{" "}
+        <a
+          href="https://github.com/Yolo1105/flareo/issues"
+          className="text-accent underline"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
         </a>{" "}
         and we&apos;ll clarify or rewrite it.
       </PageHero>
@@ -100,12 +105,14 @@ export default function TermsPage() {
                 reads)
               </li>
               <li>
-                probe for vulnerabilities without emailing{" "}
+                probe for vulnerabilities without filing a report via{" "}
                 <a
-                  href="mailto:security@flareo.dev"
+                  href="https://github.com/Yolo1105/flareo/security/advisories/new"
                   className="text-accent underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
                 >
-                  security@flareo.dev
+                  GitHub Security Advisories
                 </a>{" "}
                 first
               </li>
@@ -194,12 +201,14 @@ export default function TermsPage() {
           <Section n="9" title="Termination">
             <p>
               You can stop using Flareo at any time. We&apos;ll delete your
-              account data within 30 days if you email{" "}
+              account data within 30 days if you open an issue on{" "}
               <a
-                href="mailto:privacy@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                privacy@flareo.dev
+                GitHub
               </a>{" "}
               to request it.
             </p>
@@ -222,24 +231,30 @@ export default function TermsPage() {
             <p>
               For terms questions:{" "}
               <a
-                href="mailto:legal@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                legal@flareo.dev
+                GitHub Issues
               </a>
               . For security reports:{" "}
               <a
-                href="mailto:security@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/security/advisories/new"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                security@flareo.dev
+                GitHub Security Advisories
               </a>
               . For everything else:{" "}
               <a
-                href="mailto:hello@flareo.dev"
+                href="https://github.com/Yolo1105/flareo/issues"
                 className="text-accent underline"
+                target="_blank"
+                rel="noopener noreferrer"
               >
-                hello@flareo.dev
+                GitHub Issues
               </a>
               .
             </p>

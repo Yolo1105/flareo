@@ -46,8 +46,8 @@ export function Stage04Vex({ module, vex }: Props) {
         <pre className="overflow-x-auto p-5 font-mono text-[10.5px] leading-[1.65] text-ink-mute">
 {`{
   "@context": "https://openvex.dev/ns/v0.2.0",
-  "@id": "https://flareo.dev/vex/${module.slug}/${module.version}",
-  "author": "Flareo Reviewer Team <reviewers@flareo.dev>",
+  "@id": "https://flareo.app/vex/${module.slug}/${module.version}",
+  "author": "Flareo Reviewer Team",
   "timestamp": "${new Date().toISOString().slice(0, 19)}Z",
   "version": 1,
   "statements": ${JSON.stringify(vex.statements, null, 2).split("\n").map(

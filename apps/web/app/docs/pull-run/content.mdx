@@ -10,10 +10,10 @@ Always pull by digest, not by tag. A digest is the content hash; it can't be rep
 docker pull public.ecr.aws/flareo/vaultwarden@sha256:abc123...
 ```
 
-If you want the current pinned digest for a module, it's on the module page at [flareo.dev/modules/vaultwarden](https://flareo.dev/modules/vaultwarden), or via API:
+If you want the current pinned digest for a module, it's on the module page at [flareo.app/modules/vaultwarden](https://flareo.app/modules/vaultwarden), or via API:
 
 ```sh
-curl -s https://flareo.dev/api/v1/modules/vaultwarden | jq -r .digest
+curl -s https://flareo.app/api/v1/modules/vaultwarden | jq -r .digest
 ```
 
 ## Run a one-off
@@ -80,7 +80,7 @@ When a module ships a major version bump upstream (Vaultwarden 1.30 → 1.31, Pa
 
 **Health checks.** The Flareo base image sets a sensible `HEALTHCHECK` for each module. Compose's `depends_on: { condition: service_healthy }` works out of the box.
 
-**Reverse proxy.** The [Caddy module](https://flareo.dev/modules/caddy) is designed to sit in front of everything else. A minimal Caddyfile for Vaultwarden:
+**Reverse proxy.** The [Caddy module](https://flareo.app/modules/caddy) is designed to sit in front of everything else. A minimal Caddyfile for Vaultwarden:
 
 ```
 vw.your-domain.example {

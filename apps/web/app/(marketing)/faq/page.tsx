@@ -504,12 +504,14 @@ export default function FaqPage() {
           <p className="font-body text-[13px] leading-[1.6] text-ink-softer">
             Send it. Every legitimate question makes this page better, and
             we'd rather answer it once on a public page than over and over
-            in private email. Reach{" "}
+            in private email. Reach us on{" "}
             <a
-              href="mailto:hello@flareo.dev"
+              href="https://github.com/Yolo1105/flareo/issues"
               className="text-accent hover:text-accent-hot"
+              target="_blank"
+              rel="noopener noreferrer"
             >
-              hello@flareo.dev
+              GitHub Issues
             </a>
             .
           </p>

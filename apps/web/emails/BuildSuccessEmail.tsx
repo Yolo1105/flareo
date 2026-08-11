@@ -204,8 +204,8 @@ BuildSuccessEmail.PreviewProps = {
   signerIssuer: "https://github.com/login/oauth",
   rekorIndex: "123456789",
   imageRef: "public.ecr.aws/flareo/my-cool-app",
-  sbomUrl: "https://r2.flareo.dev/sboms/my-cool-app-abc.json",
-  catalogUrl: "https://flareo.dev/catalog/my-cool-app",
+  sbomUrl: "https://r2.flareo.app/sboms/my-cool-app-abc.json",
+  catalogUrl: "https://flareo.app/catalog/my-cool-app",
 } satisfies BuildSuccessEmailProps;
 
 const headingStyle = {
