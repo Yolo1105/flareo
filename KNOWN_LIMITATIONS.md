@@ -37,15 +37,28 @@ so they do not have to.
    webhook and quota enforcement exist and are gated off. Retained as
    an engineering record.
 
-9. **Test coverage and the reasoning.** 17 worker unit tests, Playwright
-   E2E specs, and CLI smoke coverage exist. CI runs typecheck and lint
-   for web but there are no web unit tests. Pure logic and the critical
-   path are covered; React components are not, because the
-   cost-to-value ratio is poor for a frozen artifact. The file that
-   most deserves unit tests and does not have them is
-   `apps/web/lib/sigstore/verify.ts`.
+9. **Test coverage and the reasoning.** 17 worker unit tests, web unit
+   tests for reference parsing / bundle-layout detection / verify status
+   mapping (`npm run test:web`, run in web CI), Playwright E2E specs,
+   and CLI smoke coverage exist. Pure logic and the critical path are
+   covered; React components are not, because the cost-to-value ratio
+   is poor for a frozen artifact. The network path inside
+   `apps/web/lib/sigstore/verify.ts` is deliberately unmocked — the
+   decision logic is extracted as `mapVerifyOutcome` so it can be
+   tested without one.
 
-10. **Outstanding dependency advisories.** After non-breaking
+10. **Verify path limits (not a presence check).** Verification fetches
+    the cosign signature manifest, locates a recognised Sigstore bundle
+    layout, and verifies it with `@sigstore/verify` against the
+    public-good TUF trust root (cached in module scope for six hours —
+    not fetched per request). Layouts handled: Sigstore bundle layers
+    (v0.1–v0.3 media types) and the older simplesigning annotation
+    layout. Unrecognised layouts return `invalid`, not `unsigned`.
+    There is no keyless identity policy on the public endpoint —
+    arbitrary third-party images are in scope. Attestation /
+    `cosign attest` verification is out of scope.
+
+11. **Outstanding dependency advisories.** After non-breaking
     `npm audit fix`, the public lockfile still reports **31**
     vulnerabilities (**2 critical**, 5 high, 23 moderate, 1 low) —
     reproduce with `npm audit --package-lock-only`. Deferred majors
@@ -83,11 +96,11 @@ so they do not have to.
     `npm audit --package-lock-only` themselves. Unrelated dependency
     upgrades remain intentionally out of scope.
 
-11. **Single-host deployment.** Deliberate for a single maintainer.
+12. **Single-host deployment.** Deliberate for a single maintainer.
     Scaling means a larger machine, not a rewrite.
 
-12. **No SLA.** Reference implementation and portfolio artifact, not a
+13. **No SLA.** Reference implementation and portfolio artifact, not a
     hosted service with uptime promises.
 
-13. **Status.** Intentionally frozen. Not seeking contributors, feature
+14. **Status.** Intentionally frozen. Not seeking contributors, feature
     requests or a roadmap. See [`CONTRIBUTING.md`](CONTRIBUTING.md).

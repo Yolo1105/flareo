@@ -13,9 +13,10 @@ verification client).
 ## Decision
 
 For images **outside the catalog**, verification returns **signature
-status only**: resolved digest, signer identity, issuer, Rekor index.
-For catalog images, the response may include scan/SBOM/trust metadata
-already produced by the republish pipeline.
+status only**: resolved digest, signer identity, issuer, Rekor index
+(all taken from the verified Sigstore bundle). For catalog images, the
+response may include scan/SBOM/trust metadata already produced by the
+republish pipeline.
 
 Flareo does **not** scan arbitrary user-supplied images on demand.
 

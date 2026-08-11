@@ -27,7 +27,7 @@ Or open http://localhost:3000/verify and paste an image reference. The server is
 
 **Track A — Curated catalog.** A republish pipeline (`apps/web/scripts/republish/`) takes a pinned upstream image (for example `docker.io/vaultwarden/server:1.32.7`), pulls it, records the **upstream digest**, re-tags and pushes to ECR Public under Flareo's namespace (**no rebuild — the bits are identical**), generates a CycloneDX SBOM with Syft, runs Trivy, uploads artifacts to R2, signs with cosign keyless, and upserts a `Module` row with a trust score derived from those outputs.
 
-**Track B — Public verification utility.** `POST /api/v1/verify` and `flareo verify <image>` check the **Sigstore signature of any image**, in the catalog or not. For catalog images the response is enriched with scan/SBOM/trust metadata. For images outside the catalog, the response is **signature status only** (resolved digest, signer identity, issuer, Rekor index).
+**Track B — Public verification utility.** `POST /api/v1/verify` and `flareo verify <image>` verify the **Sigstore signature of any image**, in the catalog or not, against the public-good trust root. For catalog images the response is enriched with scan/SBOM/trust metadata. For images outside the catalog, the response is still **signature status only** (resolved digest, signer identity, issuer, Rekor index) — those three identity fields now come from the verified bundle, not from Postgres.
 
 **This boundary is deliberate.** Flareo does **not** scan arbitrary user-supplied images on demand. It is a neutral verification client, not a scanning service. On-demand pull-and-scan of arbitrary images reintroduces compute abuse; VEX has no author for external images; and a trust score for an unsigned third-party image would be meaningless. See [ADR-014](docs/adr/ADR-014-verification-scope.md).
 
@@ -63,7 +63,14 @@ The EU Cyber Resilience Act's vulnerability reporting obligations took effect on
 
 - Re-publishes pinned upstream images with Syft CycloneDX SBOMs and Trivy scans
 - Cosign **keyless** signing (Fulcio/OIDC), with Rekor log index surfaced in verify output
-- Sigstore bundle parsing (v0.1–v0.3) across Docker Hub, GHCR, and ECR Public (`apps/web/lib/sigstore/verify.ts`)
+- Sigstore bundle verification against the public-good trust root
+  (`apps/web/lib/sigstore/verify.ts`): handles Sigstore bundle layers
+  (`application/vnd.dev.sigstore.bundle+json;version=0.x` and
+  `application/vnd.dev.sigstore.bundle.v0.3+json`) and the older cosign
+  simplesigning annotation layout. Registry transport uses the anonymous
+  Docker token flow. Live-exercised for T-802 against Docker Hub
+  (unsigned) and `cgr.dev` (signed); GHCR and ECR Public share the same
+  API path and were not separately re-proven in that matrix
 - VEX annotation distinguishing exploitable from `not_affected`
 - Trust score from four real signals: vulns, SBOM, signature, provenance (Rekor + upstream digest)
 - Kyverno and sigstore/policy-controller admission templates in Audit mode (`deploy/kubernetes/`)

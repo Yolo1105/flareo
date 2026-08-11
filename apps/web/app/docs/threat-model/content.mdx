@@ -9,14 +9,16 @@ Flareo has two tracks:
 
 - **Catalog (Track A):** re-publish a pinned upstream image with
   receipts. Bits are identical to upstream; Flareo did not rebuild.
-- **Verify (Track B):** check the Sigstore signature of any image.
-  Outside the catalog, the response is signature status only — no
+- **Verify (Track B):** verify the Sigstore signature of any image
+  against the public-good trust root. Outside the catalog, the
+  response is signature status only (resolved digest, signer
+  identity, issuer, Rekor index from the verified bundle) — no
   on-demand scan, no trust score.
 
 The trust boundary is: Flareo attests to **signature, SBOM, scan, and
-recorded upstream digest** for catalog images, and to **signature
-status** for anything else. It does not vouch for upstream intent, and
-it does not execute stranger-supplied build inputs anymore.
+recorded upstream digest** for catalog images, and to **verified
+signature status** for anything else. It does not vouch for upstream
+intent, and it does not execute stranger-supplied build inputs anymore.
 
 ## Paths that execute third-party code
 

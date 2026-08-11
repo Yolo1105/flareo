@@ -13,7 +13,7 @@
     "/api/v1/verify": {
       "post": {
         "summary": "Verify an image against Sigstore",
-        "description": "Resolves the given image reference to a digest, checks whether a Sigstore signature exists for that digest, and enriches the result with Flareo catalog metadata if the digest is known to Flareo.",
+        "description": "Resolves the given image reference to a digest, fetches and verifies the Sigstore bundle against the public-good trust root, and enriches the result with Flareo catalog metadata if the digest is known to Flareo. Outside the catalog, signer identity, issuer, and Rekor index still come from the verified bundle.",
         "requestBody": {
           "required": true,
           "content": {

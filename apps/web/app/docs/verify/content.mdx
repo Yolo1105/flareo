@@ -10,27 +10,25 @@ Given an image reference like `registry.example.com/app:v1.2.3`:
 
 2. **Resolve tag → digest.** If you gave a tag, the tool does a HEAD request to the registry's manifest endpoint to pin down the sha256 digest. Tags can be moved; digests cannot. All subsequent checks run against the digest.
 
-3. **Find the signature.** cosign writes signatures as a sibling image tagged `<repo>:sha256-<hex>.sig`. The tool HEAD-requests that tag. If it 404s, the image is unsigned.
+3. **Fetch and verify the signature.** cosign writes signatures as a sibling image tagged `<repo>:sha256-<hex>.sig`. The tool GETs that manifest, locates a recognised Sigstore bundle layout (a Sigstore bundle layer, or the older simplesigning layer with cosign annotations), and verifies the bundle against the Sigstore public-good trust root. A 404 means unsigned. A present but unrecognised layout, or a cryptographic failure, means invalid — not unsigned.
 
-4. **Cross-reference with the Flareo catalog.** If the digest matches a Flareo-signed module, we enrich the result with the catalog metadata — trust score, CVE counts, SBOM link, scan report link.
+4. **Cross-reference with the Flareo catalog.** If the digest matches a Flareo-signed module, we enrich the result with the catalog metadata — trust score, CVE counts, SBOM link, scan report link. Signer identity, issuer, and Rekor index always come from the verified bundle; if a catalog row disagrees, the bundle wins and the mismatch is surfaced.
 
 ## Possible results
 
 **Verified.** The image has a valid Sigstore signature AND it's in the Flareo catalog with an acceptable CVE status. You see the signer identity, Rekor log index, and full catalog metadata.
 
-**Signed.** The image has a Sigstore signature but isn't in the Flareo catalog. We report the signature exists but don't make a trust claim. You'd want to verify the signature yourself with `cosign verify` and your own identity expectations.
+**Signed.** The image has a valid Sigstore signature but isn't in the Flareo catalog. You still get the resolved digest, signer identity, OIDC issuer, and Rekor log index from the verified bundle. Flareo does not make a full trust claim (no scan, no trust score) for images it did not catalog — see [ADR-014](https://github.com/Yolo1105/flareo/blob/main/docs/adr/ADR-014-verification-scope.md).
 
 **Unsigned.** No Sigstore signature manifest exists for this image. Very common for images pushed without a signing step. Not a statement about the image being bad — just a statement that there's no cryptographic provenance to check.
 
-**Invalid.** A signature exists but we found a reason to reject it. For Flareo modules, this includes "signature is valid but the image has a critical CVE so we pulled it from the catalog." For non-Flareo images, this is currently not reachable; offline Sigstore bundle validation lands in v0.2.0 of the CLI (Horizon 2 for the web tool).
+**Invalid.** Verification failed or the signature is present but rejected. Causes include a bad signature, a certificate-chain failure, an unrecognised bundle layout, or (for catalog images) a CVE threshold breach after a successful cryptographic check.
 
-**Error.** We couldn't reach the registry, the manifest was malformed, or something else went wrong. Retry first; if it persists, the registry may be throttling anonymous manifest requests.
+**Error.** We couldn't reach the registry, the request timed out, or something else went wrong before a verification outcome was possible. Registry outages are not reported as unsigned or invalid.
 
-## Why the web tool doesn't validate the full Sigstore bundle
+## What this is not
 
-The web tool confirms a signature *manifest* exists on the registry, surfaces what's there (signer identity from the certificate, Rekor inclusion proof if discoverable, SBOM/SLSA attestation links when present), and runs a Trivy CVE scan against the image. What it does NOT do is walk the Fulcio certificate chain end-to-end against the trust root client-side — that runs in the CLI's `flareo verify`, which has the full `cosign verify` semantics.
-
-This is deliberate, and we say it out loud: **if you want end-to-end cryptographic proof, use the CLI**. The web tool is for the "does this image have signing set up correctly, what's in it, what does the catalog say about it" workflow. It's not a substitute for `cosign verify` against your own identity expectations, and we don't pretend otherwise. Whether full client-side bundle walking is worth adding to the web tool depends on whether the bottleneck for users is "can't easily install a CLI" — feedback welcome via the contact link in the footer.
+The endpoint verifies the signature and the Fulcio certificate chain. It does **not** enforce a keyless identity policy — any correctly signed third-party image can return `signed`. It also does not run an on-demand Trivy scan of arbitrary images, and it does not replace `cosign verify` when you need to pin a specific signer identity in your own policy. For offline / identity-pinned checks, use [Verify from the CLI](/docs/verify-cli) against cosign directly.
 
 ## Rate limits
 

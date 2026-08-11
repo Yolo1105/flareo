@@ -1,9 +1,9 @@
 //! `flareo verify <image>` — verify any signed container image.
 //!
-//! Posts to `/api/v1/verify` on the Flareo server, which in turn does the
-//! Sigstore signature-manifest check against the upstream registry. The
-//! server is the source of truth; this command is a friendly terminal
-//! wrapper around it.
+//! Posts to `/api/v1/verify` on the Flareo server, which fetches the
+//! Sigstore bundle from the registry and verifies it against the
+//! public-good trust root. The server is the source of truth; this
+//! command is a friendly terminal wrapper around it.
 //!
 //! Exit codes:
 //!   0  `verified` or `signed` — signature present and valid
@@ -195,7 +195,7 @@ fn render(r: &VerifyResponse) {
             );
             println!(
                 "  {}",
-                "  We cannot attest to it beyond 'signature present'.".bright_black()
+                "  Identity and Rekor index above come from the verified bundle.".bright_black()
             );
         }
         "unsigned" => {
