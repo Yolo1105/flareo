@@ -32,7 +32,7 @@ export function Nav() {
           Container supply chain
           <br />
           <span className="text-accent">
-            Verification / Preview / Takeaway
+            Verification / Republish / Receipts
           </span>
         </span>
       </Link>

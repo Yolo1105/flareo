@@ -21,31 +21,31 @@ export function HeroSection() {
           V0.4.2 / PUBLIC BETA
         </div>
         <h1 className="mb-7 max-w-[1100px] font-display text-[88px] font-black leading-[0.92] tracking-[-0.04em]">
-          VERIFIED CONTAINERS.
+          VERIFIED SIGNATURES.
           <br />
-          PREVIEWED LIVE.
+          REPUBLISHED WITH RECEIPTS.
           <br />
-          DEPLOYED ON YOUR BOX.
+          CHECKABLE BY ANYONE.
         </h1>
         <p className="max-w-[640px] font-body text-[17px] leading-[1.55] text-canvas/90">
           Flareo builds, scans, signs, and attests third-party containers so
           you can run self-hosted software without trusting strangers on
-          Docker Hub. A curated marketplace, real receipts on every module,
-          live previews, and a portable compose file you take home. Your
-          infrastructure. Your security.
+          Docker Hub. A curated catalog, real receipts on every module, and a
+          portable compose file you take home. Your infrastructure. Your
+          security.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <a
-            href="/marketplace"
+            href="/verify"
             className="btn-chamfer border border-canvas bg-canvas px-[22px] py-3 font-body text-[14px] font-medium tracking-[0.01em] text-ink transition-colors hover:bg-canvas-panel"
           >
-            Open the marketplace →
+            Verify any image →
           </a>
           <a
-            href="/verify"
+            href="/catalog"
             className="btn-chamfer border border-canvas/40 px-[22px] py-3 font-body text-[14px] font-medium tracking-[0.01em] text-canvas transition-all hover:border-canvas"
           >
-            Audit any image
+            Browse the catalog
           </a>
           <a
             href="#install"

@@ -1,5 +1,6 @@
 import { HeroSection } from "@/components/sections/landing/HeroSection";
 import { Marquee } from "@/components/sections/landing/Marquee";
+import { VerifyCta } from "@/components/sections/landing/VerifyCta";
 import { InstallSection } from "@/components/sections/landing/InstallSection";
 import { ProblemSection } from "@/components/sections/landing/ProblemSection";
 import { BeforeAfterSection } from "@/components/sections/landing/BeforeAfterSection";
@@ -31,9 +32,10 @@ export const dynamic = "force-dynamic";
  * Landing page composition.
  *
  * Section order tells a story:
- *   01 Hero — headline + tagline
+ *   01 Hero — headline + primary CTA to /verify
  *   01a Marquee — at-a-glance brand bar
- *   01b Install — first concrete CTA
+ *   01b Verify — live VerifyTool (image ref → digest / signer / Rekor)
+ *   01c Install — CLI install path
  *   02 Problem — why this exists at all
  *   02a Pipeline terminal — how the verification works (animated)
  *   03 Metrics — live counts from getCatalogStats()
@@ -86,6 +88,7 @@ export default async function LandingPage() {
     <>
       <HeroSection />
       <Marquee />
+      <VerifyCta />
       <InstallSection />
       <ProblemSection />
       <BeforeAfterSection />
