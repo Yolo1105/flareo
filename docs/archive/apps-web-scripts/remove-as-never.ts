@@ -1,5 +1,8 @@
 #!/usr/bin/env tsx
 /**
+ * ARCHIVED (2026-08-11): one-off Prisma `as never` cleanup codemod from
+ * the multi-session buildout — not maintained tooling. Do not run.
+ *
  * Remove unnecessary `as never` casts after `prisma generate` runs.
  *
  * Background: during the multi-session buildout, the Prisma client

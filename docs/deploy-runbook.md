@@ -53,9 +53,10 @@ npm run typecheck
 
 If you see > 5 errors that look real: paste them in the next session.
 
-Then run the cleanup script:
+Then run the cleanup script (historical — archived at
+`docs/archive/apps-web-scripts/remove-as-never.ts`; do not treat as live tooling):
 ```sh
-npx tsx scripts/cleanup/remove-as-never.ts
+npx tsx ../../docs/archive/apps-web-scripts/remove-as-never.ts
 npm run typecheck   # check again — should still be ≤ 5
 ```
 If typecheck breaks after cleanup: `git checkout` the affected files and ignore. The casts can stay; they're only cosmetic.
