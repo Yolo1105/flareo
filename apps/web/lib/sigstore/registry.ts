@@ -220,6 +220,22 @@ export type FetchJsonResult =
   | { ok: true; body: unknown; digestHeader: string | null }
   | { ok: false; error: RegistryError };
 
+/** Accept list for OCI / cosign manifests. GHCR returns 404 for some
+ *  signature manifests when Accept is only a wildcard, so the 401
+ *  retry must keep this list — not collapse the Accept header. */
+const MANIFEST_ACCEPT = [
+  "application/vnd.oci.image.manifest.v1+json",
+  "application/vnd.oci.image.index.v1+json",
+  "application/vnd.docker.distribution.manifest.v2+json",
+  "application/vnd.docker.distribution.manifest.list.v2+json",
+  "application/vnd.dev.cosign.simplesigning.v1+json",
+  "application/vnd.dev.sigstore.bundle+json;version=0.1",
+  "application/vnd.dev.sigstore.bundle+json;version=0.2",
+  "application/vnd.dev.sigstore.bundle+json;version=0.3",
+  "application/vnd.dev.sigstore.bundle.v0.3+json",
+  "*/*",
+].join(", ");
+
 /**
  * GET a manifest by tag or digest and return the parsed JSON body.
  * Retries once with an anonymous token on 401.
@@ -234,20 +250,7 @@ export async function fetchManifestJson(
   try {
     let resp = await fetchWithTimeout(url, {
       method: "GET",
-      headers: {
-        Accept: [
-          "application/vnd.oci.image.manifest.v1+json",
-          "application/vnd.oci.image.index.v1+json",
-          "application/vnd.docker.distribution.manifest.v2+json",
-          "application/vnd.docker.distribution.manifest.list.v2+json",
-          "application/vnd.dev.cosign.simplesigning.v1+json",
-          "application/vnd.dev.sigstore.bundle+json;version=0.1",
-          "application/vnd.dev.sigstore.bundle+json;version=0.2",
-          "application/vnd.dev.sigstore.bundle+json;version=0.3",
-          "application/vnd.dev.sigstore.bundle.v0.3+json",
-          "*/*",
-        ].join(", "),
-      },
+      headers: { Accept: MANIFEST_ACCEPT },
       redirect: "follow",
     });
     if (resp.status === 401) {
@@ -259,7 +262,7 @@ export async function fetchManifestJson(
         resp = await fetchWithTimeout(url, {
           method: "GET",
           headers: {
-            Accept: "*/*",
+            Accept: MANIFEST_ACCEPT,
             Authorization: `Bearer ${token}`,
           },
           redirect: "follow",

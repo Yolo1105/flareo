@@ -71,9 +71,15 @@ export async function extractBundleFromSigManifest(
     return extractFromBundleLayer(parsed, layers, bundleLayer);
   }
 
-  const simpleLayer = layers.find(
-    (l) => l.mediaType === SIMPLESIGNING_MEDIA_TYPE,
+  // Cosign often attaches multiple simplesigning layers (e.g. a
+  // signature-only layer plus a keyless layer with Fulcio cert). Prefer
+  // the layer that carries the certificate.
+  const simpleLayers = layers.filter(
+    (l) => l.mediaType === SIMPLESIGNING_MEDIA_TYPE && l.digest,
   );
+  const simpleLayer =
+    simpleLayers.find((l) => l.annotations?.["dev.sigstore.cosign/certificate"]) ??
+    simpleLayers[0];
   if (simpleLayer?.digest) {
     return extractFromAnnotationLayout(parsed, simpleLayer);
   }

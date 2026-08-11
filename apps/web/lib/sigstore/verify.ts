@@ -106,8 +106,20 @@ export async function verifyImage(imageRef: string): Promise<VerifyResult> {
     return errorResult(imageRef, "no_reference", "ref must include a tag or digest");
   }
 
+  let crypto = await verifyDigestSignature(parsed, digest);
+
+  // Multi-arch indexes are rarely signed as a whole; cosign signs each
+  // platform manifest. If the index digest has no .sig sibling, descend
+  // to linux/amd64 (else first linux) and verify that digest instead.
+  if (crypto.kind === "unsigned") {
+    const platformDigest = await resolvePlatformDigestIfIndex(parsed, digest);
+    if (platformDigest && platformDigest !== digest) {
+      digest = platformDigest;
+      crypto = await verifyDigestSignature(parsed, digest);
+    }
+  }
+
   const mod = await findModuleByDigest(digest);
-  const crypto = await verifyDigestSignature(parsed, digest);
   return mapVerifyOutcome({
     imageRef,
     digest,
@@ -257,6 +269,40 @@ export function mapVerifyOutcome(input: {
 }
 
 // ─── cryptographic verification ──────────────────────────────────
+
+/**
+ * If `digest` names an OCI index / manifest list, return a platform
+ * child digest to verify (linux/amd64 preferred). Otherwise null.
+ */
+async function resolvePlatformDigestIfIndex(
+  parsed: ParsedRef,
+  digest: string,
+): Promise<string | null> {
+  const manifest = await fetchManifestJson(parsed, digest);
+  if (!manifest.ok) return null;
+  const body = manifest.body as {
+    mediaType?: string;
+    manifests?: Array<{
+      digest?: string;
+      platform?: { os?: string; architecture?: string };
+    }>;
+  };
+  const media = body.mediaType ?? "";
+  const isIndex =
+    media.includes("image.index") ||
+    media.includes("manifest.list") ||
+    Array.isArray(body.manifests);
+  if (!isIndex || !body.manifests?.length) return null;
+
+  const amd64 = body.manifests.find(
+    (m) => m.platform?.os === "linux" && m.platform?.architecture === "amd64",
+  );
+  const linux = body.manifests.find((m) => m.platform?.os === "linux");
+  const pick = amd64 ?? linux ?? body.manifests[0];
+  const child = pick?.digest;
+  if (!child || !/^sha256:[a-f0-9]{64}$/i.test(child)) return null;
+  return child.toLowerCase();
+}
 
 async function verifyDigestSignature(
   parsed: ParsedRef,
