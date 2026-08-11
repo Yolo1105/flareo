@@ -31,6 +31,8 @@ export interface ParsedRef {
 export function parseImageRef(ref: string): ParsedRef | null {
   const trimmed = ref.trim();
   if (!trimmed) return null;
+  // Image refs cannot contain whitespace; reject before we invent a tag.
+  if (/\s/.test(trimmed)) return null;
 
   // Split on @ first — everything after is a digest if it matches sha256:...
   let digest: string | null = null;
