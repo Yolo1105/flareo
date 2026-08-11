@@ -7,15 +7,25 @@ import type { Module } from "@/lib/types";
  * Landing's catalog preview — shows up to 4 high-trust modules from
  * the live DB list. Parent omits this section when the database is
  * unreachable or the catalog is empty — never fixture data.
+ *
+ * `totalCount` is the real public-catalog size (from stats). The
+ * `modules` prop is only the preview slice, so length alone would
+ * under-count "VIEW ALL N".
  */
-export function CatalogPreview({ modules }: { modules: Module[] }) {
+export function CatalogPreview({
+  modules,
+  totalCount,
+}: {
+  modules: Module[];
+  totalCount?: number;
+}) {
   if (modules.length === 0) return null;
 
   const featured = [...modules]
     .sort((a, b) => b.trust - a.trust)
     .slice(0, 4);
 
-  const total = modules.length;
+  const total = totalCount && totalCount > 0 ? totalCount : modules.length;
 
   return (
     <section className="border-b border-hairline px-8 py-14">

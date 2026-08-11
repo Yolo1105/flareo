@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Archivo_Black, Space_Grotesk, JetBrains_Mono } from "next/font/google";
 import { appBaseUrl } from "@/lib/config/env";
-import { auth } from "@/lib/auth/config";
 import { SessionRoot } from "@/components/providers/SessionRoot";
 import { PlausibleScript } from "@/components/analytics/PlausibleScript";
 import "./globals.css";
@@ -69,17 +68,24 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
-export default async function RootLayout({
+/**
+ * Root layout deliberately does NOT await auth().
+ *
+ * A server-side session read uses cookies and forces every child route
+ * into dynamic rendering — which is why the marketing surface used to
+ * be uncacheable. SessionProvider fetches /api/auth/session on the
+ * client instead. /app/* still gates via middleware + its own layout.
+ */
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const session = await auth();
   return (
     <html
       lang="en"
       className={`${archivoBlack.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <body className="bg-canvas text-ink font-body antialiased">
-        <SessionRoot session={session}>{children}</SessionRoot>
+        <SessionRoot>{children}</SessionRoot>
         <PlausibleScript />
       </body>
     </html>

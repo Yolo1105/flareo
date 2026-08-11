@@ -22,11 +22,41 @@ import { prisma } from "@/lib/db/prisma";
 import { shapeToModule, type ModuleShape } from "@/lib/db/queries";
 import type { Module } from "@/lib/types";
 
-// Force dynamic so the homepage refreshes featured + reviews on each
-// load without needing revalidation. Both queries are cheap (small
-// table scans) so the cost is acceptable; if traffic grows past a
-// point where this matters, switch to ISR with a 5-minute window.
-export const dynamic = "force-dynamic";
+// ISR: refresh featured / reviews / stats every five minutes. The root
+// layout no longer awaits auth(), so this can actually be cached.
+export const revalidate = 300;
+
+/** Columns CatalogPreview (via shapeToModule) actually reads. */
+const PREVIEW_SELECT = {
+  id: true,
+  slug: true,
+  name: true,
+  version: true,
+  author: true,
+  description: true,
+  tags: true,
+  category: true,
+  status: true,
+  slsa: true,
+  trust: true,
+  trustVulns: true,
+  trustSlsa: true,
+  trustSignature: true,
+  trustSbom: true,
+  cveCritical: true,
+  cveHigh: true,
+  cveMedium: true,
+  cveLow: true,
+  deploys: true,
+  updatedHours: true,
+  size: true,
+  digest: true,
+  previewable: true,
+  visibility: true,
+  pulls30d: true,
+  building: true,
+  lastRebuiltAt: true,
+} as const;
 
 /**
  * Landing page composition.
@@ -49,39 +79,54 @@ export const dynamic = "force-dynamic";
  * the DB is empty or unreachable. Never fall back to fixture modules.
  */
 export default async function LandingPage() {
+  const db = hasDatabaseUrl();
+
+  const [featuredR, reviewsR, statsR, modulesR] = await Promise.allSettled([
+    listActiveFeatured(4),
+    listReviewsForLandingWall(4),
+    getCatalogStats(),
+    db
+      ? prisma.module.findMany({
+          where: { visibility: "public" },
+          orderBy: { trust: "desc" },
+          take: 6,
+          select: PREVIEW_SELECT,
+        })
+      : Promise.resolve([] as ModuleShape[]),
+  ]);
+
   let featured: FeaturedLandingItem[] = [];
+  if (featuredR.status === "fulfilled") {
+    featured = featuredR.value.map((f) => ({
+      module: f.module,
+      blurb: f.blurb,
+    }));
+  } else {
+    console.error("[landing] failed to load featured strip", featuredR.reason);
+  }
+
   let reviews: ReviewRow[] = [];
+  if (reviewsR.status === "fulfilled") {
+    reviews = reviewsR.value;
+  } else {
+    console.error("[landing] failed to load reviews wall", reviewsR.reason);
+  }
+
   let stats: CatalogStats | null = null;
+  if (statsR.status === "fulfilled") {
+    stats = statsR.value;
+  } else {
+    console.error("[landing] failed to load catalog stats", statsR.reason);
+  }
+
   let previewModules: Module[] = [];
-
-  try {
-    const items = await listActiveFeatured(4);
-    featured = items.map((f) => ({ module: f.module, blurb: f.blurb }));
-  } catch (err) {
-    console.error("[landing] failed to load featured strip", err);
-  }
-
-  try {
-    reviews = await listReviewsForLandingWall(4);
-  } catch (err) {
-    console.error("[landing] failed to load reviews wall", err);
-  }
-
-  try {
-    stats = await getCatalogStats();
-  } catch (err) {
-    console.error("[landing] failed to load catalog stats", err);
-  }
-
-  if (hasDatabaseUrl()) {
-    try {
-      const rows = (await prisma.module.findMany({
-        where: { visibility: "public" } as never,
-      })) as ModuleShape[];
-      previewModules = rows.map(shapeToModule);
-    } catch (err) {
-      console.error("[landing] failed to load catalog preview modules", err);
-    }
+  if (modulesR.status === "fulfilled") {
+    previewModules = (modulesR.value as ModuleShape[]).map(shapeToModule);
+  } else {
+    console.error(
+      "[landing] failed to load catalog preview modules",
+      modulesR.reason,
+    );
   }
 
   return (
@@ -94,7 +139,10 @@ export default async function LandingPage() {
       <BeforeAfterSection />
       <PipelineTerminal />
       {stats ? <MetricsStrip stats={stats} /> : null}
-      <CatalogPreview modules={previewModules} />
+      <CatalogPreview
+        modules={previewModules}
+        totalCount={stats?.moduleCount}
+      />
       <FeaturedStrip items={featured} />
       <ReviewsWall reviews={reviews} />
       <ComposePreview />
