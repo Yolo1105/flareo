@@ -36,7 +36,7 @@ flareo/
 
 **`deploy/kubernetes`** holds the OPA Gatekeeper manifests (`flareo-admission.yaml`, `flareo-admission-strict.yaml`, `flareo-admission-sigstore.yaml`) that operators install in their cluster to enforce "only verified images can run."
 
-**`deploy/preview`** holds the operations scripts for the Hetzner preview box that runs `preview.flareo.dev` — Caddy config, systemd units, reset scripts.
+**`docs/archive/deploy-preview`** holds the archived operations scripts for the retired Hetzner shared-preview box (historical only).
 
 **`selfhost`** is a placeholder for the future self-host distribution. Currently README-only.
 

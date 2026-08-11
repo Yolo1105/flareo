@@ -25,9 +25,7 @@ export type PlausibleEvent =
   | "SubmissionCreated"
   | "SubmissionQuotaBlocked"
   | "UpgradeClicked"
-  | "VerifyToolUsed"
-  | "PreviewConversion"
-  | "PreviewLinkClicked";
+  | "VerifyToolUsed";
 
 /**
  * Custom props per event. Plausible's free plan allows up to 30
@@ -56,49 +54,6 @@ export interface PlausibleEventProps {
   };
   VerifyToolUsed: {
     result: "ok" | "signature_mismatch" | "scan_failed" | "unknown_image";
-  };
-  /**
-   * Fired when a user lands on a "conversion-relevant" main-site page
-   * (signup, verify, docs/install, pricing, marketplace) AFTER having
-   * been on a shared preview subdomain. The preview's URL is detected
-   * via document.referrer matching `s-*-demo.preview.flareo.dev`.
-   *
-   * This is the load-bearing measurement for the F0 preview-analytics
-   * decision. The 30-day kill criterion is built on this event:
-   *   <5%  of preview visits resulting in PreviewConversion → don't
-   *        build per-user previews; the demand isn't there
-   *   5-15% → build something cheaper than per-user (CLI ephemeral,
-   *        per-session shared reset, walkthroughs)
-   *   >15% → build per-user previews
-   *
-   * Per-event fields are deliberately small closed sets to stay under
-   * Plausible's 30-distinct-values cardinality limit. The source
-   * module is normalized to slug; the conversion target is normalized
-   * to one of a fixed list.
-   */
-  PreviewConversion: {
-    /** Slug of the preview module the visitor came from */
-    sourceModule: string;
-    /** Where on the main site they landed */
-    target:
-      | "signup"
-      | "verify"
-      | "docs_install"
-      | "pricing"
-      | "marketplace"
-      | "module_detail";
-  };
-  /**
-   * Fired when a visitor clicks a "Try in 15s sandbox" / preview link
-   * on a module detail page. Distinct from PreviewConversion (which
-   * fires on the return trip from the preview); this fires on the
-   * forward trip. Pair the two together to compute conversion rates.
-   */
-  PreviewLinkClicked: {
-    /** Slug of the module whose preview was clicked */
-    moduleSlug: string;
-    /** Whether the visitor was signed in at the time */
-    signedIn: "yes" | "no";
   };
 }
 

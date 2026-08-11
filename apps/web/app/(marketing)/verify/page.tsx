@@ -2,7 +2,6 @@ import { PageHero } from "@/components/ui/PageHero";
 import { VerifyTool } from "@/components/sections/verify/VerifyTool";
 import { RunLocallySection } from "@/components/sections/verify/RunLocallySection";
 import { VerifyFaqSection } from "@/components/sections/verify/VerifyFaqSection";
-import { PreviewConversionDetector } from "@/components/analytics/PreviewConversionDetector";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -37,7 +36,6 @@ export default function VerifyPage() {
       <VerifyTool />
       <RunLocallySection />
       <VerifyFaqSection />
-      <PreviewConversionDetector target="verify" />
     </>
   );
 }

@@ -21,7 +21,6 @@ import { MarketplaceSpotlight } from "@/components/sections/marketplace/Marketpl
 import { MarketplaceCategoryRow } from "@/components/sections/marketplace/MarketplaceCategoryRow";
 import { MarketplaceReviewBoard } from "@/components/sections/marketplace/MarketplaceReviewBoard";
 import { MarketplacePublishCTA } from "@/components/sections/marketplace/MarketplacePublishCTA";
-import { PreviewConversionDetector } from "@/components/analytics/PreviewConversionDetector";
 
 export const metadata: Metadata = {
   title: "Marketplace",
@@ -168,7 +167,6 @@ export default async function MarketplacePage() {
       )}
 
       <MarketplacePublishCTA />
-      <PreviewConversionDetector target="marketplace" />
     </>
   );
 }

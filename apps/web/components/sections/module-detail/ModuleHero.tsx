@@ -90,31 +90,6 @@ export function ModuleHero({ module, userSignedIn = false }: Props) {
         <div className="flex flex-col gap-2">
           <Button variant="ghost">Export runbook</Button>
           <Button variant="primary">Pull this module</Button>
-          {module.previewable ? (
-            <Button
-              variant="ghost"
-              href={`https://s-${module.slug}-demo.preview.flareo.dev`}
-              newTab
-              // Plausible's tagged-event pattern: className tokens with
-              // `plausible-event-name=...` and `plausible-event-<prop>=...`
-              // are picked up by the loader script and fire the named
-              // event with those props. No JS handler needed; works in a
-              // server component.
-              //
-              // Pair this `PreviewLinkClicked` (forward trip) with the
-              // `PreviewConversion` event fired from the conversion-
-              // detector on /signup, /verify, /pricing, etc. (return
-              // trip). Together they give a click-through funnel for the
-              // F0 30-day decision gate.
-              className={`plausible-event-name=PreviewLinkClicked plausible-event-moduleSlug=${module.slug} plausible-event-signedIn=${userSignedIn ? "yes" : "no"}`}
-            >
-              Preview this module →
-            </Button>
-          ) : (
-            <Button variant="ghost" disabled>
-              Preview unavailable · local only
-            </Button>
-          )}
           {/* SPECULATIVE — see decisions.md G-1.
               Per-user preview launch button. Only rendered when
               the feature flag is on (set FLAREO_FEATURE_PREVIEWS_PER_USER=true

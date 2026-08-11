@@ -1,6 +1,5 @@
 import { PageHero } from "@/components/ui/PageHero";
 import { SignupForm } from "@/components/sections/signup/SignupForm";
-import { PreviewConversionDetector } from "@/components/analytics/PreviewConversionDetector";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -32,7 +31,6 @@ export default function SignupPage() {
         one message when a seat opens.
       </PageHero>
       <SignupForm />
-      <PreviewConversionDetector target="signup" />
     </>
   );
 }

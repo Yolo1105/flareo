@@ -1,3 +1,5 @@
+> **HISTORICAL / ARCHIVED.** Shared preview demos at `s-*-demo.preview.flareo.dev` were discontinued. This directory is kept only as an operations record of the Hetzner shared-demo box (Caddy, systemd reset, compose). Do not treat these scripts as live runbooks.
+
 # flareo-preview
 
 Shared preview infrastructure for the Flareo MVP.

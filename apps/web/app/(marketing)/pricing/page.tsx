@@ -1,7 +1,6 @@
 import { PageHero } from "@/components/ui/PageHero";
 import { FaqRow } from "@/components/ui/FaqRow";
 import { SectionHeader } from "@/components/ui/SectionHeader";
-import { PreviewConversionDetector } from "@/components/analytics/PreviewConversionDetector";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -446,7 +445,6 @@ export default function PricingPage() {
           </button>
         </div>
       </section>
-      <PreviewConversionDetector target="pricing" />
     </>
   );
 }
