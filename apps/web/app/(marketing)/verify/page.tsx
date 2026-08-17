@@ -7,7 +7,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "Verify any container",
   description:
-    "Paste any public OCI image — Flareo's, Docker Hub's, GHCR, Quay, anywhere — and see whether it's signed, what's in it, and what the receipts say. Pre-auth, no Flareo trust required.",
+    "Paste any public OCI image and read the receipts. Sign-in required for the web tool; the CLI remains public.",
 };
 
 export default function VerifyPage() {

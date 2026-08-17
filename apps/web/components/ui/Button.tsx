@@ -52,19 +52,20 @@ const VARIANTS: Record<
   { container: string; outlineColor: string | null }
 > = {
   primary: {
-    container: "bg-accent text-canvas hover:bg-accent-hot",
+    container:
+      "group bg-accent text-canvas hover:bg-accent-hot hover:text-canvas",
     outlineColor: null, // no SVG outline; clip-path handles the shape
   },
   ghost: {
     // No CSS border — the SVG below paints the visible outline.
     // Hover state changes the SVG stroke via a CSS variable swap.
     container:
-      "text-ink hover:text-ink [--btn-stroke:var(--color-hairline)] hover:[--btn-stroke:var(--color-ink-ghost)]",
+      "group text-ink hover:text-accent [--btn-stroke:var(--color-hairline)] hover:[--btn-stroke:var(--color-accent)]",
     outlineColor: "var(--btn-stroke)",
   },
   danger: {
     container:
-      "text-warn hover:bg-warn/[0.06] [--btn-stroke:var(--color-hairline)] hover:[--btn-stroke:var(--color-warn)]",
+      "group text-warn hover:bg-warn/[0.06] hover:text-warn [--btn-stroke:var(--color-hairline)] hover:[--btn-stroke:var(--color-warn)]",
     outlineColor: "var(--btn-stroke)",
   },
 };
@@ -95,18 +96,17 @@ const VARIANTS: Record<
  *     means hover styling propagates from the parent's :hover
  *     state without needing JS.
  */
-function ChamferedOutline({ color }: { color: string }) {
+function ChamferedOutline() {
   return (
     <svg
       aria-hidden
-      className="pointer-events-none absolute inset-0 h-full w-full"
+      className="pointer-events-none absolute inset-0 h-full w-full transition-[color] duration-150 [&_path]:stroke-[var(--btn-stroke)]"
       preserveAspectRatio="none"
       viewBox="0 0 100 100"
     >
       <path
         d="M 0 0 L 100 0 L 100 88 L 88 100 L 0 100 Z"
         fill="none"
-        stroke={color}
         strokeWidth="1"
         vectorEffect="non-scaling-stroke"
       />
@@ -127,7 +127,7 @@ export function Button({
 }: ButtonProps) {
   const v = VARIANTS[variant];
   const base =
-    "relative inline-flex items-center gap-2 px-[18px] py-3 font-body text-[13px] font-medium tracking-[0.01em] transition-colors disabled:cursor-not-allowed disabled:opacity-50";
+    "group relative inline-flex cursor-pointer items-center gap-2 px-[18px] py-3 font-body text-[13px] font-medium tracking-[0.01em] transition-colors disabled:cursor-not-allowed disabled:opacity-50";
   const classes = cn(base, v.container, className);
 
   // PRIMARY: clip-path on the element itself.
@@ -137,9 +137,7 @@ export function Button({
       ? ({ clipPath: CHAMFER_CLIP } as React.CSSProperties)
       : undefined;
 
-  const outline = v.outlineColor ? (
-    <ChamferedOutline color={v.outlineColor} />
-  ) : null;
+  const outline = v.outlineColor ? <ChamferedOutline /> : null;
 
   // Wrap text/icon in spans with z-index so they paint above the SVG
   // outline. The outline is `position: absolute` and would otherwise
@@ -147,7 +145,11 @@ export function Button({
   const content = (
     <>
       {outline}
-      {icon && <span className="relative z-[1] flex items-center">{icon}</span>}
+      {icon && (
+        <span className="relative z-[1] flex items-center transition-transform duration-150 group-hover:scale-110">
+          {icon}
+        </span>
+      )}
       <span className="relative z-[1]">{children}</span>
     </>
   );

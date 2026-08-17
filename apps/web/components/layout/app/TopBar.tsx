@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAppShell } from "@/components/overlays/AppShellProvider";
+import { getRouteBreadcrumbs } from "@/lib/data/route-titles";
 import type { NotificationItem } from "@/lib/types";
 
 /**
@@ -16,6 +18,7 @@ export function TopBar() {
   const pathname = usePathname();
   const { setCmdOpen, setNotifOpen, notifOpen } = useAppShell();
   const [unread, setUnread] = useState(0);
+  const crumbs = getRouteBreadcrumbs(pathname);
 
   useEffect(() => {
     let cancelled = false;
@@ -38,25 +41,27 @@ export function TopBar() {
     };
   }, [notifOpen]);
 
-  const parts = pathname.split("/").filter(Boolean);
-  const crumbs: { label: string; href: string }[] = [];
-  let acc = "";
-  for (const part of parts) {
-    acc += "/" + part;
-    crumbs.push({ label: part, href: acc });
-  }
-
   return (
-    <header className="sticky top-0 z-40 flex h-[48px] items-center justify-between border-b border-hairline bg-canvas-deep/95 pl-5 pr-4 backdrop-blur-md">
+    <header className="z-40 flex h-[48px] shrink-0 items-center justify-between border-b border-hairline bg-canvas-deep pl-5 pr-4">
       <nav className="flex items-center gap-1.5 font-mono text-[11.5px] tracking-[0.04em] text-ink-faint">
-        {crumbs.map((c, i) => (
-          <span key={c.href} className="flex items-center gap-1.5">
-            {i > 0 && <span className="text-ink-ghost">/</span>}
-            <span className={i === crumbs.length - 1 ? "text-ink" : "text-ink-mute"}>
-              {c.label}
+        {crumbs.map((c, i) => {
+          const isLast = i === crumbs.length - 1;
+          return (
+            <span key={c.href} className="flex items-center gap-1.5">
+              {i > 0 && <span className="text-ink-ghost">/</span>}
+              {isLast ? (
+                <span className="text-ink">{c.label}</span>
+              ) : (
+                <Link
+                  href={c.href}
+                  className="text-ink-mute transition-colors hover:text-accent"
+                >
+                  {c.label}
+                </Link>
+              )}
             </span>
-          </span>
-        ))}
+          );
+        })}
       </nav>
 
       <div className="flex items-center gap-2">
@@ -74,10 +79,18 @@ export function TopBar() {
         <button
           type="button"
           onClick={() => setNotifOpen(true)}
-          className="relative border border-hairline bg-canvas p-1.5 text-ink-mute transition-colors hover:border-ink-ghost hover:text-ink"
+          className="group relative border border-hairline bg-canvas p-1.5 text-ink-mute transition-colors hover:border-ink-ghost hover:text-accent"
           aria-label={`${unread} unread notifications`}
         >
-          <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.4"
+            className="transition-transform duration-150 group-hover:scale-110"
+          >
             <path d="M4 6a4 4 0 018 0v3l1.5 2h-11L4 9V6z" strokeLinejoin="round" />
             <path d="M6.5 13a1.5 1.5 0 003 0" strokeLinecap="round" />
           </svg>

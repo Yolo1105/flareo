@@ -95,3 +95,17 @@ export function authSecret(): string {
   // when env vars are not yet configured. Replace with a real secret in env.
   return "prod-fallback-auth-secret-set-auth-secret-in-env";
 }
+
+/**
+ * Demo sign-in (skip OAuth) — on by default in local development.
+ *
+ * Hard-disabled in production regardless of env. Set DEMO_MODE=0 to
+ * turn off locally; set DEMO_MODE=1 to force on in non-prod deploys.
+ */
+export function isDemoModeEnabled(): boolean {
+  if (process.env.NODE_ENV === "production") return false;
+  const flag = process.env.DEMO_MODE;
+  if (flag === "0") return false;
+  if (flag === "1") return true;
+  return process.env.NODE_ENV === "development";
+}

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Eyebrow } from "@/components/ui/Eyebrow";
 import { FLAREO_VERSION } from "@/lib/version";
 
@@ -29,31 +30,30 @@ export function HeroSection() {
           CHECKABLE BY ANYONE.
         </h1>
         <p className="max-w-[640px] font-body text-[17px] leading-[1.55] text-canvas/90">
-          Flareo builds, scans, signs, and attests third-party containers so
-          you can run self-hosted software without trusting strangers on
-          Docker Hub. A curated catalog, real receipts on every module, and a
-          portable compose file you take home. Your infrastructure. Your
-          security.
+          Flareo re-publishes pinned upstream images with receipts — SBOM,
+          scan, Sigstore signature — so you can check the bits yourself. A
+          curated catalog, and a compose file you take home. We do not
+          build from Dockerfiles.
         </p>
         <div className="mt-8 flex flex-wrap items-center gap-3">
-          <a
-            href="/verify"
+          <Link
+            href="/login?callbackUrl=/app/start"
             className="btn-chamfer border border-canvas bg-canvas px-[22px] py-3 font-body text-[14px] font-medium tracking-[0.01em] text-ink transition-colors hover:bg-canvas-panel"
           >
-            Verify any image →
-          </a>
-          <a
-            href="/catalog"
+            Sign in →
+          </Link>
+          <Link
+            href="/signup"
             className="btn-chamfer border border-canvas/40 px-[22px] py-3 font-body text-[14px] font-medium tracking-[0.01em] text-canvas transition-all hover:border-canvas"
           >
-            Browse the catalog
-          </a>
-          <a
-            href="#install"
+            Join waitlist
+          </Link>
+          <Link
+            href="/catalog"
             className="font-body text-[13px] font-medium tracking-[0.01em] text-canvas/80 transition-colors hover:text-canvas"
           >
-            or install the CLI →
-          </a>
+            or browse the catalog →
+          </Link>
         </div>
       </div>
       {/* Eyebrow renders nothing here — just imported to avoid tree-shake surprises */}

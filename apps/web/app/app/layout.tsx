@@ -18,7 +18,7 @@ import { listModules } from "@/lib/db/queries";
 export const metadata: Metadata = {
   title: {
     default: "App",
-    template: "%s",
+    template: "%s · Flareo",
   },
   robots: { index: false, follow: false },
 };
@@ -70,8 +70,8 @@ export default async function AppLayout({
 
   return (
     <AppShellProvider>
-      <div className="relative bg-canvas text-ink">
-        <div className="flex min-h-screen">
+      <div className="relative h-screen overflow-hidden bg-canvas text-ink">
+        <div className="flex h-full">
           <Sidebar
             userName={sessionUser.name ?? sessionUser.email ?? "you"}
             userEmail={sessionUser.email ?? undefined}
@@ -79,17 +79,11 @@ export default async function AppLayout({
             role={sessionUser.role}
           />
 
-          <div className="flex min-h-screen flex-1 flex-col">
+          <div className="flex h-full min-w-0 flex-1 flex-col">
             <TopBar />
-            {/* `<main>` and `<StatusBar>` are siblings in this flex
-                column. `<main>` takes flex-1 so it consumes vertical
-                space; the StatusBar is a fixed-height footer at the
-                bottom of the column. StatusBar uses `sticky bottom-0`
-                so it stays visible at the bottom of the viewport even
-                when the page content is taller than one screen — but
-                it's scoped to this column, not the viewport, so it
-                never extends into the right gutter on wide displays. */}
-            <main className="flex-1 overflow-x-hidden">{children}</main>
+            <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-none">
+              {children}
+            </main>
             <StatusBar />
           </div>
         </div>

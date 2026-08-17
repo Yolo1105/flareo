@@ -18,7 +18,7 @@ export function SettingsSidebar({ active }: { active: string }) {
     { label: "Danger zone", href: "/app/settings/delete", slug: "delete" },
   ];
   return (
-    <aside className="sticky top-[48px] h-fit border-r border-hairline py-6">
+    <aside className="border-r border-hairline py-6">
       <ul className="space-y-0.5">
         {items.map((item) => {
           const isActive = item.slug === active;

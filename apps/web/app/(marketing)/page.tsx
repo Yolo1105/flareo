@@ -1,6 +1,7 @@
+import type { Metadata } from "next";
 import { HeroSection } from "@/components/sections/landing/HeroSection";
 import { Marquee } from "@/components/sections/landing/Marquee";
-import { VerifyCta } from "@/components/sections/landing/VerifyCta";
+import { GetStartedSection } from "@/components/sections/landing/GetStartedSection";
 import { InstallSection } from "@/components/sections/landing/InstallSection";
 import { ProblemSection } from "@/components/sections/landing/ProblemSection";
 import { BeforeAfterSection } from "@/components/sections/landing/BeforeAfterSection";
@@ -21,6 +22,12 @@ import { hasDatabaseUrl } from "@/lib/config/env";
 import { prisma } from "@/lib/db/prisma";
 import { shapeToModule, type ModuleShape } from "@/lib/db/queries";
 import type { Module } from "@/lib/types";
+
+export const metadata: Metadata = {
+  title: {
+    absolute: "Flareo · Container supply chain",
+  },
+};
 
 // ISR: refresh featured / reviews / stats every five minutes. The root
 // layout no longer awaits auth(), so this can actually be cached.
@@ -62,9 +69,9 @@ const PREVIEW_SELECT = {
  * Landing page composition.
  *
  * Section order tells a story:
- *   01 Hero — headline + primary CTA to /verify
+ *   01 Hero — headline + sign-in CTA
  *   01a Marquee — at-a-glance brand bar
- *   01b Verify — live VerifyTool (image ref → digest / signer / Rekor)
+ *   01b Get started — pipeline / verify (sign-in) + public catalog
  *   01c Install — CLI install path
  *   02 Problem — why this exists at all
  *   02a Pipeline terminal — how the verification works (animated)
@@ -133,7 +140,7 @@ export default async function LandingPage() {
     <>
       <HeroSection />
       <Marquee />
-      <VerifyCta />
+      <GetStartedSection />
       <InstallSection />
       <ProblemSection />
       <BeforeAfterSection />

@@ -75,10 +75,10 @@ export function Nav() {
           })}
         </div>
         <Link
-          href="/signup"
+          href="/login?callbackUrl=/app/start"
           className="btn-chamfer bg-accent px-[18px] py-2.5 font-body text-[13px] font-medium tracking-[0.01em] text-canvas transition-colors hover:bg-accent-hot"
         >
-          Early access
+          Sign in
         </Link>
       </div>
     </nav>

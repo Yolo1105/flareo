@@ -28,6 +28,7 @@ const GROUPS: NavGroup[] = [
   {
     label: "WORKSPACE",
     items: [
+      { num: "00", label: "Start here", href: "/app/start" },
       { num: "01", label: "Dashboard", href: "/app" },
       { num: "02", label: "My modules", href: "/app/modules", badge: "4" },
       { num: "03", label: "My submissions", href: "/app/submissions" },
@@ -70,8 +71,8 @@ export function Sidebar({ userName, userEmail: _userEmail, userImage, role }: Si
   const initial = (userName || "?").trim().charAt(0).toUpperCase();
 
   return (
-    <aside className="sticky top-0 flex h-screen w-[220px] flex-col border-r border-hairline bg-canvas">
-      <div className="flex items-center justify-between border-b border-hairline px-5 py-4">
+    <aside className="flex h-full w-[220px] shrink-0 flex-col border-r border-hairline bg-canvas">
+      <div className="flex h-[48px] shrink-0 items-center justify-between border-b border-hairline px-5">
         <Link
           href="/app"
           className="flex items-baseline gap-2 font-display text-[18px] font-black tracking-[-0.02em] text-ink transition-colors hover:text-accent"
@@ -88,7 +89,7 @@ export function Sidebar({ userName, userEmail: _userEmail, userImage, role }: Si
         </Link>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-3">
+      <nav className="min-h-0 flex-1 overflow-y-auto overscroll-none py-3">
         {GROUPS.map((group) => {
           const visibleItems = group.items.filter((i) => !i.adminOnly || isAdmin);
           if (visibleItems.length === 0) return null;

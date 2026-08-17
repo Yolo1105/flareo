@@ -11,9 +11,10 @@ import { SubmissionDecisionPanel } from "@/components/sections/app-admin/Submiss
 import { DockerfileViewer } from "@/components/sections/app-admin/DockerfileViewer";
 import { LiveBuildLog } from "@/components/sections/app-admin/LiveBuildLog";
 
-export const metadata: Metadata = {
-  title: "Submission review",
-};
+export async function generateMetadata({ params }: Ctx): Promise<Metadata> {
+  const { id } = await params;
+  return { title: `Submission review ${id.slice(0, 8)}` };
+}
 
 export const dynamic = "force-dynamic";
 

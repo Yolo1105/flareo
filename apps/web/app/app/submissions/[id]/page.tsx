@@ -7,9 +7,10 @@ import { getMySubmission } from "@/lib/db/my-submissions";
 import { LiveBuildLog } from "@/components/sections/app-admin/LiveBuildLog";
 import { hoursAgo } from "@/lib/utils/time";
 
-export const metadata: Metadata = {
-  title: "Submission",
-};
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  return { title: `Submission ${id.slice(0, 8)}` };
+}
 
 export const dynamic = "force-dynamic";
 

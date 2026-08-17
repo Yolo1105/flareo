@@ -9,9 +9,10 @@ import { buildTrivyReport, type TrivyVuln } from "@/lib/data/pipeline-artifacts"
 import { ViewHeader } from "@/components/sections/app-dashboard/ViewHeader";
 import { VexAnnotationForm } from "@/components/sections/app-admin/VexAnnotationForm";
 
-export const metadata: Metadata = {
-  title: "VEX annotations · admin",
-};
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  return { title: `VEX · ${slug}` };
+}
 
 export const dynamic = "force-dynamic";
 

@@ -13,7 +13,7 @@ const { auth } = NextAuth({
 });
 
 /**
- * Middleware guard for /app/*.
+ * Middleware guard for /app/* and signed-in demo routes (/pipeline, /verify).
  *
  * Unauthenticated users get redirected to /login with the original path
  * preserved as callbackUrl so NextAuth can send them back after login.
@@ -54,6 +54,8 @@ export default auth((req) => {
 
   const isAppRoute = nextUrl.pathname.startsWith("/app");
   const isAdminRoute = nextUrl.pathname.startsWith("/app/admin");
+  const isSignedInDemo =
+    nextUrl.pathname === "/pipeline" || nextUrl.pathname === "/verify";
 
   // Every /api/* route authenticates itself inline — middleware does
   // NOT gate /api/*. We deliberately keep /api/* out of the matcher
@@ -61,13 +63,17 @@ export default auth((req) => {
   // directly and gets the right JSON-shaped 401/403 response instead
   // of a generic middleware redirect.
 
-  if (!isAppRoute) return NextResponse.next();
+  const needsAuth = isAppRoute || isSignedInDemo;
+
+  if (!needsAuth) return NextResponse.next();
 
   if (!isLoggedIn) {
     const loginUrl = new URL("/login", nextUrl);
     loginUrl.searchParams.set("callbackUrl", nextUrl.pathname + nextUrl.search);
     return NextResponse.redirect(loginUrl);
   }
+
+  if (!isAppRoute) return NextResponse.next();
 
   if (isAdminRoute && !isAdmin) {
     const homeUrl = new URL("/app", nextUrl);
@@ -85,5 +91,5 @@ export default auth((req) => {
  * response rather than a redirect.
  */
 export const config = {
-  matcher: ["/app/:path*", "/@:handle*"],
+  matcher: ["/app/:path*", "/@:handle*", "/pipeline", "/verify"],
 };

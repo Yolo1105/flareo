@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { BrandMark } from "@/components/ui/BrandMark";
 import { LoginButtons } from "@/components/sections/login/LoginButtons";
 import { auth } from "@/lib/auth/config";
+import { isDemoModeEnabled } from "@/lib/config/env";
 
 export const metadata: Metadata = {
   title: "Sign in",
@@ -15,9 +16,14 @@ export default async function LoginPage({
 }: {
   searchParams: Promise<{ callbackUrl?: string }>;
 }) {
-  const session = await auth();
+  let session = null;
+  try {
+    session = await auth();
+  } catch (err) {
+    console.error("[login] session check failed", err);
+  }
   if (session?.user) {
-    redirect("/app");
+    redirect("/app/start");
   }
   const params = await searchParams;
   const callbackUrl = params.callbackUrl ?? null;
@@ -25,20 +31,6 @@ export default async function LoginPage({
   return (
     <div className="flex min-h-[calc(100vh-28px-94px)] items-center justify-center px-8 py-16">
       <div className="w-full max-w-[440px] border border-hairline bg-canvas-deep">
-        <div className="flex items-center justify-between border-b border-hairline bg-canvas-panel px-6 py-4">
-          <div className="flex items-center gap-2 font-mono text-[11px] tracking-[0.08em] text-ink-faint">
-            <div className="flex gap-[5px]">
-              <span className="block h-2 w-2 rounded-full bg-accent" />
-              <span className="block h-2 w-2 rounded-full bg-hairline-soft" />
-              <span className="block h-2 w-2 rounded-full bg-hairline-soft" />
-            </div>
-            <span>flareo login</span>
-          </div>
-          <span className="font-mono text-[9.5px] tracking-[0.1em] text-ink-ghost">
-            SSO &middot; GITHUB
-          </span>
-        </div>
-
         <div className="px-10 py-12">
           <div className="mb-8 flex items-center gap-3">
             <BrandMark size={26} />
@@ -58,7 +50,7 @@ export default async function LoginPage({
 
           <LoginButtons />
 
-          {process.env.DEMO_MODE === "1" && (
+          {isDemoModeEnabled() && (
             <DemoSignInPanel callbackUrl={callbackUrl} />
           )}
 
@@ -119,16 +111,16 @@ function DemoSignInPanel({ callbackUrl }: { callbackUrl: string | null }) {
   // a protected page like /pipeline).
   const ROLES = [
     {
+      role: "publisher",
+      label: "Publisher (mai-ops)",
+      blurb:
+        "Best for demos — walk pipeline, verify, and browse published modules.",
+    },
+    {
       role: "admin",
       label: "Admin Reviewer",
       blurb:
         "Triage queue, moderation, featured curation, rebuild log, reports inbox.",
-    },
-    {
-      role: "publisher",
-      label: "Publisher (mai-ops)",
-      blurb:
-        "3 published modules, profile page, write reviews on others' modules.",
     },
     {
       role: "submitter",
@@ -150,13 +142,12 @@ function DemoSignInPanel({ callbackUrl }: { callbackUrl: string | null }) {
           ◆ DEMO MODE — DEV ONLY
         </span>
         <span className="font-mono text-[9.5px] text-ink-ghost">
-          DEMO_MODE=1
+          no OAuth needed
         </span>
       </div>
       <p className="mb-3 font-body text-[12px] leading-[1.55] text-ink-softer">
-        Skip OAuth and sign in directly as a seeded demo user. Useful for
-        clicking through the authenticated surface without setting up a
-        GitHub OAuth app.
+        Skip GitHub OAuth — pick a demo persona and go straight to the
+        pipeline, verify tool, or dashboard. Local development only.
       </p>
       <div className="grid grid-cols-1 gap-2">
         {ROLES.map((r) => {

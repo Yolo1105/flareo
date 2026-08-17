@@ -3,7 +3,7 @@ import { SignupForm } from "@/components/sections/signup/SignupForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Early access",
+  title: "Join waitlist",
   description:
     "Flareo is in closed beta. Join the waitlist and we'll email you when your seat opens.",
 };

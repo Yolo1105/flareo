@@ -33,14 +33,10 @@ import { test, expect } from "@playwright/test";
  *   - Form action URLs that 404 silently
  */
 
-test("landing page loads and shows the primary CTAs", async ({ page }) => {
+test("landing page loads and shows sign-in first", async ({ page }) => {
   await page.goto("/");
-  // Hero copy — the load-bearing one-liner. If this fails the whole
-  // marketing surface is broken.
   await expect(page).toHaveTitle(/Flareo/i);
-  // Primary CTAs after the verify-first pivot: verify + catalog, plus
-  // marketplace remains in primary nav.
-  await expect(page.getByRole("link", { name: /verify/i }).first()).toBeVisible();
+  await expect(page.getByRole("link", { name: /sign in/i }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /catalog/i }).first()).toBeVisible();
   await expect(page.getByRole("link", { name: /marketplace/i }).first()).toBeVisible();
 });
@@ -87,26 +83,9 @@ test("module detail shows the action buttons and links to receipts", async ({ pa
   }
 });
 
-test("verify tool form accepts input and shows an error envelope shape", async ({ page }) => {
+test("verify page redirects anonymous users to login", async ({ page }) => {
   await page.goto("/verify");
-  // Find the input. The component renders an `<input>` with
-  // placeholder text mentioning "image" — match by role + name.
-  const input = page.getByRole("textbox").first();
-  await expect(input).toBeVisible();
-  await input.fill("public.ecr.aws/flareo/vaultwarden:latest");
-
-  // The submit button. Naming-resilient — use whatever button is in
-  // the form area.
-  const submit = page
-    .getByRole("button", { name: /verify|check/i })
-    .first();
-  await expect(submit).toBeVisible();
-
-  // Don't actually submit — that hits the real Sigstore API, which is
-  // too slow and flaky to run on every E2E run. We just verified the
-  // form is interactive. A separate `verify-online.spec.ts` could run
-  // the real submission with longer timeouts and `.skip` in CI by
-  // default.
+  await expect(page).toHaveURL(/\/login\?callbackUrl=%2Fverify/);
 });
 
 test("docs install page renders and shows the source build path", async ({ page }) => {
@@ -126,6 +105,14 @@ test("pricing page renders three tiers", async ({ page }) => {
   // hardcode prices (they change); just confirm the tier labels.
   await expect(page.locator("text=/free/i").first()).toBeVisible();
   await expect(page.locator("text=/pro/i").first()).toBeVisible();
+});
+
+test("pipeline and verify require sign-in", async ({ page }) => {
+  await page.goto("/pipeline");
+  await expect(page).toHaveURL(/\/login\?callbackUrl=/);
+
+  await page.goto("/verify");
+  await expect(page).toHaveURL(/\/login\?callbackUrl=/);
 });
 
 test("signup page form is interactive", async ({ page }) => {

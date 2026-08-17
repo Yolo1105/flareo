@@ -9,7 +9,7 @@ import type { NavLink } from "@/lib/types";
  * grid). Both link into the same /modules/<slug> detail pages.
  */
 export const NAV_LINKS: readonly NavLink[] = [
-  { num: "01", label: "Pipeline", href: "/" },
+  { num: "01", label: "Pipeline", href: "/pipeline" },
   { num: "02", label: "Marketplace", href: "/marketplace" },
   { num: "03", label: "Catalog", href: "/catalog" },
   { num: "04", label: "Verify", href: "/verify" },
@@ -38,7 +38,7 @@ export const FOOTER_LINKS = [
  * discovery surface) — the visitor likely arrived from there.
  */
 export function getActiveNav(pathname: string): string | null {
-  if (pathname === "/") return "01";
+  if (pathname.startsWith("/pipeline")) return "01";
   if (pathname.startsWith("/marketplace") || pathname.startsWith("/modules"))
     return "02";
   if (pathname.startsWith("/catalog")) return "03";

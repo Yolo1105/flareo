@@ -79,11 +79,34 @@ body {
   font-weight: 400;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
 }
 
 ::selection {
   background-color: var(--color-accent);
   color: var(--color-canvas);
+}
+
+/*
+ * Interactive affordance — pointer on buttons/links, not-allowed when disabled.
+ */
+button:not(:disabled),
+[role="button"]:not([aria-disabled="true"]),
+a[href],
+label[for],
+select,
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[role="button"][aria-disabled="true"] {
+  cursor: not-allowed;
+}
+
+input,
+textarea {
+  cursor: text;
 }
 
 /*
@@ -234,4 +257,5 @@ body {
  */
 .btn-chamfer {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 12px), calc(100% - 12px) 100%, 0 100%);
+  cursor: pointer;
 }

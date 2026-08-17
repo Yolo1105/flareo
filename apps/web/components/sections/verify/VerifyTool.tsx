@@ -143,9 +143,15 @@ export function VerifyTool() {
           <button
             onClick={run}
             disabled={running || !input.trim()}
-            className="flex items-center gap-2.5 bg-accent px-8 font-body text-[14px] font-medium text-canvas transition-colors hover:bg-accent-hot disabled:cursor-not-allowed disabled:bg-ink-ghost"
+            className="group flex cursor-pointer items-center gap-2.5 bg-accent px-8 font-body text-[14px] font-medium text-canvas transition-colors hover:bg-accent-hot disabled:cursor-not-allowed disabled:bg-ink-ghost"
           >
-            <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 16 16"
+              fill="none"
+              className="transition-transform duration-150 group-hover:scale-110 disabled:scale-100"
+            >
               <path
                 d="M3 8l3.5 3.5L13 4"
                 stroke="currentColor"
